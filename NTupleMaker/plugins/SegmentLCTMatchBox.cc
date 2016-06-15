@@ -166,7 +166,8 @@ int SegmentLCTMatchBox::wireGroup ( const CSCRecHit2D &hit ){
   return ( hit.hitWire() -1 );
 }
 
-bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
+// bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
+bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCTDigiCollection CSCTFlcts,
 				     int *match_report ){
 
   if (_printLevel > 2)
@@ -277,8 +278,10 @@ bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handl
   //for ( auto lct = CSCTFlcts->cbegin(); lct != CSCTFlcts->cend(); lct++) {
   std::vector<L1TMuon::TriggerPrimitive> LCT_collection;
 
-  auto chamber = CSCTFlcts -> begin();
-  auto chend  = CSCTFlcts -> end();
+  // auto chamber = CSCTFlcts -> begin();
+  // auto chend  = CSCTFlcts -> end();
+  auto chamber = CSCTFlcts.begin();
+  auto chend  = CSCTFlcts.end();
   for( ; chamber != chend; ++chamber ) {
     auto digi = (*chamber).second.first;
     auto dend = (*chamber).second.second;
@@ -286,6 +289,7 @@ bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handl
       LCT_collection.push_back(TriggerPrimitive((*chamber).first,*digi));
     }
   }
+
 
   int lctId = 0; // count number of lcts in event
 

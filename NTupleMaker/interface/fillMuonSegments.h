@@ -34,7 +34,8 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 		       edm::Handle<reco::MuonCollection> muons, 
 		       edm::Handle<CSCSegmentCollection> cscSegs, 
 		       edm::ESHandle<CSCGeometry> cscGeom,
-		       const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
+		       // const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
+		       CSCCorrelatedLCTDigiCollection CSCTFlcts,
 		       int printLevel) {
 
 
@@ -347,8 +348,10 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
         //for( auto corrLct = CSCTFlcts->cbegin(); corrLct != CSCTFlcts->cend(); corrLct++) {
 	std::vector<L1TMuon::TriggerPrimitive> LCT_collection;
 	
-	auto chamber = CSCTFlcts -> begin();
-	auto chend  = CSCTFlcts -> end();
+	/* auto chamber = CSCTFlcts -> begin(); */
+	/* auto chend  = CSCTFlcts -> end(); */
+	auto chamber = CSCTFlcts.begin();
+	auto chend  = CSCTFlcts.end();
 	for( ; chamber != chend; ++chamber ) {
 	  auto digi = (*chamber).second.first;
 	  auto dend = (*chamber).second.second;
@@ -356,7 +359,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 	    LCT_collection.push_back(TriggerPrimitive((*chamber).first,*digi));
 	  }
 	}
-	
+
 	auto Lct = LCT_collection.cbegin();
 	auto Lctend = LCT_collection.cend();
 

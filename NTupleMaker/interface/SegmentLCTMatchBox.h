@@ -42,7 +42,8 @@ class SegmentLCTMatchBox {
 
   bool isLCTAble ( const CSCSegment &segment, int *match_analysis = 0 );
 
-  bool isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection>, int *match_analysis = 0 );
+  // bool isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection>, int *match_analysis = 0 );
+  bool isMatched ( const CSCSegment &segment, CSCCorrelatedLCTDigiCollection, int *match_analysis = 0 );
 
   /*
   bool belongsToTrigger ( const CSCSegment &segment, 

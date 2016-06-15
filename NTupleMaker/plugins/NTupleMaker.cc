@@ -311,15 +311,23 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
          <<   "============================================================\n" << endl;
   
 
-  edm::Handle<CSCCorrelatedLCTDigiCollection> csclcts;
-  iEvent.getByToken(cscTPTag_token, csclcts);
-
   edm::Handle<std::vector<l1t::EMTFHitExtra>> lcts;
   iEvent.getByToken(emtfTPTag_token, lcts);	 
   
   edm::Handle<std::vector<l1t::EMTFHitExtra>> RPC_lcts;
   iEvent.getByToken(emtfTPTagRPC_token, RPC_lcts);
   
+  // edm::Handle<CSCCorrelatedLCTDigiCollection> correlated_lcts;
+  // iEvent.getByToken(cscTPTag_token, correlated_lcts);
+
+  // Fill correlated_lcts from EMTF hits, rather than CSCTF(?) - AWB 15.06.16
+  CSCCorrelatedLCTDigiCollection correlated_lcts;
+  auto iLCT = lcts->begin();
+  auto lastLCT  = lcts->end();
+  for( ; iLCT != lastLCT; ++iLCT )
+    if ( iLCT->Neighbor() == 0 )
+      correlated_lcts.insertDigi( (*iLCT).CSC_DetId(), (*iLCT).CSC_LCTDigi() );
+
   if ( lcts.isValid() ) {
     
     // Access the global phi/eta from here
@@ -764,8 +772,9 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     iEvent.getByToken(cscSegs_token, cscSegments);
     
     
-    if ( cscSegments.isValid() && csclcts.isValid())
-      fillSegmentsMuons(ev, muons, cscSegments, cscGeom, csclcts, printLevel);
+    // if ( cscSegments.isValid() && correlated_lcts.isValid())
+    if ( cscSegments.isValid() && lcts.isValid() )
+      fillSegmentsMuons(ev, muons, cscSegments, cscGeom, correlated_lcts, printLevel);
     // leaving out csc tracks for now.  Add back in later
     
     // else cout << "\t----->Invalid RECO Muon SEGMENT collection... skipping it\n";

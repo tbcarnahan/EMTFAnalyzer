@@ -87,6 +87,7 @@ void fillAllLCTs(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFHitExtra
   for( auto Lct = LCT_collection->cbegin(); Lct < LCT_collection->cend(); Lct++) {
     
     //if(Lct->subsystem() != 1) continue;
+    if (Lct->Neighbor() != 0) continue;
 
     if (printLevel>1) cout << "\nLCT CSC " << lctId << endl;
     
