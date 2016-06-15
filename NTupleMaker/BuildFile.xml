@@ -1,2 +1,7 @@
 
+<use   name="L1Trigger/L1TMuonEndCap"/>
 <use   name="root"/>
+
+<export>
+  <lib name="1"/>
+</export>
