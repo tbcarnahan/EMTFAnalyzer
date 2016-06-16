@@ -317,8 +317,8 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<std::vector<l1t::EMTFHitExtra>> RPC_lcts;
   iEvent.getByToken(emtfTPTagRPC_token, RPC_lcts);
   
-  // edm::Handle<CSCCorrelatedLCTDigiCollection> correlated_lcts;
-  // iEvent.getByToken(cscTPTag_token, correlated_lcts);
+  edm::Handle<CSCCorrelatedLCTDigiCollection> csctf_lcts;
+  iEvent.getByToken(cscTPTag_token, csctf_lcts);
 
   // Fill correlated_lcts from EMTF hits, rather than CSCTF(?) - AWB 15.06.16
   CSCCorrelatedLCTDigiCollection correlated_lcts;
@@ -484,7 +484,7 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<vector<pair<csc::L1Track,MuonDigiCollection<CSCDetId,CSCCorrelatedLCTDigi> > >> leg_tracks;
   iEvent.getByToken(csctfTag_token, leg_tracks);
 
-  if ( leg_tracks.isValid() ) {
+  if ( leg_tracks.isValid() && csctf_lcts.isValid() ) {
 
     int nTrks = 0;
     for(std::vector<std::pair<csc::L1Track,MuonDigiCollection<CSCDetId,CSCCorrelatedLCTDigi>>>::const_iterator lt = leg_tracks->begin();lt != leg_tracks->end();lt++){
@@ -574,23 +574,23 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       ev.leg_trkQualB -> push_back(qualB);
       ev.leg_trkBx -> push_back(lt->first.BX());
 
-      /*
+
       // For each trk, get the list of its LCTs
       CSCCorrelatedLCTDigiCollection LCTs = lt -> second;
-      
+
       std::vector<L1TMuon::TriggerPrimitive> LCT_collection;
       
       auto chamber = LCTs.begin();
       auto chend  = LCTs.end();
       for( ; chamber != chend; ++chamber ) {
-	auto digi = (*chamber).second.first;
-	auto dend = (*chamber).second.second;
-	for( ; digi != dend; ++digi ) {
-	  TriggerPrimitive trigPrimTemp = TriggerPrimitive((*chamber).first,*digi);
-	  trigPrimTemp.setCMSGlobalPhi( geom->calculateGlobalPhi(trigPrimTemp) );
-	  trigPrimTemp.setCMSGlobalEta( geom->calculateGlobalEta(trigPrimTemp) );
-	  LCT_collection.push_back(trigPrimTemp);
-	}
+      	auto digi = (*chamber).second.first;
+      	auto dend = (*chamber).second.second;
+      	for( ; digi != dend; ++digi ) {
+      	  TriggerPrimitive trigPrimTemp = TriggerPrimitive((*chamber).first,*digi);
+      	  // trigPrimTemp.setCMSGlobalPhi( geom->calculateGlobalPhi(trigPrimTemp) );
+      	  // trigPrimTemp.setCMSGlobalEta( geom->calculateGlobalEta(trigPrimTemp) );
+      	  LCT_collection.push_back(trigPrimTemp);
+      	}
       }
       
       int LctTrkId_ = 0; // count number of lcts in event
@@ -601,109 +601,109 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       auto Lctend = LCT_collection.cend();
       for( ; Lct != Lctend; Lct++) {
 
-	if (LctTrkId_ > MAXTRKHITS-1) break;
+      	if (LctTrkId_ > MAXTRKHITS-1) break;
 	
-	if(Lct->subsystem() != 1) continue;
+      	if(Lct->subsystem() != 1) continue;
 	
-	if (printLevel>1) cout << "\n==== Legacy LCT CSC " << LctTrkId_ << endl;
+      	if (printLevel>1) cout << "\n==== Legacy LCT CSC " << LctTrkId_ << endl;
 	
-	CSCDetId id                = Lct->detId<CSCDetId>();
-	auto lct_station           = id.station();
-	auto lct_endcap            = id.endcap();
-	auto lct_chamber           = id.chamber();
-	int lct_bx                 = Lct->getCSCData().bx - 6; // Offset so center BX is at 0
-	if (lct_bx > lct_bx_beg) lct_bx_beg = lct_bx;
-	if (lct_bx < lct_bx_end) lct_bx_end = lct_bx;
-	int lct_ring               = id.ring();
-	int lct_sector             = CSCTriggerNumbering::triggerSectorFromLabels(id);
-	int lct_subSector          = CSCTriggerNumbering::triggerSubSectorFromLabels(id);
-	int lct_bx0                = Lct->getCSCData().bx0;
-	uint16_t lct_cscID         = Lct->getCSCData().cscID;
-	uint16_t lct_strip         = Lct->getCSCData().strip;
-	//uint16_t lct_pattern       = Lct->getCSCData().pattern;
-	uint16_t lct_bend          = Lct->getCSCData().bend;
-	uint16_t lct_quality       = Lct->getCSCData().quality;
-	uint16_t lct_keywire       = Lct->getCSCData().keywire;
+      	CSCDetId id                = Lct->detId<CSCDetId>();
+      	auto lct_station           = id.station();
+      	auto lct_endcap            = id.endcap();
+      	auto lct_chamber           = id.chamber();
+      	int lct_bx                 = Lct->getCSCData().bx - 6; // Offset so center BX is at 0
+      	if (lct_bx > lct_bx_beg) lct_bx_beg = lct_bx;
+      	if (lct_bx < lct_bx_end) lct_bx_end = lct_bx;
+      	int lct_ring               = id.ring();
+      	int lct_sector             = CSCTriggerNumbering::triggerSectorFromLabels(id);
+      	int lct_subSector          = CSCTriggerNumbering::triggerSubSectorFromLabels(id);
+      	int lct_bx0                = Lct->getCSCData().bx0;
+      	uint16_t lct_cscID         = Lct->getCSCData().cscID;
+      	uint16_t lct_strip         = Lct->getCSCData().strip;
+      	//uint16_t lct_pattern       = Lct->getCSCData().pattern;
+      	uint16_t lct_bend          = Lct->getCSCData().bend;
+      	uint16_t lct_quality       = Lct->getCSCData().quality;
+      	uint16_t lct_keywire       = Lct->getCSCData().keywire;
 	
-	double lct_phi             = Lct->getCMSGlobalPhi();
-	double lct_eta             = Lct->getCMSGlobalEta();
+      	double lct_phi             = Lct->getCMSGlobalPhi();
+      	double lct_eta             = Lct->getCMSGlobalEta();
 	
-	if(id.station() == 1)
-	  modeB |= 8;
-	if(id.station() == 2)
-	  modeB |= 4;
-	if(id.station() == 3)
-	  modeB |= 2;
-	if(id.station() == 4)
-	  modeB |= 1;
+      	if(id.station() == 1)
+      	  modeB |= 8;
+      	if(id.station() == 2)
+      	  modeB |= 4;
+      	if(id.station() == 3)
+      	  modeB |= 2;
+      	if(id.station() == 4)
+      	  modeB |= 1;
       
-	if ( printLevel > 0 ) {
-	  cout << "\n======\n";
-	  cout <<"lctEndcap       = " << lct_endcap << endl;
-	  cout <<"lctSector       = " << lct_sector<< endl;
-	  cout <<"lctSubSector    = " << lct_subSector << endl;
-	  cout <<"lctStation      = " << lct_station << endl;
-	  cout <<"lctRing         = " << lct_ring << endl;
-	  cout <<"lctChamber      = " << lct_chamber << endl;
-	  cout <<"lctTriggerCSCID = " << lct_cscID << endl;
-	  cout <<"lctBx           = " << lct_bx << endl;
-	  cout <<"lctBx0          = " << lct_bx0 << endl;
-	  cout <<"lctKeyWire      = " << lct_keywire << endl;
-	  cout <<"lctStrip        = " << lct_strip << endl;
-	  cout <<"lctBend         = " << lct_bend << endl;
-	  cout <<"lctQuality      = " << lct_quality << endl;
-	  cout <<"lct_globphi     = " << lct_phi << endl;
-	  cout <<"lct_globeta     = " << lct_eta << endl;
-	}
+      	if ( printLevel > 0 ) {
+      	  cout << "\n======\n";
+      	  cout <<"lctEndcap       = " << lct_endcap << endl;
+      	  cout <<"lctSector       = " << lct_sector<< endl;
+      	  cout <<"lctSubSector    = " << lct_subSector << endl;
+      	  cout <<"lctStation      = " << lct_station << endl;
+      	  cout <<"lctRing         = " << lct_ring << endl;
+      	  cout <<"lctChamber      = " << lct_chamber << endl;
+      	  cout <<"lctTriggerCSCID = " << lct_cscID << endl;
+      	  cout <<"lctBx           = " << lct_bx << endl;
+      	  cout <<"lctBx0          = " << lct_bx0 << endl;
+      	  cout <<"lctKeyWire      = " << lct_keywire << endl;
+      	  cout <<"lctStrip        = " << lct_strip << endl;
+      	  cout <<"lctBend         = " << lct_bend << endl;
+      	  cout <<"lctQuality      = " << lct_quality << endl;
+      	  cout <<"lct_globphi     = " << lct_phi << endl;
+      	  cout <<"lct_globeta     = " << lct_eta << endl;
+      	}
 	
 	
-	// Do not FIll array over their given size!!
-	if (nTrks > MAXTRK-1) {
-	  if (printLevel > 1) cout << "-----> nTrks is greater than MAXTRK-1.  Skipping this Track..." << endl;
-	  continue;
-	}
+      	// Do not FIll array over their given size!!
+      	if (nTrks > MAXTRK-1) {
+      	  if (printLevel > 1) cout << "-----> nTrks is greater than MAXTRK-1.  Skipping this Track..." << endl;
+      	  continue;
+      	}
 	
-	if (LctTrkId_ > MAXTRKHITS-1) {
-	  if (printLevel > 1)cout << "-----> LctTrkId_ is greater than MAXTRKHITS-1.  Skipping this Track..." << endl;
-	  continue;
-	}
+      	if (LctTrkId_ > MAXTRKHITS-1) {
+      	  if (printLevel > 1)cout << "-----> LctTrkId_ is greater than MAXTRKHITS-1.  Skipping this Track..." << endl;
+      	  continue;
+      	}
 	
 	
-	ev.leg_trkLct_endcap[nTrks][LctTrkId_] = lct_endcap;
+      	ev.leg_trkLct_endcap[nTrks][LctTrkId_] = lct_endcap;
 	
-	// sector (end 1: 1->6, end 2: 7 -> 12)
-	//if ( lct_endcap == 1)
-	ev.leg_trkLct_sector[nTrks][LctTrkId_] = lct_sector;
-	//else
-	//        lctSector[nTrk][LctTrkId_] = 6+lct_sector;
+      	// sector (end 1: 1->6, end 2: 7 -> 12)
+      	//if ( lct_endcap == 1)
+      	ev.leg_trkLct_sector[nTrks][LctTrkId_] = lct_sector;
+      	//else
+      	//        lctSector[nTrk][LctTrkId_] = 6+lct_sector;
 	
-	ev.leg_trkLct_station[nTrks][LctTrkId_] = lct_station;
+      	ev.leg_trkLct_station[nTrks][LctTrkId_] = lct_station;
 	
-	ev.leg_trkLct_ring[nTrks][LctTrkId_] = lct_ring;
+      	ev.leg_trkLct_ring[nTrks][LctTrkId_] = lct_ring;
 	
-	ev.leg_trkLct_chamber[nTrks][LctTrkId_] = lct_chamber;
+      	ev.leg_trkLct_chamber[nTrks][LctTrkId_] = lct_chamber;
 	
-	ev.leg_trkLct_cscId[nTrks][LctTrkId_] = lct_cscID;
+      	ev.leg_trkLct_cscId[nTrks][LctTrkId_] = lct_cscID;
 	
-	ev.leg_trkLct_wire[nTrks][LctTrkId_] = lct_keywire;
+      	ev.leg_trkLct_wire[nTrks][LctTrkId_] = lct_keywire;
 	
-	ev.leg_trkLct_strip[nTrks][LctTrkId_] = lct_strip;
+      	ev.leg_trkLct_strip[nTrks][LctTrkId_] = lct_strip;
 	
-	ev.leg_trkLct_globPhi[nTrks][LctTrkId_] = lct_phi;
+      	ev.leg_trkLct_globPhi[nTrks][LctTrkId_] = lct_phi;
 	
-	ev.leg_trkLct_eta[nTrks][LctTrkId_] = lct_eta;
+      	ev.leg_trkLct_eta[nTrks][LctTrkId_] = lct_eta;
 
-	if (lct_bx > 3) {
-	  std::cout << "Why is the legacy lct_bx = " << lct_bx << " ? Setting to -999." << std::endl;
-	  lct_bx = -999;
-	}
+      	if (lct_bx > 3) {
+      	  std::cout << "Why is the legacy lct_bx = " << lct_bx << " ? Setting to -999." << std::endl;
+      	  lct_bx = -999;
+      	}
 	
-	ev.leg_trkLct_bx[nTrks][LctTrkId_] = lct_bx;
+      	ev.leg_trkLct_bx[nTrks][LctTrkId_] = lct_bx;
 	
-	LctTrkId_++;
+      	LctTrkId_++;
 	
       } // end track LCT loop
-      */
+
 
       
       ev.leg_trkModeB -> push_back(modeB);
@@ -716,7 +716,7 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     } // end legacy track loop
     
     ev.numLegTrks = nTrks;
-    
+
     //fillLeg_CSCTFTracks(ev, leg_tracks, printLevel, srLUTs_, scale, ptScale);
 
   }
