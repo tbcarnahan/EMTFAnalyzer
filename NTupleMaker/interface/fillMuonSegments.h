@@ -115,8 +115,10 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
     // --------- Loop over the CSC segments -------------
     for (auto segIter = cscSegs->begin(); segIter != cscSegs->end(); segIter++){
       
-      int nHits=segIter -> nRecHits();
+      bool isSegMatched = false;
       
+      int nHits=segIter -> nRecHits();
+
       if (printLevel > 3) {
 	cout << " ======================================== " << endl;
 	cout << "Segment in CSC:" << icscSegment++ << endl;
@@ -191,9 +193,11 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 	    // local position
 	    LocalPoint rhitlocal = iRH->localPosition();
 	    
-	    if (segHitX==rhitlocal.x() &&
-		segHitY==rhitlocal.y()  )
-	      isHitMatched=true;
+	    if (segHitX==rhitlocal.x() && segHitY==rhitlocal.y() ) {
+	      isHitMatched = true;
+	      isSegMatched = true;
+	    }
+
 	  } // end loop over hits of a segment
 	  
 	} // end loop trackingRecHit_iterator (segments of a muon)
@@ -212,15 +216,11 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 			      << " matched"      << endl;
       
       // fill the the vector with the matching segments
-      if (nMuonMatchedHits!=0) {
-	
-	
+      if (nMuonMatchedHits!=0 && isSegMatched) {
 	Segment* segment = new Segment(*segIter, nMuonMatchedHits);
-
 	segVect -> push_back(segment);
-
-
       }
+
       
     }  // end loop on the CSC segments
     
@@ -322,6 +322,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 	std::cout << "globalDirection.phi() = " << ev.recoCscSeg_glob_dir_phi[whichMuon][iSegment] << std::endl << std::endl;
       }
       
+      /*
       // Check if segment is within DR window of RECO muon for removing bugged segments
       float dphi = ev.recoCscSeg_glob_phi[whichMuon][iSegment] - trackRef->phi();
       if (dphi > 3.14256) dphi -= 3.14256;
@@ -333,7 +334,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 	ev.recoCscSeg_isMatched[whichMuon][iSegment] = -999;
 	continue;
       }
-      
+      */
 
       // is the segment triggerable?
       bool isTriggerAble = _matchBox.isLCTAble( (*segmentCSC)->cscsegcand, 0);
