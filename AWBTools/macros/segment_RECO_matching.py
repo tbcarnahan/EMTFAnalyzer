@@ -5,7 +5,8 @@ import math
 import numpy
 from ROOT import *
 
-in_filename = '/afs/cern.ch/work/a/abrinke1/public/EMTF/Emulator/files/EMTF_NTuple_ZMu_274198_10k_B.root'
+## in_filename = '/afs/cern.ch/work/a/abrinke1/public/EMTF/Emulator/files/EMTF_NTuple_ZMu_274198_10k_B.root'
+in_filename = '../NTupleMaker/EMTF_NTuple_ZMu_274198_10k.root'
 in_file = TFile.Open(in_filename)
 tree = in_file.Get("ntuple/tree")
 
@@ -41,7 +42,7 @@ h_dPhi_LCT = TH1F('h_dPhi_LCT', 'dPhi(segment, LCT)', dPhi_bins[0], dPhi_bins[1]
 
 for iEvt in range(tree.GetEntries()):
     
-    if iEvt > 300: break
+    ## if iEvt > 300: break
     if iEvt % 100 is 0: print 'Event #', iEvt
     tree.GetEntry(iEvt)
     if ( tree.numRecoMuons == 0 and tree.numTrks == 0 ):
@@ -70,12 +71,12 @@ for iEvt in range(tree.GetEntries()):
         if isHalo:
             continue
 
-        if hasHiDPhi:
-            print ''
-            print 'In event %d, RECO track pT = %.1f, eta = %.2f, phi = %.2f' % ( iEvt, tree.recoPt[iReco], tree.recoEta[iReco], tree.recoPhi[iReco] )
-            for jReco in range(tree.numRecoMuons):
-                if jReco != iReco:
-                    print 'Event has other RECO track pT = %.1f, eta = %.2f, phi = %.2f' % ( tree.recoPt[jReco], tree.recoEta[jReco], tree.recoPhi[jReco] )
+        # if hasHiDPhi:
+        #     print ''
+        #     print 'In event %d, RECO track pT = %.1f, eta = %.2f, phi = %.2f' % ( iEvt, tree.recoPt[iReco], tree.recoEta[iReco], tree.recoPhi[iReco] )
+        #     for jReco in range(tree.numRecoMuons):
+        #         if jReco != iReco:
+        #             print 'Event has other RECO track pT = %.1f, eta = %.2f, phi = %.2f' % ( tree.recoPt[jReco], tree.recoEta[jReco], tree.recoPhi[jReco] )
 
         for iSeg in range(tree.recoNumCscSegs[iReco]):
             if iSeg > 15 or tree.recoCscSeg_isMatched[iReco*16 + iSeg] != 1 or tree.recoCscSeg_lctId[iReco*16 + iSeg] == -999:
@@ -84,9 +85,9 @@ for iEvt in range(tree.GetEntries()):
             recoID = tree.recoCscSeg_lctId[iReco*16 + iSeg]
             reco_lctIDs.append( recoID )
 
-            if hasHiDPhi:
-                print 'Station %d seg with eta = %.2f, phi = %.2f' % ( tree.recoCscSeg_station[iReco*16 + iSeg], tree.recoCscSeg_glob_eta[iReco*16 + iSeg], tree.recoCscSeg_glob_phi[iReco*16 + iSeg] )
-                print 'Station %d hit with eta = %.2f, phi = %.2f' % ( tree.lctStation.at(recoID), tree.lctEta.at(recoID), tree.lctGlobalPhi.at(recoID) )
+            # if hasHiDPhi:
+            #     print 'Station %d seg with eta = %.2f, phi = %.2f' % ( tree.recoCscSeg_station[iReco*16 + iSeg], tree.recoCscSeg_glob_eta[iReco*16 + iSeg], tree.recoCscSeg_glob_phi[iReco*16 + iSeg] )
+            #     print 'Station %d hit with eta = %.2f, phi = %.2f' % ( tree.lctStation.at(recoID), tree.lctEta.at(recoID), tree.lctGlobalPhi.at(recoID) )
                 
             dEta_mu = tree.recoCscSeg_glob_eta[iReco*16 + iSeg] - tree.recoEta[iReco]
             dPhi_mu = numpy.sign( math.sin( tree.recoCscSeg_glob_phi[iReco*16 + iSeg] - tree.recoPhi[iReco] ) ) * math.acos( math.cos( tree.recoCscSeg_glob_phi[iReco*16 + iSeg] - tree.recoPhi[iReco] ) )

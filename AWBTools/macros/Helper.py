@@ -2,12 +2,20 @@
 import math
 
 def HitsMatch( Hit1, Hit2 ):
-	
-	if ( Hit1.BX() == Hit2.BX() and Hit1.Station() == Hit2.Station() and Hit1.Sector() == Hit2.Sector() ):
-		if ( Hit1.CSC_ID() == Hit2.CSC_ID() and Hit1.Strip() == Hit2.Strip() and Hit1.Wire() == Hit2.Wire() ):
-			return True
-		else:
-			return False
+
+	if ( Hit1.BX() == Hit2.BX() and Hit1.Station() == Hit2.Station() and Hit1.Sector() == Hit2.Sector() and
+	     Hit1.Subsector() == Hit2.Subsector() and Hit1.Ring() == Hit2.Ring() and Hit1.Chamber() == Hit2.Chamber() and
+	     Hit1.CSC_ID() == Hit2.CSC_ID() and Hit1.Strip() == Hit2.Strip() and Hit1.Wire() == Hit2.Wire() ):
+		return True
+	else:
+		return False
+
+def HitsMatchNoBX( Hit1, Hit2 ):
+
+	if ( Hit1.Station() == Hit2.Station() and Hit1.Sector() == Hit2.Sector() and
+	     Hit1.Subsector() == Hit2.Subsector() and Hit1.Ring() == Hit2.Ring() and Hit1.Chamber() == Hit2.Chamber() and
+	     Hit1.CSC_ID() == Hit2.CSC_ID() and Hit1.Strip() == Hit2.Strip() and Hit1.Wire() == Hit2.Wire() ):
+		return True
 	else:
 		return False
 
@@ -123,8 +131,9 @@ def PtLutAddrMatch( Trk1, Trk2 ):
 
 
 def PrintEMTFHit( Hit ):
-	print 'BX = %d, station = %d, sector = %d, subsector = %d, ring = %d, ' % ( Hit.BX(), Hit.Station(), Hit.Sector(), Hit.Subsector(), Hit.Ring() ), \
-	    'CSC ID = %d, chamber = %d, strip = %d, wire = %d, neighbor = %d' % ( Hit.CSC_ID(), Hit.Chamber(), Hit.Strip(), Hit.Wire(), Hit.Neighbor() )
+	print 'BX = %d, endcap = %d, station = %d, sector = %d, subsector = %d,' % ( Hit.BX(), Hit.Endcap(), Hit.Station(), Hit.Sector(), Hit.Subsector() ), \
+	    'ring = %d, CSC ID = %d, chamber = %d, strip = %d, wire = %d,' % ( Hit.Ring(), Hit.CSC_ID(), Hit.Chamber(), Hit.Strip(), Hit.Wire() ), \
+	    'neighbor = %d, valid = %d' % ( Hit.Neighbor(), Hit.Valid() )
 
 def PrintEMTFHitExtra( Hit ):
 	PrintEMTFHit( Hit )
@@ -132,7 +141,7 @@ def PrintEMTFHitExtra( Hit ):
 	print 'phi_loc_int = %d, theta_int = %d, phi_glob_deg = %.1f, eta = %.3f' % ( Hit.Phi_loc_int(), Hit.Theta_int(), CalcPhiGlobDeg( Hit.Phi_loc_int(), Hit.Sector() ), Hit.Eta() )
 
 def PrintEMTFTrack( Trk ):
-	print 'BX = %d, sector = %d, mode = %d, phi_loc_int = %d, phi_GMT = %d, ' % ( Trk.BX(), Trk.Sector(), Trk.Mode(), Trk.Phi_loc_int(), Trk.Phi_GMT() ), \
+	print 'BX = %d, sector = %d, mode = %d, phi_loc_int = %d, phi_GMT = %d,' % ( Trk.BX(), Trk.Sector(), Trk.Mode(), Trk.Phi_loc_int(), Trk.Phi_GMT() ), \
 	    'eta_GMT = %d, pT_GMT = %d, phi_glob_deg = %.1f, eta = %.3f, pT = %.1f, ' % ( Trk.Eta_GMT(), Trk.Pt_GMT(), Trk.Phi_glob_deg(), Trk.Eta(), Trk.Pt() )
 	    # 'has some (all) neighbor hits = %d (%d)' % ( Trk.Has_neighbor(), Trk.All_neighbor() ) 
 	
@@ -158,6 +167,23 @@ def PrintSimulatorHit( Hit ):
 		tmp_bend = Hit.Bend()
 	print '%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d' % ( Hit.BX() + 6, tmp_endcap, Hit.Sector(), tmp_sub, Hit.Station(), Hit.Valid(),
 								 Hit.Quality(), Hit.Pattern(), Hit.Wire(), tmp_id, tmp_bend, Hit.Strip() )
+
+def PrintEventHeaderHeader():
+	print 'Event Header output: endcap, sector, sp_ts, tbin, me1a, me1b, me2, me3, me4'
+def PrintEventHeader( HD ):
+	print '%d, %d, %d, %d, %d, %d, %d, %d, %d' % ( HD.Endcap(), HD.Sector(), HD.SP_TS(), HD.TBIN(), HD.ME1a(), HD.ME1b(), HD.ME2(), HD.ME3(), HD.ME4() )
+
+def PrintMEHeader():
+	print 'ME output: tbin, station, csc_id, vp, quality, clct_pattern, lr, wire, strip'
+def PrintME( ME ):
+	print '%d, %d, %d, %d, %d, %d, %d, %d, %d' % ( ME.TBIN(), ME.Station(), ME.CSC_ID(), ME.VP(), ME.Quality(), ME.CLCT_pattern(), ME.LR(), ME.Wire(), ME.Strip() )
+
+def PrintSPHeader():
+	print 'SP output: phi_full, phi_GMT, eta_GMT, pt_GMT, quality_GMT, mode, tbin, me1_subsector, me1_csc_id, me1_delay, me2_csc_id, me2_delay, me3_csc_id, me3_delay, me4_csc_id, me4_delay'
+def PrintSP( SP ):
+	print '%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d' % ( SP.Phi_full(), SP.Phi_GMT(), SP.Eta_GMT(), SP.Pt_GMT(), SP.Quality_GMT(), SP.Mode(), 
+										   SP.TBIN(), SP.ME1_subsector(), SP.ME1_CSC_ID(), SP.ME1_delay(), SP.ME2_CSC_ID(), 
+										   SP.ME2_delay(), SP.ME3_CSC_ID(), SP.ME3_delay(), SP.ME4_CSC_ID(), SP.ME4_delay() )
 
 def PrintPtLUT( Trk ):
 
