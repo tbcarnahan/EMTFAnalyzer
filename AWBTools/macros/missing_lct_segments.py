@@ -29,6 +29,7 @@ for iEvt in range(tree.GetEntries()):
             if tree.recoCscSeg_isMatched[iReco*16 + iSeg] == 1 and tree.recoCscSeg_lctId[iReco*16 + iSeg] >= 0:
                 recoID = tree.recoCscSeg_lctId[iReco*16 + iSeg]
                 reco_lctIDs.append( recoID )
+                print 'Station %d seg with eta = %.2f, phi = %.2f' % ( tree.recoCscSeg_station[iReco*16 + iSeg], tree.recoCscSeg_glob_eta[iReco*16 + iSeg], tree.recoCscSeg_glob_phi[iReco*16 + iSeg] )
                 print 'Station %d hit with eta = %.2f, phi = %.2f' % ( tree.lctStation.at(recoID), tree.lctEta.at(recoID), tree.lctGlobalPhi.at(recoID) )
         print ''
                 
