@@ -707,9 +707,9 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
       
       ev.leg_trkModeB -> push_back(modeB);
-      //ev.leg_trkBxBeg -> push_back(lct_bx_beg);
-      //ev.leg_trkBxEnd -> push_back(lct_bx_end);
-      //ev.numLegTrkLCTs -> push_back(LctTrkId_);
+      ev.leg_trkBxBeg -> push_back(lct_bx_beg);
+      ev.leg_trkBxEnd -> push_back(lct_bx_end);
+      ev.numLegTrkLCTs -> push_back(LctTrkId_);
       
       nTrks++;
       
