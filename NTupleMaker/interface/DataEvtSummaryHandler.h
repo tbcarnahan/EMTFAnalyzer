@@ -19,12 +19,10 @@
 
 #endif
 
-#define MAXEMTF 4
-#define MAXTRK 4
+#define MAXTRK 8
 #define MAXTRKHITS 4
-#define MAX_MUONS 100
+#define MAX_MUONS 8
 #define MAX_CSC_RECHIT 48 // 4 stations x 6 layers + (overlap between chambers: added other 24 hits to be safe)
-#define MAX_TRK_SEGS 100  // max # segments to a given tracker muon
 #define MAX_LCTS_PER_TRK 4  // max # of LCTS which form a CSCTF track
 #define MAX_SEGS_STD 16 // MAX number of segments which can be associated to StandAlone component of the GBL muon
 

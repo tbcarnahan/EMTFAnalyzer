@@ -144,22 +144,22 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("trkStraight",&evSummary_.trkStraight);
     t_->Branch("numTrkLCTs", &evSummary_.numTrkLCTs);
 
-    t_->Branch("trkLct_endcap",    &evSummary_.trkLct_endcap,    "trkLct_endcap[4][4]/I");
-    t_->Branch("trkLct_chamber",    &evSummary_.trkLct_chamber,    "trkLct_chamber[4][4]/I");
-    t_->Branch("trkLct_station",    &evSummary_.trkLct_station,    "trkLct_station[4][4]/I");
-    t_->Branch("trkLct_sector",    &evSummary_.trkLct_sector,    "trkLct_sector[4][4]/I");
-    t_->Branch("trkLct_ring",    &evSummary_.trkLct_ring,    "trkLct_ring[4][4]/I");
-    t_->Branch("trkLct_wire",    &evSummary_.trkLct_wire,    "trkLct_wire[4][4]/I");
-    t_->Branch("trkLct_strip",    &evSummary_.trkLct_strip,    "trkLct_strip[4][4]/I");
-    t_->Branch("trkLct_cscId",    &evSummary_.trkLct_cscId,    "trkLct_cscId[4][4]/I");
-    t_->Branch("trkLct_globPhi",    &evSummary_.trkLct_globPhi,    "trkLct_globPhi[4][4]/F");
-    t_->Branch("trkLct_geomPhi",    &evSummary_.trkLct_geomPhi,    "trkLct_geomPhi[4][4]/F");
-    t_->Branch("trkLct_eta",    &evSummary_.trkLct_eta,    "trkLct_eta[4][4]/F");
-    t_->Branch("trkLct_locPhi",    &evSummary_.trkLct_locPhi,    "trkLct_locPhi[4][4]/I");
-    t_->Branch("trkLct_locTheta",    &evSummary_.trkLct_locTheta,    "trkLct_locTheta[4][4]/I");
-    t_->Branch("trkLct_bx",    &evSummary_.trkLct_bx,    "trkLct_bx[4][4]/I");
-    t_->Branch("trkLct_qual",    &evSummary_.trkLct_qual,    "trkLct_qual[4][4]/I");
-    t_->Branch("trkLct_pattern",    &evSummary_.trkLct_pattern,    "trkLct_pattern[4][4]/I");
+    t_->Branch("trkLct_endcap",    &evSummary_.trkLct_endcap,    "trkLct_endcap[8][4]/I");
+    t_->Branch("trkLct_chamber",    &evSummary_.trkLct_chamber,    "trkLct_chamber[8][4]/I");
+    t_->Branch("trkLct_station",    &evSummary_.trkLct_station,    "trkLct_station[8][4]/I");
+    t_->Branch("trkLct_sector",    &evSummary_.trkLct_sector,    "trkLct_sector[8][4]/I");
+    t_->Branch("trkLct_ring",    &evSummary_.trkLct_ring,    "trkLct_ring[8][4]/I");
+    t_->Branch("trkLct_wire",    &evSummary_.trkLct_wire,    "trkLct_wire[8][4]/I");
+    t_->Branch("trkLct_strip",    &evSummary_.trkLct_strip,    "trkLct_strip[8][4]/I");
+    t_->Branch("trkLct_cscId",    &evSummary_.trkLct_cscId,    "trkLct_cscId[8][4]/I");
+    t_->Branch("trkLct_globPhi",    &evSummary_.trkLct_globPhi,    "trkLct_globPhi[8][4]/F");
+    t_->Branch("trkLct_geomPhi",    &evSummary_.trkLct_geomPhi,    "trkLct_geomPhi[8][4]/F");
+    t_->Branch("trkLct_eta",    &evSummary_.trkLct_eta,    "trkLct_eta[8][4]/F");
+    t_->Branch("trkLct_locPhi",    &evSummary_.trkLct_locPhi,    "trkLct_locPhi[8][4]/I");
+    t_->Branch("trkLct_locTheta",    &evSummary_.trkLct_locTheta,    "trkLct_locTheta[8][4]/I");
+    t_->Branch("trkLct_bx",    &evSummary_.trkLct_bx,    "trkLct_bx[8][4]/I");
+    t_->Branch("trkLct_qual",    &evSummary_.trkLct_qual,    "trkLct_qual[8][4]/I");
+    t_->Branch("trkLct_pattern",    &evSummary_.trkLct_pattern,    "trkLct_pattern[8][4]/I");
 
 
     
@@ -176,17 +176,17 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("unp_trkBxEnd",&evSummary_.unp_trkBxEnd);
     t_->Branch("numUnpTrkLCTs", &evSummary_.numUnpTrkLCTs);
 
-    t_->Branch("unp_trkLct_endcap",    &evSummary_.unp_trkLct_endcap,    "unp_trkLct_endcap[4][4]/I");
-    t_->Branch("unp_trkLct_chamber",    &evSummary_.unp_trkLct_chamber,    "unp_trkLct_chamber[4][4]/I");
-    t_->Branch("unp_trkLct_station",    &evSummary_.unp_trkLct_station,    "unp_trkLct_station[4][4]/I");
-    t_->Branch("unp_trkLct_sector",    &evSummary_.unp_trkLct_sector,    "unp_trkLct_sector[4][4]/I");
-    t_->Branch("unp_trkLct_ring",    &evSummary_.unp_trkLct_ring,    "unp_trkLct_ring[4][4]/I");
-    t_->Branch("unp_trkLct_wire",    &evSummary_.unp_trkLct_wire,    "unp_trkLct_wire[4][4]/I");
-    t_->Branch("unp_trkLct_strip",    &evSummary_.unp_trkLct_strip,    "unp_trkLct_strip[4][4]/I");
-    t_->Branch("unp_trkLct_cscId",    &evSummary_.unp_trkLct_cscId,    "unp_trkLct_cscId[4][4]/I");
-    t_->Branch("unp_trkLct_bx",    &evSummary_.unp_trkLct_bx,    "unp_trkLct_bx[4][4]/I");
-    t_->Branch("unp_trkLct_qual",    &evSummary_.unp_trkLct_qual,    "unp_trkLct_qual[4][4]/I");
-    t_->Branch("unp_trkLct_pattern",    &evSummary_.unp_trkLct_pattern,    "unp_trkLct_pattern[4][4]/I");
+    t_->Branch("unp_trkLct_endcap",    &evSummary_.unp_trkLct_endcap,    "unp_trkLct_endcap[8][4]/I");
+    t_->Branch("unp_trkLct_chamber",    &evSummary_.unp_trkLct_chamber,    "unp_trkLct_chamber[8][4]/I");
+    t_->Branch("unp_trkLct_station",    &evSummary_.unp_trkLct_station,    "unp_trkLct_station[8][4]/I");
+    t_->Branch("unp_trkLct_sector",    &evSummary_.unp_trkLct_sector,    "unp_trkLct_sector[8][4]/I");
+    t_->Branch("unp_trkLct_ring",    &evSummary_.unp_trkLct_ring,    "unp_trkLct_ring[8][4]/I");
+    t_->Branch("unp_trkLct_wire",    &evSummary_.unp_trkLct_wire,    "unp_trkLct_wire[8][4]/I");
+    t_->Branch("unp_trkLct_strip",    &evSummary_.unp_trkLct_strip,    "unp_trkLct_strip[8][4]/I");
+    t_->Branch("unp_trkLct_cscId",    &evSummary_.unp_trkLct_cscId,    "unp_trkLct_cscId[8][4]/I");
+    t_->Branch("unp_trkLct_bx",    &evSummary_.unp_trkLct_bx,    "unp_trkLct_bx[8][4]/I");
+    t_->Branch("unp_trkLct_qual",    &evSummary_.unp_trkLct_qual,    "unp_trkLct_qual[8][4]/I");
+    t_->Branch("unp_trkLct_pattern",    &evSummary_.unp_trkLct_pattern,    "unp_trkLct_pattern[8][4]/I");
 
     // ====================
     // Legacy Tracks
@@ -209,18 +209,18 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("leg_trkBxEnd",&evSummary_.leg_trkBxEnd);
 
     t_->Branch("numLegTrkLCTs", &evSummary_.numLegTrkLCTs);
-    t_->Branch("leg_trkLct_endcap",    &evSummary_.leg_trkLct_endcap,    "leg_trkLct_endcap[4][4]/I");
-    t_->Branch("leg_trkLct_chamber",    &evSummary_.leg_trkLct_chamber,    "leg_trkLct_chamber[4][4]/I");
-    t_->Branch("leg_trkLct_station",    &evSummary_.leg_trkLct_station,    "leg_trkLct_station[4][4]/I");
-    t_->Branch("leg_trkLct_sector",    &evSummary_.leg_trkLct_sector,    "leg_trkLct_sector[4][4]/I");
-    t_->Branch("leg_trkLct_ring",    &evSummary_.leg_trkLct_ring,    "leg_trkLct_ring[4][4]/I");
-    t_->Branch("leg_trkLct_wire",    &evSummary_.leg_trkLct_wire,    "leg_trkLct_wire[4][4]/I");
-    t_->Branch("leg_trkLct_strip",    &evSummary_.leg_trkLct_strip,    "leg_trkLct_strip[4][4]/I");
-    t_->Branch("leg_trkLct_cscId",    &evSummary_.leg_trkLct_cscId,    "leg_trkLct_cscId[4][4]/I");
-    t_->Branch("leg_trkLct_globPhi",    &evSummary_.leg_trkLct_globPhi,    "leg_trkLct_globPhi[4][4]/F");
-    t_->Branch("leg_trkLct_eta",    &evSummary_.leg_trkLct_eta,    "leg_trkLct_eta[4][4]/F");
-    t_->Branch("leg_trkLct_locPhi",    &evSummary_.leg_trkLct_locPhi,    "leg_trkLct_locPhi[4][4]/I");
-    t_->Branch("leg_trkLct_bx",    &evSummary_.leg_trkLct_bx,    "leg_trkLct_bx[4][4]/I");
+    t_->Branch("leg_trkLct_endcap",    &evSummary_.leg_trkLct_endcap,    "leg_trkLct_endcap[8][4]/I");
+    t_->Branch("leg_trkLct_chamber",    &evSummary_.leg_trkLct_chamber,    "leg_trkLct_chamber[8][4]/I");
+    t_->Branch("leg_trkLct_station",    &evSummary_.leg_trkLct_station,    "leg_trkLct_station[8][4]/I");
+    t_->Branch("leg_trkLct_sector",    &evSummary_.leg_trkLct_sector,    "leg_trkLct_sector[8][4]/I");
+    t_->Branch("leg_trkLct_ring",    &evSummary_.leg_trkLct_ring,    "leg_trkLct_ring[8][4]/I");
+    t_->Branch("leg_trkLct_wire",    &evSummary_.leg_trkLct_wire,    "leg_trkLct_wire[8][4]/I");
+    t_->Branch("leg_trkLct_strip",    &evSummary_.leg_trkLct_strip,    "leg_trkLct_strip[8][4]/I");
+    t_->Branch("leg_trkLct_cscId",    &evSummary_.leg_trkLct_cscId,    "leg_trkLct_cscId[8][4]/I");
+    t_->Branch("leg_trkLct_globPhi",    &evSummary_.leg_trkLct_globPhi,    "leg_trkLct_globPhi[8][4]/F");
+    t_->Branch("leg_trkLct_eta",    &evSummary_.leg_trkLct_eta,    "leg_trkLct_eta[8][4]/F");
+    t_->Branch("leg_trkLct_locPhi",    &evSummary_.leg_trkLct_locPhi,    "leg_trkLct_locPhi[8][4]/I");
+    t_->Branch("leg_trkLct_bx",    &evSummary_.leg_trkLct_bx,    "leg_trkLct_bx[8][4]/I");
     
     // ================================
     // Legacy CSCTF input-to-GMT Tracks

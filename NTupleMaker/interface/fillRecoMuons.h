@@ -67,10 +67,10 @@ bool fillRecoMuons(DataEvtSummary_t &ev, edm::Handle<reco::MuonCollection> muons
                trackRef->pt(), trackRef->eta(), trackRef->phi());
       }
       
-      if ( abs(trackRef->eta()) < 1.1 && trackRef->pt() > 30 ) tagExists = true;
+      if ( abs(trackRef->eta()) < 1.0 && trackRef->pt() > 30 ) tagExists = true;
 
       // Only fill for known CSC eta range
-      if ( abs(trackRef->eta()) < 1.1 || abs(trackRef->eta()) > 2.4) continue;
+      if ( abs(trackRef->eta()) < 1.0 || abs(trackRef->eta()) > 2.5) continue;
       
       ev.recoPt       -> push_back(trackRef->pt    ());
       ev.recoSamPt    -> push_back(muon->standAloneMuon()->pt() );

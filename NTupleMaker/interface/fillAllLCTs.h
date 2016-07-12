@@ -109,27 +109,27 @@ void fillAllLCTs(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFHitExtra
     float lct_eta         = Lct->Eta();
 
     if ( printLevel > 0 ) {
-      //cout << "\nLCT CSC " << lctId
       cout << "\n======\n";
-      cout <<"lctEndcap       = " << lct_endcap << endl;
-      cout <<"lctSector       = " << lct_sector<< endl;
-      cout <<"lctSubSector    = " << lct_subSector << endl;
-      cout <<"lctStation      = " << lct_station << endl;
-      cout <<"lctRing         = " << lct_ring << endl;
-      cout <<"lctChamber      = " << lct_chamber << endl;
-      cout <<"lctTriggerCSCID = " << lct_cscID << endl;
-      cout <<"lctBx           = " << lct_bx << endl;
-      cout <<"lctBc0          = " << lct_bc0 << endl;
-      cout <<"lctKeyWire      = " << lct_keywire << endl;
-      cout <<"lctStrip        = " << lct_strip << endl;
-      cout <<"lctBend         = " << lct_bend << endl;
-      cout <<"lctQuality      = " << lct_quality << endl;
-      cout <<"lct_pattern     = " << lct_pattern << endl;
-      //cout <<"lct fpga        = " << fpga << endl;
-      cout <<"phi global      = " << lct_phi << endl;
-      cout <<"eta global      = " << lct_eta << endl;
+      cout << "lctId = " << lctId
+	/* cout */ <<", lctEndcap       = " << lct_endcap /* << endl; */
+	/* cout */ <<", lctSector       = " << lct_sector/* << endl; */
+	/* cout */ <<", lctSubSector    = " << lct_subSector /* << endl; */
+	/* cout */ <<", lctStation      = " << lct_station /* << endl; */
+	/* cout */ <<", lctRing         = " << lct_ring /* << endl; */
+	/* cout */ <<", lctChamber      = " << lct_chamber /* << endl; */
+	/* cout */ <<", lctTriggerCSCID = " << lct_cscID << endl;
+      cout  <<"lctBx           = " << lct_bx /* << endl; */
+	/* cout */ <<", lctBc0          = " << lct_bc0 /* << endl; */
+	/* cout */ <<", lctKeyWire      = " << lct_keywire /* << endl; */
+	/* cout */ <<", lctStrip        = " << lct_strip /* << endl; */
+	/* cout */ <<", lctBend         = " << lct_bend /* << endl; */
+	/* cout */ <<", lctQuality      = " << lct_quality /* << endl; */
+	/* cout */ <<", lct_pattern     = " << lct_pattern /* << endl; */
+	///* cout */ <<", lct fpga        = " << fpga /* << endl; */
+	/* cout */ <<", phi global      = " << lct_phi /* << endl; */
+	/* cout */ <<", eta global      = " << lct_eta << endl;
     }
-
+      
     ev.lctEndcap -> push_back(lct_endcap);
     ev.lctSector -> push_back(lct_sector);
     ev.lctSubSector -> push_back(lct_subSector);

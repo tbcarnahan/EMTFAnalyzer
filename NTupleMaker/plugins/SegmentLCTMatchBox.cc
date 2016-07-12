@@ -166,17 +166,17 @@ int SegmentLCTMatchBox::wireGroup ( const CSCRecHit2D &hit ){
   return ( hit.hitWire() -1 );
 }
 
-// bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
-bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCTDigiCollection CSCTFlcts,
-				     int *match_report ){
+// bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts, int *match_report ){
+// bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCTDigiCollection CSCTFlcts, int *match_report ){
+std::vector<int> SegmentLCTMatchBox::lctsMatch ( const CSCSegment &segment, const edm::Handle<std::vector<l1t::EMTFHitExtra>> LCTs, int *match_report ){
+
+  int lct_arr[] = {-999, -999, -999, -999, -999, -999, -999, -999};
 
   if (_printLevel > 2)
     std::cout << "\n*** SegmentLCTMatchBox::isMatched *** " << std::endl;
   
   if (match_report)
     (*match_report) = 0;
-
-  bool retVal=false;
 
   int LCT_key_strip = -999;
   int LCT_key_wireg = -999;
@@ -265,40 +265,29 @@ bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCT
 
   int numLCTsChamber = 0;
 
-  //CSCCorrelatedLCTDigiCollection::Range lctRange = CSCTFlcts -> get( *tempDetId );
-  
   int deltaWireg = 999, deltaStrip = 999;
-    
-  bool lctWiregMatch = false;
-  bool lctStripMatch = false;
 
+  int lctId = -1;    
+  for (uint iLCT = 0; iLCT < LCTs->size(); iLCT++) {
 
-  if (_printLevel > 2) cout << "Loop over CSCCorrelatedLCTDigiCollection\n"; 
-  
-  //for ( auto lct = CSCTFlcts->cbegin(); lct != CSCTFlcts->cend(); lct++) {
-  std::vector<L1TMuon::TriggerPrimitive> LCT_collection;
+    l1t::EMTFHitExtra _LCT =  LCTs->at(iLCT);
+    if (_LCT.Neighbor() != 0) continue;
+    lctId += 1;
 
-  // auto chamber = CSCTFlcts -> begin();
-  // auto chend  = CSCTFlcts -> end();
-  auto chamber = CSCTFlcts.begin();
-  auto chend  = CSCTFlcts.end();
-  for( ; chamber != chend; ++chamber ) {
-    auto digi = (*chamber).second.first;
-    auto dend = (*chamber).second.second;
-    for( ; digi != dend; ++digi ) {
-      LCT_collection.push_back(TriggerPrimitive((*chamber).first,*digi));
+    if (_printLevel > 2) {
+      cout << "lctId = " << lctId
+	/* cout */ <<", lctEndcap       = " << _LCT.Endcap() /* << endl; */
+	/* cout */ <<", lctSector       = " << _LCT.Sector() /* << endl; */
+	/* cout */ <<", lctSubSector    = " << _LCT.Subsector()
+	/* cout */ <<", lctStation      = " << _LCT.Station() /* << endl; */
+	/* cout */ <<", lctRing         = " << _LCT.Ring() /* << endl; */
+	/* cout */ <<", lctChamber      = " << _LCT.Chamber() << endl;
     }
-  }
 
-
-  int lctId = 0; // count number of lcts in event
-
-  auto Lct = LCT_collection.cbegin();
-  auto Lctend = LCT_collection.cend();
-    
-  for( ; Lct != Lctend; Lct++,lctId++ ) {
-
-    if(Lct->subsystem() != 1) continue;
+    // Require segment and LCT to be from the same chamber
+    if ( (tempDetId->endcap() == 1) != (_LCT.Endcap() == 1) || tempDetId->station() != _LCT.Station() ||
+	 tempDetId->triggerSector() != _LCT.Sector() || tempDetId->chamber() != _LCT.Chamber() ) continue;
+    if ( tempDetId->ring() != _LCT.Ring() && abs(tempDetId->ring() - _LCT.Ring()) != 3 ) continue;
     
     /*
     CSCDetId id                = Lct->detId<CSCDetId>();
@@ -318,11 +307,12 @@ bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCT
     uint16_t lct_keywire       = Lct->getCSCData().keywire;
     */
     
-    if (match_report)
-      (*match_report) |= MATCH_CHAMBER;
+    // // Not sure what these lines did. - AWB 01.07.16
+    // if (match_report)
+    //   (*match_report) |= MATCH_CHAMBER;
     
-    LCT_key_wireg = Lct -> getCSCData().keywire;
-    LCT_key_strip = Lct -> getCSCData().strip;
+    LCT_key_wireg = _LCT.Wire();
+    LCT_key_strip = _LCT.Strip();
       
     numLCTsChamber++;
       
@@ -356,43 +346,47 @@ bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCT
         
     } 
 
-    lctWiregMatch |= ( abs(deltaWireg) <=  5 );
-    lctStripMatch |= ( abs(deltaStrip) <= 10 );
+    // Fill the array of LCT ID values.  What motivates the choice of window?
+    // if ( abs(deltaWireg) <= 5 && abs(deltaStrip) <= 10 ) { // This seems too wide - AWB 02.07.16
+    if ( abs(deltaWireg) + abs(deltaStrip) <= 5 ) {
+      // cout << "Found matching LCT at dWire = " << deltaWireg << ", dStrip = " << deltaStrip
+      // << ": bx = " << _LCT.BX() << ", endcap = " <<  _LCT.Endcap() << ", sector = " << _LCT.Sector() 
+      // << ", sub = " << _LCT.Subsector() << ", station = " << _LCT.Station() << ", ring = " << _LCT.Ring() 
+      // << ", chamber = " <<  _LCT.Chamber() << ", CSC ID = " << _LCT.CSC_ID() << ", strip = " << _LCT.Strip() << ", wire = " << _LCT.Wire() << endl;
+      for (uint i = 0; i < 8; i++) {
+	if (lct_arr[i] == -999) {
+	  lct_arr[i] = lctId;
+	  break; }
+      }
+  }
 
     if (_printLevel > 3) {
       cout << "deltaWireg = " << deltaWireg << endl;
       cout << "deltaStrip = " << deltaStrip << endl;
-      cout << "lctWiregMatch (if |deltaWireg| <=  5) = " << lctWiregMatch << endl;
-      cout << "lctStripMatch (if |deltaStrip| <= 10) = " << lctStripMatch << endl;
     }
   }
-    
-  if (lctWiregMatch && match_report)
-    (*match_report) |= MATCH_WIREG;
-    
-  if (lctStripMatch && match_report)
-    (*match_report) |= MATCH_STRIP;
-    
-  retVal =  lctWiregMatch && lctStripMatch ;
+
+  // // Not sure what these lines did. - AWB 01.07.16
+  // if (lctWiregMatch && match_report)
+  //   (*match_report) |= MATCH_WIREG;
+  // if (lctStripMatch && match_report)
+  //   (*match_report) |= MATCH_STRIP;
     
   //_numLCTSChamber [histoFillIndex] -> Fill ( numLCTsChamber );
 	
   if (_printLevel > 2) {
-    
-    if (!retVal)
-      cout << "FAIL: retVal was " << retVal 
-                << " numLCTS was: " << numLCTsChamber 
-                << segment.cscDetId() << endl;
-      
-    else
-      cout << "SUCCESS: retVal was " << retVal 
-                << " numLCTS was: " << numLCTsChamber 
-                << segment.cscDetId() << endl;
+
+    if (lct_arr[0] == -999) cout << "FAIL: no match for segment with CSC ID " << segment.cscDetId() 
+				 << " in " << numLCTsChamber << " LCTs" << endl;
+    else cout << "SUCCESS: segment with CSC ID " << segment.cscDetId() << " has matched LCTs with ID "
+	      << lct_arr[0] << ", " << lct_arr[1] << ", " << lct_arr[2] << ", " << lct_arr[3] << " ..." << endl;
+
   }
   
   delete tempDetId;
   
-  return retVal;
+  std::vector<int> lct_vec(lct_arr, lct_arr+8);
+  return lct_vec;
   
 }
 
