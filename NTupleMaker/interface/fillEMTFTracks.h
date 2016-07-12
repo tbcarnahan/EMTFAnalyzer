@@ -76,6 +76,8 @@ void fillEMTFTracks(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFTrack
       int trlct_bx       = lct->BX();
       if (trlct_bx > trBx_beg) trBx_beg = trlct_bx;
       if (trlct_bx < trBx_end) trBx_end = trlct_bx;
+
+      if (trlct_station < 1 || trlct_station > 4) std::cout << "Station = " << trlct_station << std::endl;
       
       // for consistency with LCT collection
       if (trlct_endcap<0) trlct_endcap = 2;

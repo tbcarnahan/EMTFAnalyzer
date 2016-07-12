@@ -320,13 +320,11 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<CSCCorrelatedLCTDigiCollection> csctf_lcts;
   iEvent.getByToken(cscTPTag_token, csctf_lcts);
 
-  // Fill correlated_lcts from EMTF hits, rather than CSCTF(?) - AWB 15.06.16
-  CSCCorrelatedLCTDigiCollection correlated_lcts;
-  auto iLCT = lcts->begin();
-  auto lastLCT  = lcts->end();
-  for( ; iLCT != lastLCT; ++iLCT )
-    if ( iLCT->Neighbor() == 0 )
-      correlated_lcts.insertDigi( (*iLCT).CSC_DetId(), (*iLCT).CSC_LCTDigi() );
+  // // Fill correlated_lcts from EMTF hits, rather than CSCTF(?) - AWB 15.06.16
+  // CSCCorrelatedLCTDigiCollection correlated_lcts;
+  // for( auto Lct = lcts->cbegin(); Lct < lcts->cend(); Lct++)
+  //   if (Lct->Neighbor() == 0) correlated_lcts.insertDigi( (*Lct).CSC_DetId(), (*Lct).CSC_LCTDigi() );
+
 
   if ( lcts.isValid() ) {
     
@@ -774,7 +772,7 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     
     // if ( cscSegments.isValid() && correlated_lcts.isValid())
     if ( cscSegments.isValid() && lcts.isValid() )
-      fillSegmentsMuons(ev, muons, cscSegments, cscGeom, correlated_lcts, printLevel);
+      fillSegmentsMuons(ev, muons, cscSegments, cscGeom, lcts, printLevel);
     // leaving out csc tracks for now.  Add back in later
     
     // else cout << "\t----->Invalid RECO Muon SEGMENT collection... skipping it\n";

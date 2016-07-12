@@ -35,7 +35,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 		       edm::Handle<CSCSegmentCollection> cscSegs, 
 		       edm::ESHandle<CSCGeometry> cscGeom,
 		       // const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
-		       CSCCorrelatedLCTDigiCollection CSCTFlcts,
+		       edm::Handle<std::vector<l1t::EMTFHitExtra>> LCTs,
 		       int printLevel) {
 
 
@@ -62,15 +62,9 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
   // find the segments belonging to the muon and see
   // if they are "LCTAble" (i.e. could generate an LCT)
 
-  int whichMuon = 0;
-  for (auto muon = muons->begin(); muon != muons->end(); muon++, whichMuon++) {
+  int whichMuon = -1;
+  for (auto muon = muons->begin(); muon != muons->end(); muon++) {
     
-    if (whichMuon > (MAX_MUONS-1) ) {
-      cout << "the muon has " << whichMuon << ", but the MAX allowed is "
-           << MAX_MUONS << " -> Skipping the muon... " << endl;
-      continue;
-    }
-
     // Only Global Muons that were also filled in the event record and has standalone component
     if (!muon->combinedMuon().isNonnull() || !muon->isGlobalMuon() || !muon->isStandAloneMuon()) continue;
 
@@ -78,7 +72,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 
     if (printLevel > 3) {
       printf("************************************************\n");
-      printf("M U O N  #%d\n", whichMuon);
+      printf("M U O N  #%d\n", whichMuon+1);
       printf("************************************************\n\n");
       printf("%s\n"    , "--------------------------------");
       printf("%s: %d\n", "isGlobalMuon    ()", muon->isGlobalMuon    ());
@@ -93,11 +87,9 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 	     trackRef->pt(), trackRef->eta(), trackRef->phi());
     }
 
-    
-    
     // Only fill for known CSC eta range
-    if ( abs(trackRef->eta()) < 1.1 || abs(trackRef->eta()) >2.4) continue;
-    
+    if ( abs(trackRef->eta()) < 1.0 || abs(trackRef->eta()) >2.4) continue;
+
     // get the segments which match the muon candidate.  Comes from class defined below
     //SegmentVector *segVect = SegmentsInMuon( &(*muon), &(*cscSegs), cscGeom, printLevel);
     
@@ -111,6 +103,13 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
     if (!isMuonStd) continue;
     int nMuonMatchedHits=0;
     int icscSegment=0;
+    
+    whichMuon += 1;
+    if (whichMuon > (MAX_MUONS-1) ) {
+      cout << "the muon has " << whichMuon << ", but the MAX allowed is "
+           << MAX_MUONS << " -> Skipping the muon... " << endl;
+      continue;
+    }
     
     // --------- Loop over the CSC segments -------------
     for (auto segIter = cscSegs->begin(); segIter != cscSegs->end(); segIter++){
@@ -312,7 +311,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
       ev.recoCscSeg_glob_phi    [whichMuon][iSegment] = globalPosition.phi();
       ev.recoCscSeg_glob_dir_eta[whichMuon][iSegment] = globalDirection.eta();
       ev.recoCscSeg_glob_dir_phi[whichMuon][iSegment] = globalDirection.phi();
-
+      
       if (printLevel > 3) {
 	std::cout << "globalPosition.x()    = " << ev.recoCscSeg_glob_x      [whichMuon][iSegment] << " cm"<< std::endl;
 	std::cout << "globalPosition.y()    = " << ev.recoCscSeg_glob_y      [whichMuon][iSegment] << " cm"<< std::endl;
@@ -340,94 +339,23 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
       bool isTriggerAble = _matchBox.isLCTAble( (*segmentCSC)->cscsegcand, 0);
       
       // is the segment matched to an LCT?
-      bool isLCTMatched  = _matchBox.isMatched( (*segmentCSC)->cscsegcand, CSCTFlcts , 0 );
+      std::vector<int> matched_IDs = _matchBox.lctsMatch( (*segmentCSC)->cscsegcand, LCTs , 0 );
+      // int tmp_num_matched = 0;
+      // for (uint xLCT = 0; xLCT < matched_IDs.size(); xLCT++)
+	// if (matched_IDs.at(xLCT) != -999) tmp_num_matched += 1;
+      // cout << "Segment is matched to " << tmp_num_matched << " LCTs" << endl;
 
-      if (printLevel > 3) cout <<"isMatched? = " << isLCTMatched  << endl;
+      if (printLevel > 3) cout << "isMatched? = " << ((matched_IDs.at(0) != -999) ? 1 : 0) << endl;
 
       ev.recoCscSeg_isLctAble[whichMuon][iSegment] = isTriggerAble;
-      ev.recoCscSeg_isMatched[whichMuon][iSegment] = isLCTMatched;
-      
-      vector<int> whichLCT;  // find the corresponding LCT in the list.  This seems to be done by matching CSCDetId for segment lct and list lct
-      if (isLCTMatched) {
-        
-	int iLCT=-1;
+      ev.recoCscSeg_isMatched[whichMuon][iSegment] = (matched_IDs.at(0) != -999) ? 1 : 0;
+      ev.recoCscSeg_lctId[whichMuon][iSegment] = matched_IDs.at(0);
 
-        CSCDetId *segDetId = 0;
-        const CSCDetId &origId = (*segmentCSC)->cscsegcand.cscDetId();
-
-        // if we're in ME11a, we have to worry about triple-ganging of strips.
-        if (origId.ring() == 4){
-          segDetId = new CSCDetId ( origId.endcap(), origId.station(), 1,origId.chamber());
-        } else {
-          segDetId = new CSCDetId ( origId );
-	}
-	
-	// loop over CSC Lcts
-        int match_count = 0; // keep track of how many lcts can be matched to the same segment
-	
-        //for( auto corrLct = CSCTFlcts->cbegin(); corrLct != CSCTFlcts->cend(); corrLct++) {
-	std::vector<L1TMuon::TriggerPrimitive> LCT_collection;
-	
-	/* auto chamber = CSCTFlcts -> begin(); */
-	/* auto chend  = CSCTFlcts -> end(); */
-	auto chamber = CSCTFlcts.begin();
-	auto chend  = CSCTFlcts.end();
-	for( ; chamber != chend; ++chamber ) {
-	  auto digi = (*chamber).second.first;
-	  auto dend = (*chamber).second.second;
-	  for( ; digi != dend; ++digi ) {
-	    LCT_collection.push_back(TriggerPrimitive((*chamber).first,*digi));
-	  }
-	}
-
-	auto Lct = LCT_collection.cbegin();
-	auto Lctend = LCT_collection.cend();
-
-	for( ; Lct != Lctend; Lct++) {
-	
-	  iLCT++;
-          if (printLevel > 3) cout << "Looping over Lct # " << iLCT << endl;
-
-	  if (Lct->subsystem() != 1 ) continue;
-          CSCDetId LctId = Lct->detId<CSCDetId>();
-
-	  if (printLevel > 3) {
-	    cout << "*segDetId: " << *segDetId << endl;
-	    cout << "LctId    : " << LctId << endl;
-	  }
-	  
-          // find the matching one
-          if ( (*segDetId) == LctId) {
-	    match_count ++;
-            whichLCT.push_back(iLCT);
-            if (printLevel > 3 ) cout << "Match is found. Corresponds to LCT number:" << iLCT << endl;
-          }
-	  
-        }  // end loop CSC lcts
-	
-	if (whichLCT.size() == 0)
-	  ev.recoCscSeg_lctId[whichMuon][iSegment] = -999;
-	
-	else
-	  ev.recoCscSeg_lctId[whichMuon][iSegment] = whichLCT.front();
-
-	
-	// Only when we have tracks compile the rest
-	/*
-	// If match has been made to only one or no lcts do the following
-        if (match_count == 1) {
-          recoCscSeg_lctId[whichMuon][iSegment] = whichLCT.front();
-          if (printLevel > 1) cout << "Fill recoCscSeg_lctId with " << whichLCT.front()  << endl;
-        }
-	
-        if (match_count == 0) recoCscSeg_lctId[whichMuon][iSegment] = -999;
-	*/
-      }
     } // end segment loop
-      //delete segVect;
-      
+    //delete segVect;
+    
   } // end muon loop
-
+  
 } // end fill SegmentsMuon
 
 
