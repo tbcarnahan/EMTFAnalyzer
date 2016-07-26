@@ -41,14 +41,14 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     // ==================
     t_->Branch("numRecoMuons", &evSummary_.numRecoMuons, "numRecoMuons/I");
 
+    t_->Branch("recoPt",   &evSummary_.recoPt);
     t_->Branch("recoEta",  &evSummary_.recoEta);
     t_->Branch("recoPhi",  &evSummary_.recoPhi);
-    t_->Branch("recoPt",   &evSummary_.recoPt);
-    t_->Branch("recoSamPt",   &evSummary_.recoSamPt);
-    t_->Branch("recoValHits",   &evSummary_.recoValHits);
-    t_->Branch("recoD0",   &evSummary_.recoD0);
-    t_->Branch("recoChi2Norm",   &evSummary_.recoChi2Norm);
     t_->Branch("recoCharge",   &evSummary_.recoCharge);
+    t_->Branch("recoSamPt",   &evSummary_.recoSamPt);
+    t_->Branch("recoIsTight",   &evSummary_.recoIsTight);
+    t_->Branch("recoMatchedStations",   &evSummary_.recoMatchedStations);
+    t_->Branch("recoChi2Norm",   &evSummary_.recoChi2Norm);
 
     // Muon CSC Segments
     t_->Branch("recoNumCscSegs", &evSummary_.recoNumCscSegs);
@@ -285,15 +285,14 @@ void DataEvtSummaryHandler::initStruct() {
   // RECO Muons
   // ==================
   evSummary_.numRecoMuons = 0;
+  evSummary_.recoPt  = new vector<float>;
   evSummary_.recoEta = new vector<float>;
   evSummary_.recoPhi = new vector<float>;
-  evSummary_.recoPt  = new vector<float>;
-  evSummary_.recoSamPt  = new vector<float>;
-  evSummary_.recoD0  = new vector<float>;
-  evSummary_.recoChi2Norm  = new vector<float>;
-  evSummary_.recoValHits  = new vector<int>;
   evSummary_.recoCharge  = new vector<int>;
-  
+  evSummary_.recoSamPt  = new vector<float>;
+  evSummary_.recoIsTight  = new vector<int>;
+  evSummary_.recoMatchedStations  = new vector<int>;
+  evSummary_.recoChi2Norm  = new vector<float>;
   
   // Segments
   evSummary_.recoNumCscSegs = new std::vector<int>;
@@ -546,14 +545,14 @@ void DataEvtSummaryHandler::resetStruct() {
   // ==================
   // RECO Muons
   // ==================
+  vector<float>().swap(*evSummary_.recoPt);
   vector<float>().swap(*evSummary_.recoEta);
   vector<float>().swap(*evSummary_.recoPhi);
-  vector<float>().swap(*evSummary_.recoPt);
-  vector<float>().swap(*evSummary_.recoSamPt);
   vector<int>().swap(*evSummary_.recoCharge);
+  vector<float>().swap(*evSummary_.recoSamPt);
+  vector<int>().swap(*evSummary_.recoIsTight);
+  vector<int>().swap(*evSummary_.recoMatchedStations);
   vector<float>().swap(*evSummary_.recoChi2Norm);
-  vector<float>().swap(*evSummary_.recoD0);
-  vector<int>().swap(*evSummary_.recoValHits);
   vector<int>().swap(*evSummary_.recoNumCscSegs);
   vector<int>().swap(*evSummary_.recoNumRpcClusts);
   

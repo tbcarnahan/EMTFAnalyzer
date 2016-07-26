@@ -144,6 +144,7 @@ private:
   edm::EDGetTokenT<std::vector<l1t::EMTFHitExtra>> emtfTPTagRPC_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrackExtra>> emtfTag_token;
   edm::EDGetTokenT<reco::MuonCollection> muons_token;
+  edm::EDGetTokenT<std::vector<reco::Vertex>> vertex_token;
   edm::EDGetTokenT<CSCSegmentCollection> cscSegs_token;
   edm::EDGetTokenT<std::vector<reco::GenParticle>> genTag_token;
   edm::EDGetTokenT<std::vector<pair<csc::L1Track,MuonDigiCollection<CSCDetId,CSCCorrelatedLCTDigi>>> > csctfTag_token;
@@ -185,6 +186,7 @@ NTupleMaker::NTupleMaker(const edm::ParameterSet& iConfig) {
   cscTPTag_token =  consumes<CSCCorrelatedLCTDigiCollection>(iConfig.getParameter<edm::InputTag>("cscTPTag"));
   genTag_token  =  consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genTag"));
   muons_token   =  consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonsTag"));
+  vertex_token   =  consumes<std::vector<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("vertexTag"));
   cscSegs_token = consumes<CSCSegmentCollection>(iConfig.getParameter<edm::InputTag>("cscSegTag"));
   csctfTag_token =  consumes<std::vector<pair<csc::L1Track,MuonDigiCollection<CSCDetId,CSCCorrelatedLCTDigi>>>>(iConfig.getParameter<edm::InputTag>("csctfTag"));
   // leg_gmtTag_token = consumes<L1MuGMTReadoutCollection>(iConfig.getParameter<edm::InputTag>("leg_gmtTag"));
@@ -749,14 +751,16 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	   <<   "================================================================\n" << endl;
     
     
-    edm::Handle<reco::MuonCollection>  muons;
+    edm::Handle<reco::MuonCollection> muons;
     iEvent.getByToken(muons_token, muons);
+    edm::Handle<std::vector<reco::Vertex>> vertices;
+    iEvent.getByToken(vertex_token, vertices);
     
     //edm::Handle<reco::BeamSpot> beamSpot;
     //iEvent.getByLabel("offlineBeamSpot", beamSpot);
     
     if ( muons.isValid() )
-      tagAndProbeExist = fillRecoMuons(ev, muons, printLevel);
+      tagAndProbeExist = fillRecoMuons(ev, muons, vertices, printLevel);
     
     // else cout << "\t----->Invalid RECO Muon collection... skipping it\n";
     

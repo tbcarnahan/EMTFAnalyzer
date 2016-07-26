@@ -46,13 +46,13 @@ struct DataEvtSummary_t {
   int numRecoMuons;
   
   std::vector<float>* recoPt;
-  std::vector<float>* recoSamPt;
   std::vector<float>* recoEta;
   std::vector<float>* recoPhi;
-  std::vector<float>* recoD0;
-  std::vector<float>* recoChi2Norm;
-  std::vector<int>* recoValHits;
   std::vector<int>* recoCharge;
+  std::vector<float>* recoSamPt;
+  std::vector<int>* recoIsTight;
+  std::vector<int>* recoMatchedStations;
+  std::vector<float>* recoChi2Norm;
 
   // Muon CSC Segments
   std::vector<int>* recoNumCscSegs;

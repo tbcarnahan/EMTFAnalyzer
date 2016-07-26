@@ -58,58 +58,32 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
   
   _matchBox.setPrintLevel(printLevel);
   
-  // given a muon candidate, loop over the segments and
+  // Given a muon candidate, loop over the segments and
   // find the segments belonging to the muon and see
   // if they are "LCTAble" (i.e. could generate an LCT)
 
   int whichMuon = -1;
   for (auto muon = muons->begin(); muon != muons->end(); muon++) {
-    
-    // Only Global Muons that were also filled in the event record and has standalone component
-    if (!muon->combinedMuon().isNonnull() || !muon->isGlobalMuon() || !muon->isStandAloneMuon()) continue;
 
-    TrackRef trackRef = muon->combinedMuon();
-
-    if (printLevel > 3) {
-      printf("************************************************\n");
-      printf("M U O N  #%d\n", whichMuon+1);
-      printf("************************************************\n\n");
-      printf("%s\n"    , "--------------------------------");
-      printf("%s: %d\n", "isGlobalMuon    ()", muon->isGlobalMuon    ());
-      printf("%s: %d\n", "isTrackerMuon   ()", muon->isTrackerMuon   ());
-      printf("%s: %d\n", "isStandAloneMuon()", muon->isStandAloneMuon());
-      printf("%s: %d\n", "combinedMuon    ().isNonnull()", muon->combinedMuon  ().isNonnull());
-      printf("%s: %d\n", "track           ().isNonnull()", muon->track         ().isNonnull());
-      printf("%s: %d\n", "standAloneMuon  ().isNonnull()", muon->standAloneMuon().isNonnull());
-      printf("%s\n\n"  , "--------------------------------");
-      
-      printf("(GBL) muon->pt(): %10.5f, muon->eta(): %10.5f, muon->phi(): %10.5f\n",
-	     trackRef->pt(), trackRef->eta(), trackRef->phi());
-    }
-
-    // Only fill for known CSC eta range
-    if ( abs(trackRef->eta()) < 1.0 || abs(trackRef->eta()) >2.4) continue;
-
-    // get the segments which match the muon candidate.  Comes from class defined below
-    //SegmentVector *segVect = SegmentsInMuon( &(*muon), &(*cscSegs), cscGeom, printLevel);
-    
-    SegmentVector *segVect = new SegmentVector();
-
-    bool isMuonStd=false; // has the muon a standalone component
-    if (muon->combinedMuon().isNonnull() || muon->standAloneMuon().isNonnull())
-      isMuonStd=true;
-    
-    // return empty vector if the muon is not interesting
-    if (!isMuonStd) continue;
-    int nMuonMatchedHits=0;
-    int icscSegment=0;
-    
+    // Same as in fillRecoMuons.h ... really shouldn't do this manually - AWB 19.07.16
+    if ( !(muon::isLooseMuon((*muon))) ) continue;
     whichMuon += 1;
+
     if (whichMuon > (MAX_MUONS-1) ) {
       cout << "the muon has " << whichMuon << ", but the MAX allowed is "
            << MAX_MUONS << " -> Skipping the muon... " << endl;
       continue;
     }
+    
+    // Need a stand-alone component to match segments
+    if ( !(muon->isStandAloneMuon()) ) continue;
+    
+    // Get the segments which match the muon candidate.  Comes from class defined below
+    // SegmentVector *segVect = SegmentsInMuon( &(*muon), &(*cscSegs), cscGeom, printLevel);
+    
+    SegmentVector *segVect = new SegmentVector();
+    int nMuonMatchedHits=0;
+    int icscSegment=0;
     
     // --------- Loop over the CSC segments -------------
     for (auto segIter = cscSegs->begin(); segIter != cscSegs->end(); segIter++){
@@ -125,7 +99,6 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
       }
 
       if (icscSegment > MAX_SEGS_STD-1) continue;
-	
       
       const std::vector<CSCRecHit2D>& theHits = segIter -> specificRecHits();
       std::vector<CSCRecHit2D>::const_iterator hitIter;
