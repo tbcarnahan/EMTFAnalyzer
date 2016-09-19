@@ -14,7 +14,17 @@ def HitsMatchNoBX( Hit1, Hit2 ):
 
 	if ( Hit1.Station() == Hit2.Station() and Hit1.Sector() == Hit2.Sector() and
 	     Hit1.Subsector() == Hit2.Subsector() and Hit1.Ring() == Hit2.Ring() and Hit1.Chamber() == Hit2.Chamber() and
-	     Hit1.CSC_ID() == Hit2.CSC_ID() and Hit1.Strip() == Hit2.Strip() and Hit1.Wire() == Hit2.Wire() ):
+	     Hit1.CSC_ID() == Hit2.CSC_ID() and Hit1.Strip() == Hit2.Strip() and Hit1.Wire() == Hit2.Wire() and
+	     Hit1.Quality() == Hit1.Quality() and Hit1.Bend() == Hit2.Bend() and Hit1.Pattern() == Hit2.Pattern() ):
+		return True
+	else:
+		return False
+
+def HitsMatchChamber( Hit1, Hit2 ):
+
+	if ( Hit1.BX() == Hit2.BX() and Hit1.Endcap() == Hit2.Endcap() and Hit1.Station() == Hit2.Station() and 
+	     Hit1.Sector() == Hit2.Sector() and Hit1.Subsector() == Hit2.Subsector() and Hit1.Ring() == Hit2.Ring() and 
+	     Hit1.Chamber() == Hit2.Chamber() and Hit1.CSC_ID() == Hit2.CSC_ID() ):
 		return True
 	else:
 		return False
@@ -27,6 +37,15 @@ def CalcPhiGlobDeg( phi_loc_int, sector ):
 	if (phi_glob_deg <   0): phi_glob_deg = phi_glob_deg + 360
 	if (phi_glob_deg > 360): phi_glob_deg = phi_glob_deg - 360
 	return phi_glob_deg
+
+def CalcDPhi( phi1, phi2 ):
+	dPhi = math.acos( math.cos( phi1 - phi2 ) )
+	dPhi *= math.sin( phi1 - phi2 ) / max(abs( math.sin( phi1 - phi2 ) ), 0.01)
+	return dPhi
+
+def CalcDR( eta1, phi1, eta2, phi2 ):
+	return math.sqrt( math.pow(CalcDPhi(phi1, phi2), 2) + math.pow(eta1 - eta2, 2) )
+	
 
 def HitPhiInChamber( Hit ):
 
@@ -94,23 +113,23 @@ def TracksMatch( Trk1, Trk2 ):
 	if ( Trk1.Phi_loc_int() == Trk2.Phi_loc_int() and Trk1.Sector() == Trk2.Sector() and Trk1.Phi_GMT() != Trk2.Phi_GMT() ):
 		print 'Trk1 phi_loc (GMT) = %d (%d), Trk2 phi_loc (GMT) = %d (%d)' % ( Trk1.Phi_loc_int() , Trk1.Phi_GMT(), Trk2.Phi_loc_int() , Trk2.Phi_GMT() )
 	
-	## Exact match requirement
-	if Trk1.Eta_GMT() == Trk2.Eta_GMT() and Trk1.Phi_loc_int() == Trk2.Phi_loc_int() and Trk1.BX() == Trk2.BX() and Trk1.Mode() == Trk2.Mode():
-		return True
-	else:
-		return False
+	# ## Exact match requirement
+	# if Trk1.Eta_GMT() == Trk2.Eta_GMT() and Trk1.Phi_loc_int() == Trk2.Phi_loc_int() and Trk1.BX() == Trk2.BX() and Trk1.Mode() == Trk2.Mode():
+	# 	return True
+	# else:
+	# 	return False
+		
+	# if (Trk2.Eta_GMT() == -240 or Trk2.Eta_GMT() == 239):
 
-	if ( abs(Trk1.Eta_GMT() - Trk2.Eta_GMT()) < 6 ):
-		if ( abs(Trk1.Phi_GMT() - Trk2.Phi_GMT()) < 6 ):
-			return True
+	# if ( abs(Trk1.Eta() - Trk2.Eta()) < 0.05 and CalcDPhi(Trk1.Phi_glob_rad(), Trk2.Phi_glob_rad()) < 0.05 ):
+	if ( abs(Trk1.Eta_GMT() - Trk2.Eta_GMT()) < 6 and abs(Trk1.Phi_GMT() - Trk2.Phi_GMT()) < 6 and
+	     ( Trk1.Sector() == Trk2.Sector() or Trk1.Sector_GMT() == Trk2.Sector_GMT() or Trk1.Sector_index() == Trk2.Sector_index() ) ):
+		return True
 		# elif ( Trk1.Sector() == Trk2.Sector() + 1 and abs(Trk1.Phi_GMT() + 95 - Trk2.Phi_GMT()) < 8 ):
 		# 	return True
 		# elif ( Trk1.Sector() == 1 and Trk2.Sector() == 6 and abs(Trk1.Phi_GMT() + 95 - Trk2.Phi_GMT()) < 8 ):
 		# 	return True
-		else:
-			return False
-	else:
-		return False
+	else: return False
 	
 
 def PtLutAddrMatch( Trk1, Trk2 ):
@@ -133,7 +152,7 @@ def PtLutAddrMatch( Trk1, Trk2 ):
 def PrintEMTFHit( Hit ):
 	print 'BX = %d, endcap = %d, station = %d, sector = %d, subsector = %d,' % ( Hit.BX(), Hit.Endcap(), Hit.Station(), Hit.Sector(), Hit.Subsector() ), \
 	    'ring = %d, CSC ID = %d, chamber = %d, strip = %d, wire = %d,' % ( Hit.Ring(), Hit.CSC_ID(), Hit.Chamber(), Hit.Strip(), Hit.Wire() ), \
-	    'neighbor = %d, valid = %d' % ( Hit.Neighbor(), Hit.Valid() )
+	    'neighbor = %d, bend = %d, CLCT pattern = %d, quality = %d, valid = %d' % ( Hit.Neighbor(), Hit.Bend(), Hit.Pattern(), Hit.Quality(), Hit.Valid() )
 
 def PrintEMTFHitExtra( Hit ):
 	PrintEMTFHit( Hit )
@@ -141,9 +160,9 @@ def PrintEMTFHitExtra( Hit ):
 	print 'phi_loc_int = %d, theta_int = %d, phi_glob_deg = %.1f, eta = %.3f' % ( Hit.Phi_loc_int(), Hit.Theta_int(), CalcPhiGlobDeg( Hit.Phi_loc_int(), Hit.Sector() ), Hit.Eta() )
 
 def PrintEMTFTrack( Trk ):
-	print 'BX = %d, sector = %d, mode = %d, phi_loc_int = %d, phi_GMT = %d,' % ( Trk.BX(), Trk.Sector(), Trk.Mode(), Trk.Phi_loc_int(), Trk.Phi_GMT() ), \
-	    'eta_GMT = %d, pT_GMT = %d, phi_glob_deg = %.1f, eta = %.3f, pT = %.1f, ' % ( Trk.Eta_GMT(), Trk.Pt_GMT(), Trk.Phi_glob_deg(), Trk.Eta(), Trk.Pt() )
-	    # 'has some (all) neighbor hits = %d (%d)' % ( Trk.Has_neighbor(), Trk.All_neighbor() ) 
+	print 'BX = %d, sector = %d, mode = %d, quality = %d, phi_loc_int = %d, phi_GMT = %d,' % ( Trk.BX(), Trk.Sector(), Trk.Mode(), Trk.Quality(), Trk.Phi_loc_int(), Trk.Phi_GMT() ), \
+	    'eta_GMT = %d, pT_GMT = %d, phi_glob_deg = %.1f, eta = %.3f, pT = %.1f,' % ( Trk.Eta_GMT(), Trk.Pt_GMT(), Trk.Phi_glob_deg(), Trk.Eta(), Trk.Pt() ), \
+	    'has some (all) neighbor hits = %d (%d)' % ( Trk.Has_neighbor(), Trk.All_neighbor() ) 
 	
 def PrintSimulatorHitHeader():
 	print 'EMULATOR HITS FOR SIMULATOR: time_bin, endcap, sector, subsector, station, valid, quality, CLCT pattern, wiregroup, cscid, bend, halfstrip'
@@ -174,9 +193,9 @@ def PrintEventHeader( HD ):
 	print '%d, %d, %d, %d, %d, %d, %d, %d, %d' % ( HD.Endcap(), HD.Sector(), HD.SP_TS(), HD.TBIN(), HD.ME1a(), HD.ME1b(), HD.ME2(), HD.ME3(), HD.ME4() )
 
 def PrintMEHeader():
-	print 'ME output: tbin, station, csc_id, vp, quality, clct_pattern, lr, wire, strip'
+	print 'ME output: tbin, station, vp, quality, clct_pattern, wire, csc_id, lr, strip'
 def PrintME( ME ):
-	print '%d, %d, %d, %d, %d, %d, %d, %d, %d' % ( ME.TBIN(), ME.Station(), ME.CSC_ID(), ME.VP(), ME.Quality(), ME.CLCT_pattern(), ME.LR(), ME.Wire(), ME.Strip() )
+	print '%d, %d, %d, %d, %d, %d, %d, %d, %d' % ( ME.TBIN(), ME.Station(), ME.VP(), ME.Quality(), ME.CLCT_pattern(), ME.Wire(), ME.CSC_ID(), ME.LR(), ME.Strip() )
 
 def PrintSPHeader():
 	print 'SP output: phi_full, phi_GMT, eta_GMT, pt_GMT, quality_GMT, mode, tbin, me1_subsector, me1_csc_id, me1_delay, me2_csc_id, me2_delay, me3_csc_id, me3_delay, me4_csc_id, me4_delay'
@@ -207,5 +226,5 @@ def PrintPtLUT( Trk ):
 	if (Trk.FR_2() != -999): print('fr_2 = %d,' % Trk.FR_2()),
 	if (Trk.FR_3() != -999): print('fr_3 = %d,' % Trk.FR_3()),
 	if (Trk.FR_4() != -999): print('fr_4 = %d,' % Trk.FR_4()),
-	print ''
+	print 'address = %d' % Trk.Pt_LUT_addr()
 
