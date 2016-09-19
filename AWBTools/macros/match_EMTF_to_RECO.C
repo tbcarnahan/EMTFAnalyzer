@@ -39,7 +39,7 @@ void match_EMTF_to_RECO()
 
   // Configure parameters for output
   bool  require_tag =  true; // Require tag muon in barrel that would have fired SingleMu trigger
-  float min_tag_pT =     30;
+  float min_tag_pT =     25;
   float max_tag_eta =   1.0;
   float min_RECO_pT =    20; // Only consider RECO muons with pT > XX GeV
   float max_RECO_pT = 10000; // Only consider RECO muons with pT < XX GeV
@@ -50,6 +50,11 @@ void match_EMTF_to_RECO()
   ///////////////////////////////////////
   // Set branches for variables in NTuple
   ///////////////////////////////////////
+
+  // Event information
+  TTreeReaderValue<Int_t> my_run(myReader, "run");
+  TTreeReaderValue<Int_t> my_lumi(myReader, "lumi");
+  TTreeReaderValue<Int_t> my_event(myReader, "event");
 
   // RECO muon
   TTreeReaderValue<Int_t> my_numRecoMuons(myReader, "numRecoMuons");
@@ -125,18 +130,22 @@ void match_EMTF_to_RECO()
   TH2D * h_reco_vs_trk_dR_matched_LCTs = new TH2D("h_reco_vs_trk_dR_matched_LCTs", "", 7, -1.5, 5.5, 7, -1.5, 5.5);
   
   TH1D * h_seg_dEta = new TH1D("h_seg_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
+  TH1D * h_seg_max_dEta = new TH1D("h_seg_max_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
   TH1D * h_seg_dPhi = new TH1D("h_seg_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1]);
   TH2D * h_seg_dEta_vs_dPhi =  new TH2D("h_seg_dEta_vs_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1], 40, dEta_bins[0], dEta_bins[1]);
 
   TH1D * h_seg_match_dEta = new TH1D("h_seg_match_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
+  TH1D * h_seg_match_max_dEta = new TH1D("h_seg_match_max_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
   TH1D * h_seg_match_dPhi = new TH1D("h_seg_match_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1]);
   TH2D * h_seg_match_dEta_vs_dPhi =  new TH2D("h_seg_match_dEta_vs_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1], 40, dEta_bins[0], dEta_bins[1]);
 
   TH1D * h_seg_unm_dEta = new TH1D("h_seg_unm_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
+  TH1D * h_seg_unm_max_dEta = new TH1D("h_seg_unm_max_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
   TH1D * h_seg_unm_dPhi = new TH1D("h_seg_unm_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1]);
   TH2D * h_seg_unm_dEta_vs_dPhi =  new TH2D("h_seg_unm_dEta_vs_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1], 40, dEta_bins[0], dEta_bins[1]);
 
   TH1D * h_seg_miss_dEta = new TH1D("h_seg_miss_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
+  TH1D * h_seg_miss_max_dEta = new TH1D("h_seg_miss_max_dEta", "", 40, dEta_bins[0], dEta_bins[1]);
   TH1D * h_seg_miss_dPhi = new TH1D("h_seg_miss_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1]);
   TH2D * h_seg_miss_dEta_vs_dPhi =  new TH2D("h_seg_miss_dEta_vs_dPhi", "", 40, dPhi_bins[0], dPhi_bins[1], 40, dEta_bins[0], dEta_bins[1]);
   TH1D * h_seg_miss_eta = new TH1D("h_seg_miss_eta", "", 443, eta_bins[0], eta_bins[1]);
@@ -162,7 +171,7 @@ void match_EMTF_to_RECO()
   // Loop over all entries of the TTree or TChain.
   while (myReader.Next()) {
     event_num += 1;
-    // if (event_num > 50000) continue;
+    // if (event_num > 50000) break;
     if (event_num % 1000 == 0) cout << "Processing event " << event_num << endl;
 
     // Find out if a tag muon exists
@@ -175,7 +184,7 @@ void match_EMTF_to_RECO()
       tag_exists = true;
       nTag += 1;
     }
-    if (require_tag and not tag_exists) continue;
+    if (require_tag && not tag_exists) continue;
     
     // Loop over the RECO muons
     for (uint iReco = 0; iReco < *my_numRecoMuons; iReco++) {
@@ -212,7 +221,9 @@ void match_EMTF_to_RECO()
 	  reco_num_st_dR[iSt] += 1;
 	}
       }
-      
+
+      float max_eta = -99;
+      float min_eta = 99;
       // Loop over CSC segments belonging to RECO muon
       for (uint iSeg = 0; iSeg < my_recoNumCscSegs[iReco]; iSeg++) {
 	if (iSeg > 15) continue; // We only store the first 16 segments (should be plenty)
@@ -267,6 +278,8 @@ void match_EMTF_to_RECO()
 	  dPhi *= sin(my_lctGlobalPhi[tmp_id] - my_recoPhi[iReco]) / abs(sin(my_lctGlobalPhi[tmp_id] - my_recoPhi[iReco]));
 	  dPhi *= my_recoCharge[iReco];
 	  float dEta = my_lctEta[tmp_id] - my_recoEta[iReco];
+	  max_eta = std::fmax( max_eta, my_lctEta[tmp_id] );
+	  min_eta = std::fmin( min_eta, my_lctEta[tmp_id] );
 
 	  // // Compute the dPhi between the CSC segment and the RECO muon
 	  // float dPhi = acos(cos(my_recoCscSeg_glob_phi[iReco*16 + iSeg] - my_recoPhi[iReco]));
@@ -297,6 +310,9 @@ void match_EMTF_to_RECO()
 	} // End conditional: if (not tmp_has_match)
 
       } // End loop: for (uint iSeg = 0; iSeg < my_recoNumCscSegs[iReco]; iSeg++)
+      if (max_eta != -99 && min_eta != 99)
+	h_seg_max_dEta->Fill( std::fmin( std::fmax(max_eta - min_eta, dEta_bins[0]+0.01), dEta_bins[1]-0.01 ) );
+      else h_seg_max_dEta->Fill(-0.05);
 
 
       ////////////////////////////////////////////
@@ -377,6 +393,12 @@ void match_EMTF_to_RECO()
       
 
       bool deviant = false;
+      float max_eta_match = -99;
+      float min_eta_match = 99;
+      float max_eta_unm = -99;
+      float min_eta_unm = 99;
+      float max_eta_miss = -99;
+      float min_eta_miss = 99;
       // Loop over the LCTs in each station
       for (uint iSt = 0; iSt < 4; iSt++) {
 
@@ -390,6 +412,8 @@ void match_EMTF_to_RECO()
 	  float dEta = my_trkLct_eta[best_trkId*4 + trk_st_id_match[iSt]] - my_recoEta[iReco];
 	  dEta = std::fmin( std::fmax(dEta, dEta_bins[0]+0.01), dEta_bins[1]-0.01 );
 	  dPhi = std::fmin( std::fmax(dPhi, dPhi_bins[0]+0.01), dPhi_bins[1]-0.01 );
+	  max_eta_match = std::fmax( max_eta_match, my_trkLct_eta[best_trkId*4 + trk_st_id_match[iSt]] );
+	  min_eta_match = std::fmin( min_eta_match, my_trkLct_eta[best_trkId*4 + trk_st_id_match[iSt]] );
 
 	  h_seg_match_dEta->Fill( dEta );
 	  h_seg_match_dPhi->Fill( dPhi );
@@ -406,6 +430,8 @@ void match_EMTF_to_RECO()
 	  float dEta = my_trkLct_eta[best_trkId*4 + trk_st_id_unm[iSt]] - my_recoEta[iReco];
 	  dEta = std::fmin( std::fmax(dEta, dEta_bins[0]+0.01), dEta_bins[1]-0.01 );
 	  dPhi = std::fmin( std::fmax(dPhi, dPhi_bins[0]+0.01), dPhi_bins[1]-0.01 );
+	  max_eta_unm = std::fmax( max_eta_unm, my_trkLct_eta[best_trkId*4 + trk_st_id_unm[iSt]] );
+	  min_eta_unm = std::fmin( min_eta_unm, my_trkLct_eta[best_trkId*4 + trk_st_id_unm[iSt]] );
 
 	  h_seg_unm_dEta->Fill( dEta );
 	  h_seg_unm_dPhi->Fill( dPhi );
@@ -415,7 +441,18 @@ void match_EMTF_to_RECO()
 	}
 
 	// LCTs in RECO track in station with no matched LCT between EMTF and RECO
-	if (trk_st_id_match[iSt] == -999 && abs(my_recoEta[iReco]) > min_RECO_eta) {
+	if (trk_st_id_match[iSt] == -999) {
+
+	  // Also require that EMTF track had no LCT in this station at all
+	  bool skip_event = false;
+	  if (best_trkId > -1) {
+	    if (iSt == 0 && (my_trkMode[best_trkId] & 8) == 8) skip_event = true;
+	    if (iSt == 1 && (my_trkMode[best_trkId] & 4) == 4) skip_event = true;
+	    if (iSt == 2 && (my_trkMode[best_trkId] & 2) == 2) skip_event = true;
+	    if (iSt == 3 && (my_trkMode[best_trkId] & 1) == 1) skip_event = true;
+	  }
+	  if (skip_event) continue;
+
 	  for (uint iID = 0; iID < reco_num_st[iSt]; iID++) {
 	    float dPhi = acos(cos(my_lctGlobalPhi[reco_st_id[iSt][iID]] - my_recoPhi[iReco]));
 	    dPhi *= sin(my_lctGlobalPhi[reco_st_id[iSt][iID]] - my_recoPhi[iReco]) /
@@ -429,6 +466,8 @@ void match_EMTF_to_RECO()
 	    if (station > 1) ring += (station*2);
 	    float eta = std::fmin( std::fmax(my_lctEta[reco_st_id[iSt][iID]], eta_bins[0]+0.01), eta_bins[1]-0.01 );
 	    float phi = std::fmin( std::fmax(my_lctGlobalPhi[reco_st_id[iSt][iID]], phi_bins[0]+0.01), phi_bins[1]-0.01 );
+	    max_eta_miss = std::fmax( max_eta_miss, my_lctEta[reco_st_id[iSt][iID]] );
+	    min_eta_miss = std::fmin( min_eta_miss, my_lctEta[reco_st_id[iSt][iID]] );
 
 	    h_seg_miss_dEta->Fill( dEta );
 	    h_seg_miss_dPhi->Fill( dPhi );
@@ -443,10 +482,39 @@ void match_EMTF_to_RECO()
 	    h_seg_miss_eta_vs_ring->Fill( ring, eta );
 	    h_seg_miss_phi_vs_station->Fill( station, phi );
 	    h_seg_miss_ring_vs_station->Fill( station, ring );
-	  }
-	}
 
+	    // if (abs(dEta) < 0.03 && dPhi > -0.05 && dPhi < 0 && (reco_num_st[0] > 0) + (reco_num_st[1] > 0) + (reco_num_st[2] > 0) + (reco_num_st[3] > 0) > 2) {
+	    //   cout << "\nMissing hit in run " << *my_run << ", lumi " << *my_lumi << ", event " << *my_event << endl;
+	    //   cout << "RECO muon with pT " << my_recoPt[iReco] << ", eta " << my_recoEta[iReco] << ", phi " << my_recoPhi[iReco]
+	    // 	   << " has " << reco_num_st[0] << "/" << reco_num_st[1] << "/" << reco_num_st[2] << "/" << reco_num_st[3]
+	    // 	   << " LCTs in stations 1/2/3/4" << endl;
+	    //   cout << "Missing hit in station " << station << ", ring " << ring << ", with eta " << eta << ", phi " << phi 
+	    // 	   << ", strip " << my_lctStrip[reco_st_id[iSt][iID]] << ", wire " << my_lctWire[reco_st_id[iSt][iID]] << endl;
+	    //   if (best_trkId > -1) cout << "Best-matched track has mode " << my_trkMode[best_trkId] << endl;
+	    //   else cout << "No EMTF track matched to RECO muon" << endl;
+	    // }
+
+	  }
+	} // End LCTs in RECO track in station with no matched LCT between EMTF and RECO
+
+      } // End loop over the LCTs in each station
+      if (max_eta_match != -99 && min_eta_match != 99) {
+	h_seg_match_max_dEta->Fill( std::fmin( std::fmax(max_eta_match - min_eta_match, dEta_bins[0]+0.01), dEta_bins[1]-0.01 ) );
+	if (max_eta_unm != -99 && min_eta_unm != 99)
+	  h_seg_unm_max_dEta->Fill( std::fmin( std::fmax( std::fmax(max_eta_unm - min_eta_match, max_eta_match - min_eta_unm), dEta_bins[0]+0.01), dEta_bins[1]-0.01 ) );
+	if (max_eta_miss != -99 && min_eta_miss != 99)
+	  h_seg_miss_max_dEta->Fill( std::fmin( std::fmax( std::fmax(max_eta_miss - min_eta_match, max_eta_match - min_eta_miss), dEta_bins[0]+0.01), dEta_bins[1]-0.01 ) );
       }
+      else {
+	h_seg_match_max_dEta->Fill(-0.05);
+	if (max_eta_unm != -99 && min_eta_unm != 99)
+	  h_seg_unm_max_dEta->Fill( std::fmin( std::fmax(max_eta_unm - min_eta_unm, dEta_bins[0]+0.01), dEta_bins[1]-0.01 ) );
+	else h_seg_unm_max_dEta->Fill(-0.05);
+	if (max_eta_miss != -99 && min_eta_miss != 99)
+	  h_seg_miss_max_dEta->Fill( std::fmin( std::fmax(max_eta_miss - min_eta_miss, dEta_bins[0]+0.01), dEta_bins[1]-0.01 ) );
+	else h_seg_miss_max_dEta->Fill(-0.05);
+      }
+
 
       if (deviant) {
 	cout << "*** EMTF track with very deviant hits ***" << endl;
@@ -490,18 +558,22 @@ void match_EMTF_to_RECO()
   h_reco_vs_seg_phi->Write();
 
   h_seg_dEta->Write();
+  h_seg_max_dEta->Write();
   h_seg_dPhi->Write();
   h_seg_dEta_vs_dPhi->Write();
 
   h_seg_match_dEta->Write();
+  h_seg_match_max_dEta->Write();
   h_seg_match_dPhi->Write();
   h_seg_match_dEta_vs_dPhi->Write();
 
   h_seg_unm_dEta->Write();
+  h_seg_unm_max_dEta->Write();
   h_seg_unm_dPhi->Write();
   h_seg_unm_dEta_vs_dPhi->Write();
 
   h_seg_miss_dEta->Write();
+  h_seg_miss_max_dEta->Write();
   h_seg_miss_dPhi->Write();
   h_seg_miss_dEta_vs_dPhi->Write();
   h_seg_miss_eta->Write();
