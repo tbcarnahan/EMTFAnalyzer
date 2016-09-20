@@ -12,15 +12,19 @@ def main():
     
     prefix = 'root://eoscms//eos/cms'
     file_dir = '/store/group/dpg_trigger/comm_trigger/L1Trigger/bundocka/279975_zbp0/'
-    unp_files = TChain('l1UpgradeTree/L1UpgradeTree')
-    emu_files = TChain('l1UpgradeEmuTree/L1UpgradeTree')
+    unp_uGMT = TChain('l1UpgradeTree/L1UpgradeTree')
+    emu_uGMT = TChain('l1UpgradeEmuTree/L1UpgradeTree')
+    unp_EMTF = TChain('l1UpgradeTfMuonTree/L1UpgradeTfMuonTree')
+    emu_EMTF = TChain('l1UpgradeTfMuonEmuTree/L1UpgradeTfMuonTree')
 
     for i in range(99):
         file_name = '%s%sL1Ntuple_%d.root' % (prefix, file_dir, i+1)
-        unp_files.Add(file_name)
-        emu_files.Add(file_name)
+        unp_uGMT.Add(file_name)
+        emu_uGMT.Add(file_name)
+        unp_EMTF.Add(file_name)
+        emu_EMTF.Add(file_name)
 
-    out_file = TFile('plots/rates_L1T.root','recreate')
+    out_file = TFile('plots/rates_L1T_10k.root','recreate')
 
     dR_cut = -0.1
 
@@ -85,17 +89,23 @@ def main():
     h_pT_SingleMu25_unp = TH1D('h_pT_SingleMu25_unp', 'Data pT, pass SingleMu25', pT_bins[0], pT_bins[1], pT_bins[2])
     h_pT_SingleMu25_emu = TH1D('h_pT_SingleMu25_emu', 'Emul pT, pass SingleMu25', pT_bins[0], pT_bins[1], pT_bins[2])
 
+    h_eta_2D_DoubleMu0_unp = TH2D('h_eta_2D_DoubleMu0_unp', 'Data eta_1 vs. eta_2, pass DoubleMu0', eta_bins[0], eta_bins[1], eta_bins[2], eta_bins[0], eta_bins[1], eta_bins[2])
+    h_eta_2D_DoubleMu0_emu = TH2D('h_eta_2D_DoubleMu0_emu', 'Emul eta_1 vs. eta_2, pass DoubleMu0', eta_bins[0], eta_bins[1], eta_bins[2], eta_bins[0], eta_bins[1], eta_bins[2])
+
     ## Main event loop    
-    for iEvt in range(unp_files.GetEntries()):
+    for iEvt in range(unp_uGMT.GetEntries()):
         
-        if (iEvt > 1000000): break
-        if iEvt % 10000 is 0: print 'Event #', iEvt
-        unp_files.GetEntry(iEvt)
-        emu_files.GetEntry(iEvt)
+        if (iEvt > 10000): break
+        if iEvt % 100 is 0: print 'Event #', iEvt
+        unp_uGMT.GetEntry(iEvt)
+        emu_uGMT.GetEntry(iEvt)
+        unp_EMTF.GetEntry(iEvt)
+        emu_EMTF.GetEntry(iEvt)
 
-        unp_tree = unp_files.L1Upgrade
-        emu_tree = emu_files.L1Upgrade
-
+        unp_tree = unp_uGMT.L1Upgrade
+        emu_tree = emu_uGMT.L1Upgrade
+        unp_emtf = unp_EMTF.L1UpgradeEmtfMuon
+        emu_emtf = emu_EMTF.L1UpgradeEmtfMuon
 
         ## See if unpacked tracks would fire the trigger
         SingleMu7_pass = False
@@ -148,6 +158,7 @@ def main():
                     if Pt >= 0 and not DoubleMu_0_pass: 
                         DoubleMu_0[0] += 1
                         DoubleMu_0_pass = True
+                        h_eta_2D_DoubleMu0_unp.Fill(DoubleMu_0_Leg_pass[1], Eta)
             if (Qual >= 8 and Pt >= 3.5): 
                 if not DoubleMu_3p5_Leg_pass[0]: DoubleMu_3p5_Leg[0] += 1
                 DoubleMu_3p5_Leg_pass = [True, Eta, Phi]
@@ -170,6 +181,9 @@ def main():
                     if Pt >= 5 and not DoubleMu_12_5_pass: 
                         DoubleMu_12_5[0] += 1
                         DoubleMu_12_5_pass = True
+
+        if DoubleMu_0_pass: DoubleMu_0_pass_unp = True
+        else: DoubleMu_0_pass_unp = False
 
         ## See if emulator tracks would fire the trigger
         SingleMu7_pass = False
@@ -222,6 +236,7 @@ def main():
                     if Pt >= 0 and not DoubleMu_0_pass: 
                         DoubleMu_0[1] += 1
                         DoubleMu_0_pass = True
+                        h_eta_2D_DoubleMu0_emu.Fill(DoubleMu_0_Leg_pass[1], Eta)
             if (Qual >= 8 and Pt >= 3.5): 
                 if not DoubleMu_3p5_Leg_pass[0]: DoubleMu_3p5_Leg[1] += 1
                 DoubleMu_3p5_Leg_pass = [True, Eta, Phi]
@@ -244,6 +259,38 @@ def main():
                     if Pt >= 5 and not DoubleMu_12_5_pass: 
                         DoubleMu_12_5[1] += 1
                         DoubleMu_12_5_pass = True
+
+
+        if DoubleMu_0_pass != DoubleMu_0_pass_unp:
+            print '\n*** Unpacked (emulator) DoubleMu_0 = %s (%s) ***' % (DoubleMu_0_pass_unp, DoubleMu_0_pass)
+
+            print 'Unpacked uGMT output tracks'
+            for iTrk in range(unp_tree.nMuons):
+                if unp_tree.muonBx[iTrk] != 0: continue
+                print 'pT (hw) = %.1f (%d), eta (hw) = %.2f (%d), phi (hw) = %.2f (%d), qual = %d' % (unp_tree.muonEt[iTrk], unp_tree.muonIEt[iTrk],
+                                                                                                      unp_tree.muonEta[iTrk], unp_tree.muonIEta[iTrk],
+                                                                                                      unp_tree.muonPhi[iTrk], unp_tree.muonIPhi[iTrk],
+                                                                                                      unp_tree.muonQual[iTrk])
+            print 'Unpacked uGMT input tracks from EMTF'
+            for iTrk in range(unp_emtf.nTfMuons):
+                if unp_emtf.tfMuonBx[iTrk] != 0: continue
+                print 'pT (hw) = (%d), eta (hw) = (%d), phi (hw) = %.2f (%d), qual = %d' % (unp_emtf.tfMuonHwPt[iTrk], unp_emtf.tfMuonHwEta[iTrk],
+                                                                                            unp_emtf.tfMuonGlobalPhi[iTrk], unp_emtf.tfMuonHwPhi[iTrk],
+                                                                                            unp_emtf.tfMuonHwQual[iTrk])
+            print 'Emulator uGMT output tracks'
+            for iTrk in range(emu_tree.nMuons):
+                if emu_tree.muonBx[iTrk] != 0: continue
+                print 'pT (hw) = %.1f (%d), eta (hw) = %.2f (%d), phi (hw) = %.2f (%d), qual = %d' % (emu_tree.muonEt[iTrk], emu_tree.muonIEt[iTrk],
+                                                                                                      emu_tree.muonEta[iTrk], emu_tree.muonIEta[iTrk],
+                                                                                                      emu_tree.muonPhi[iTrk], emu_tree.muonIPhi[iTrk],
+                                                                                                      emu_tree.muonQual[iTrk])
+            print 'Emulator uGMT input tracks from EMTF'
+            for iTrk in range(emu_emtf.nTfMuons):
+                if emu_emtf.tfMuonBx[iTrk] != 0: continue
+                print 'pT (hw) = (%d), eta (hw) = (%d), phi (hw) = %.2f (%d), qual = %d' % (emu_emtf.tfMuonHwPt[iTrk], emu_emtf.tfMuonHwEta[iTrk],
+                                                                                            emu_emtf.tfMuonGlobalPhi[iTrk], emu_emtf.tfMuonHwPhi[iTrk],
+                                                                                            emu_emtf.tfMuonHwQual[iTrk])
+           
 
 
 
@@ -292,6 +339,9 @@ def main():
     h_pT_SingleMu25_emu.SetLineWidth(2)
     h_pT_SingleMu25_emu.SetLineColor(kRed)
     h_pT_SingleMu25_emu.Write()
+
+    h_eta_2D_DoubleMu0_unp.Write()
+    h_eta_2D_DoubleMu0_emu.Write()
 
     out_file.Close()
 
