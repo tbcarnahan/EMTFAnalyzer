@@ -29,6 +29,7 @@ def HitsMatchChamber( Hit1, Hit2 ):
 	else:
 		return False
 
+## Only works for non-neighbor hits: need sector index for neighbor hits
 def CalcPhiGlobDeg( phi_loc_int, sector ):
 	
 	phi_loc_deg = ( phi_loc_int / 60.0 ) - 22
@@ -40,7 +41,7 @@ def CalcPhiGlobDeg( phi_loc_int, sector ):
 
 def CalcDPhi( phi1, phi2 ):
 	dPhi = math.acos( math.cos( phi1 - phi2 ) )
-	dPhi *= math.sin( phi1 - phi2 ) / max(abs( math.sin( phi1 - phi2 ) ), 0.01)
+	if math.sin( phi1 - phi2 ) < 0: dPhi *= -1
 	return dPhi
 
 def CalcDR( eta1, phi1, eta2, phi2 ):
@@ -49,7 +50,6 @@ def CalcDR( eta1, phi1, eta2, phi2 ):
 
 def HitPhiInChamber( Hit ):
 
-	## phi_glob_deg = CalcPhiGlobDeg( Hit.Phi_loc_int(), Hit.Sector() )
 	phi_glob_deg = Hit.Phi_glob_deg()
 	if (phi_glob_deg <   0): phi_glob_deg = phi_glob_deg + 360
 	if (phi_glob_deg > 360): phi_glob_deg = phi_glob_deg - 360
@@ -156,8 +156,7 @@ def PrintEMTFHit( Hit ):
 
 def PrintEMTFHitExtra( Hit ):
 	PrintEMTFHit( Hit )
-	## print 'phi_loc_int = %d, theta_int = %d, phi_glob_deg = %.1f, eta = %.3f' % ( Hit.Phi_loc_int(), Hit.Theta_int(), Hit.Phi_glob_deg(), Hit.Eta() )
-	print 'phi_loc_int = %d, theta_int = %d, phi_glob_deg = %.1f, eta = %.3f' % ( Hit.Phi_loc_int(), Hit.Theta_int(), CalcPhiGlobDeg( Hit.Phi_loc_int(), Hit.Sector() ), Hit.Eta() )
+	print 'phi_loc_int = %d, theta_int = %d, phi_glob_deg = %.1f, eta = %.3f' % ( Hit.Phi_loc_int(), Hit.Theta_int(), Hit.Phi_glob_deg(), Hit.Eta() )
 
 def PrintEMTFTrack( Trk ):
 	print 'BX = %d, sector = %d, mode = %d, quality = %d, phi_loc_int = %d, phi_GMT = %d,' % ( Trk.BX(), Trk.Sector(), Trk.Mode(), Trk.Quality(), Trk.Phi_loc_int(), Trk.Phi_GMT() ), \
@@ -165,27 +164,25 @@ def PrintEMTFTrack( Trk ):
 	    'has some (all) neighbor hits = %d (%d)' % ( Trk.Has_neighbor(), Trk.All_neighbor() ) 
 	
 def PrintSimulatorHitHeader():
-	print 'EMULATOR HITS FOR SIMULATOR: time_bin, endcap, sector, subsector, station, valid, quality, CLCT pattern, wiregroup, cscid, bend, halfstrip'
+	print 'HITS FOR SIMULATOR: tbin, endcap, sector, subsector, station, valid, quality, CLCT pattern, wiregroup, CSC ID, bend angle, halfstrip'
 
 def PrintSimulatorHit( Hit ):
-	if Hit.Endcap() == 1:
-		tmp_endcap = 1
+	
+	tbin = Hit.BX() + 3
+	endcap = 1 if Hit.Endcap() == 1 else 2
+	subsector = 0 if Hit.Station() != 1 else Hit.Subsector()
+	station = 5 if Hit.Neighbor() == 1 else Hit.Station()
+	valid = Hit.Valid()
+	if valid != 1: print 'ERROR!!! LCT with Valid = %d' % valid
+	if Hit.Neighbor() == 0: CSC_ID = Hit.CSC_ID()
 	else:
-		tmp_endcap = 2
-	if Hit.Subsector() < 0:
-		tmp_sub = 0
-	else:
-		tmp_sub = Hit.Subsector()
-	if Hit.Ring() == 4:
-		tmp_id = Hit.CSC_ID() + 9
-	else:
-		tmp_id = Hit.CSC_ID()
-	if Hit.Bend() < 0:
-		tmp_bend = 0
-	else:
-		tmp_bend = Hit.Bend()
-	print '%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d' % ( Hit.BX() + 6, tmp_endcap, Hit.Sector(), tmp_sub, Hit.Station(), Hit.Valid(),
-								 Hit.Quality(), Hit.Pattern(), Hit.Wire(), tmp_id, tmp_bend, Hit.Strip() )
+		if Hit.Station() == 1: CSC_ID = Hit.CSC_ID() / 3
+		else: CSC_ID = (2 * Hit.Station()) + ((Hit.CSC_ID() - 3) / 6) 
+	bend = 0
+	halfstrip = Hit.Strip() + 128 if Hit.Ring() == 4 and Hit.Strip() < 128 else Hit.Strip()
+
+	print '%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d' % ( tbin, endcap, Hit.Sector(), subsector, station, valid,
+								 Hit.Quality(), Hit.Pattern(), Hit.Wire(), CSC_ID, bend, halfstrip )
 
 def PrintEventHeaderHeader():
 	print 'Event Header output: endcap, sector, sp_ts, tbin, me1a, me1b, me2, me3, me4'
