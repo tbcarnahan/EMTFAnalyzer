@@ -114,7 +114,7 @@ def main():
             PrintEMTFHitExtra( Trk2.PtrHitsExtra().at(iHit) )
             if Trk2.PtrHitsExtra().at(iHit).Station() != 2 and Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg() < hit_min_phi: hit_min_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
             if Trk2.PtrHitsExtra().at(iHit).Station() != 2 and Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg() > hit_max_phi: hit_max_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
-            if Trk2.PtrHitsExtra().at(iHit).Station() == 2: hit_st2_phi = hit_max_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
+            if Trk2.PtrHitsExtra().at(iHit).Station() == 2: hit_st2_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
         if (hit_st2_phi > hit_min_phi and hit_st2_phi < hit_max_phi):
             print '\n### INSIDE: Station 2 LCT local phi = %.2f, {min, max} of other stations = {%.2f, %.2f}' % (hit_st2_phi, hit_min_phi, hit_max_phi)
         elif (hit_st2_phi == hit_min_phi or hit_st2_phi == hit_max_phi):
