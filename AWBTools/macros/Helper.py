@@ -150,7 +150,7 @@ def PtLutAddrMatch( Trk1, Trk2 ):
 
 
 def PrintEMTFHit( Hit ):
-	print 'BX = %d, endcap = %d, station = %d, sector = %d, subsector = %d,' % ( Hit.BX(), Hit.Endcap(), Hit.Station(), Hit.Sector(), Hit.Subsector() ), \
+	print 'BX = %d, endcap = %d, sector = %d, subsector = %d, station = %d,' % ( Hit.BX(), Hit.Endcap(), Hit.Sector(), Hit.Subsector(), Hit.Station() ), \
 	    'ring = %d, CSC ID = %d, chamber = %d, strip = %d, wire = %d,' % ( Hit.Ring(), Hit.CSC_ID(), Hit.Chamber(), Hit.Strip(), Hit.Wire() ), \
 	    'neighbor = %d, bend = %d, CLCT pattern = %d, quality = %d, valid = %d' % ( Hit.Neighbor(), Hit.Bend(), Hit.Pattern(), Hit.Quality(), Hit.Valid() )
 
@@ -159,8 +159,8 @@ def PrintEMTFHitExtra( Hit ):
 	print 'phi_loc_int = %d, theta_int = %d, phi_glob_deg = %.1f, eta = %.3f' % ( Hit.Phi_loc_int(), Hit.Theta_int(), Hit.Phi_glob_deg(), Hit.Eta() )
 
 def PrintEMTFTrack( Trk ):
-	print 'BX = %d, sector = %d, mode = %d, quality = %d, phi_loc_int = %d, phi_GMT = %d,' % ( Trk.BX(), Trk.Sector(), Trk.Mode(), Trk.Quality(), Trk.Phi_loc_int(), Trk.Phi_GMT() ), \
-	    'eta_GMT = %d, pT_GMT = %d, phi_glob_deg = %.1f, eta = %.3f, pT = %.1f,' % ( Trk.Eta_GMT(), Trk.Pt_GMT(), Trk.Phi_glob_deg(), Trk.Eta(), Trk.Pt() ), \
+	print 'BX = %d, endcap = %d, sector = %d, mode = %d, quality = %d, phi_loc_int = %d,' % ( Trk.BX(), Trk.Endcap(), Trk.Sector(), Trk.Mode(), Trk.Quality(), Trk.Phi_loc_int() ), \
+	    'phi_GMT = %d, eta_GMT = %d, pT_GMT = %d, phi_glob_deg = %.1f, eta = %.3f, pT = %.1f,' % ( Trk.Phi_GMT(), Trk.Eta_GMT(), Trk.Pt_GMT(), Trk.Phi_glob_deg(), Trk.Eta(), Trk.Pt() ), \
 	    'has some (all) neighbor hits = %d (%d)' % ( Trk.Has_neighbor(), Trk.All_neighbor() ) 
 	
 def PrintSimulatorHitHeader():
