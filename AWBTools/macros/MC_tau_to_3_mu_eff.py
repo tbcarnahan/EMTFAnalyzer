@@ -121,8 +121,8 @@ def main():
         Event = tree.EventAuxiliary
         Gens = tree.recoGenParticles_genParticles__HLT
         Recos = tree.recoMuons_muons__HLT
-        Trks  = tree.l1tEMTFTrackExtras_simEmtfDigis__reL1T
-        Hits  = tree.l1tEMTFHitExtras_simEmtfDigis_CSC_reL1T
+        Trks  = tree.l1tEMTFTracks_simEmtfDigis__reL1T
+        Hits  = tree.l1tEMTFHits_simEmtfDigis_CSC_reL1T
 
         nGens = Gens.size()
         nRecos = Recos.size()
@@ -218,8 +218,8 @@ def main():
             if Hit.BX() != 0: continue
             unique_hit_1 = True
             for jTrk in range(nTrks):
-                for jHit in range(Trks.at(jTrk).PtrHitsExtra().size()):
-                    if HitsMatch( Hit, Trks.at(jTrk).PtrHitsExtra().at(jHit) ):
+                for jHit in range(Trks.at(jTrk).PtrHits().size()):
+                    if HitsMatch( Hit, Trks.at(jTrk).PtrHits().at(jHit) ):
                         unique_hit_1 = False
 
             if unique_hit_1: 

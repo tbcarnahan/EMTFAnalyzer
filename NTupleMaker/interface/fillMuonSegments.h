@@ -35,7 +35,7 @@ void fillSegmentsMuons(DataEvtSummary_t &ev,
 		       edm::Handle<CSCSegmentCollection> cscSegs, 
 		       edm::ESHandle<CSCGeometry> cscGeom,
 		       // const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts,
-		       edm::Handle<std::vector<l1t::EMTFHitExtra>> LCTs,
+		       edm::Handle<std::vector<l1t::EMTFHit>> LCTs,
 		       int printLevel) {
 
 

@@ -34,8 +34,8 @@ def main():
 
         Hits_1 = in_files.l1tEMTFHits_emtfStage2Digis__L1TMuonEmulation
         Trks_1 = in_files.l1tEMTFTracks_emtfStage2Digis__L1TMuonEmulation
-        Hits_2 = in_files.l1tEMTFHitExtras_simEmtfDigis_CSC_L1TMuonEmulation
-        Trks_2 = in_files.l1tEMTFTrackExtras_simEmtfDigis__L1TMuonEmulation
+        Hits_2 = in_files.l1tEMTFHits_simEmtfDigis_CSC_L1TMuonEmulation
+        Trks_2 = in_files.l1tEMTFTracks_simEmtfDigis__L1TMuonEmulation
         
         nHits1 = Hits_1.size()
         nTrks1 = Trks_1.size()
@@ -67,8 +67,8 @@ def main():
                 if abs(Trk2.BX()) > 1: continue
                 if Trk2.Endcap()*Trk2.Sector() != -6: continue
                 nEmu += 1
-                for iHit2 in range(Trk2.PtrHitsExtra().size()):
-                    emu_st[Trk2.PtrHitsExtra().at(iHit2).Station() - 1] = [Trk2.PtrHitsExtra().at(iHit2).Strip(), Trk2.PtrHitsExtra().at(iHit2).Wire()]
+                for iHit2 in range(Trk2.PtrHits().size()):
+                    emu_st[Trk2.PtrHits().at(iHit2).Station() - 1] = [Trk2.PtrHits().at(iHit2).Strip(), Trk2.PtrHits().at(iHit2).Wire()]
 
                 if Trk1.Mode() != Trk2.Mode(): 
                     mismatch = True
@@ -110,11 +110,11 @@ def main():
         hit_max_phi = -999
         hit_st2_phi = -999
         print ' - Hits in track'
-        for iHit in range(Trk2.PtrHitsExtra().size()):
-            PrintEMTFHitExtra( Trk2.PtrHitsExtra().at(iHit) )
-            if Trk2.PtrHitsExtra().at(iHit).Station() != 2 and Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg() < hit_min_phi: hit_min_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
-            if Trk2.PtrHitsExtra().at(iHit).Station() != 2 and Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg() > hit_max_phi: hit_max_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
-            if Trk2.PtrHitsExtra().at(iHit).Station() == 2: hit_st2_phi = Trk2.PtrHitsExtra().at(iHit).Phi_loc_deg()
+        for iHit in range(Trk2.PtrHits().size()):
+            PrintEMTFHitExtra( Trk2.PtrHits().at(iHit) )
+            if Trk2.PtrHits().at(iHit).Station() != 2 and Trk2.PtrHits().at(iHit).Phi_loc_deg() < hit_min_phi: hit_min_phi = Trk2.PtrHits().at(iHit).Phi_loc_deg()
+            if Trk2.PtrHits().at(iHit).Station() != 2 and Trk2.PtrHits().at(iHit).Phi_loc_deg() > hit_max_phi: hit_max_phi = Trk2.PtrHits().at(iHit).Phi_loc_deg()
+            if Trk2.PtrHits().at(iHit).Station() == 2: hit_st2_phi = Trk2.PtrHits().at(iHit).Phi_loc_deg()
         if (hit_st2_phi > hit_min_phi and hit_st2_phi < hit_max_phi):
             print '\n### INSIDE: Station 2 LCT local phi = %.2f, {min, max} of other stations = {%.2f, %.2f}' % (hit_st2_phi, hit_min_phi, hit_max_phi)
         elif (hit_st2_phi == hit_min_phi or hit_st2_phi == hit_max_phi):

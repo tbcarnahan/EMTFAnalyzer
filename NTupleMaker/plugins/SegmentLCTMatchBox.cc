@@ -24,7 +24,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitive.h"
+#include "L1Trigger/L1TMuon/interface/MuonTriggerPrimitive.h"
 
 
 
@@ -168,7 +168,7 @@ int SegmentLCTMatchBox::wireGroup ( const CSCRecHit2D &hit ){
 
 // bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection> CSCTFlcts, int *match_report ){
 // bool SegmentLCTMatchBox::isMatched ( const CSCSegment &segment, CSCCorrelatedLCTDigiCollection CSCTFlcts, int *match_report ){
-std::vector<int> SegmentLCTMatchBox::lctsMatch ( const CSCSegment &segment, const edm::Handle<std::vector<l1t::EMTFHitExtra>> LCTs, int *match_report ){
+std::vector<int> SegmentLCTMatchBox::lctsMatch ( const CSCSegment &segment, const edm::Handle<std::vector<l1t::EMTFHit>> LCTs, int *match_report ){
 
   int lct_arr[] = {-999, -999, -999, -999, -999, -999, -999, -999};
 
@@ -270,7 +270,7 @@ std::vector<int> SegmentLCTMatchBox::lctsMatch ( const CSCSegment &segment, cons
   int lctId = -1;    
   for (uint iLCT = 0; iLCT < LCTs->size(); iLCT++) {
 
-    l1t::EMTFHitExtra _LCT =  LCTs->at(iLCT);
+    l1t::EMTFHit _LCT =  LCTs->at(iLCT);
     if (_LCT.Neighbor() != 0) continue;
     lctId += 1;
 

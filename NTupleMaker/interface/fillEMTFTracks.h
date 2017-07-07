@@ -18,7 +18,7 @@
 
 using namespace std;
 
-void fillEMTFTracks(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFTrackExtra>> tracks, int printLevel) {
+void fillEMTFTracks(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFTrack>> tracks, int printLevel) {
   
     // loop over CSCTF tracks
   int nTrk=0;
@@ -56,7 +56,7 @@ void fillEMTFTracks(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFTrack
     int LctTrkId_ = 0;
     //for( auto lct = trk->GetCSCPrimitiveCollection().cbegin(); lct < trk->GetCSCPrimitiveCollection().cend(); lct++, LctTrkId_++) {
     
-    for( auto lct = trk->PtrHitsExtra()->cbegin(); lct < trk->PtrHitsExtra()->cend(); lct++, LctTrkId_++) {
+    for( auto lct = trk->PtrHits()->cbegin(); lct < trk->PtrHits()->cend(); lct++, LctTrkId_++) {
       
       int trlct_endcap = lct->Endcap();
       if (trlct_endcap == 2) trlct_endcap = -1;

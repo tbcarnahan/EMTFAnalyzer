@@ -32,9 +32,9 @@
 #include <TH2.h>
 #include <TH1F.h>
 #include <TFile.h>
-#include "L1Trigger/L1TMuon/interface/deprecate/GeometryTranslator.h"
+#include "L1Trigger/L1TMuon/interface/GeometryTranslator.h"
 
-//#include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitive.h"
+//#include "L1Trigger/L1TMuon/interface/MuonTriggerPrimitive.h"
 //#include "L1Trigger/L1TMuonEndCap/interface/MuonInternalTrack.h"
 //#include "L1Trigger/L1TMuonEndCap/interface/MuonInternalTrackFwd.h"
 //#include "L1Trigger/L1TMuonEndCap/interface/PrimitiveConverter.h"
@@ -53,7 +53,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "L1Trigger/L1TMuon/interface/deprecate/MuonTriggerPrimitive.h"
+#include "L1Trigger/L1TMuon/interface/MuonTriggerPrimitive.h"
 #include <L1Trigger/CSCTrackFinder/interface/CSCTFSPCoreLogic.h>
 #include "L1Trigger/L1TMuonEndCap/interface/EmulatorClasses.h"
 
@@ -64,7 +64,7 @@ using namespace reco;
 using namespace csc;
 
 
-void fillAllClusts(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFHitExtra>> clust_collection, int printLevel) {
+void fillAllClusts(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFHit>> clust_collection, int printLevel) {
 
   int clustId = 0; // count number of clusters in event
   for( auto clust = clust_collection->cbegin(); clust < clust_collection->cend(); clust++) {

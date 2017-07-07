@@ -81,8 +81,8 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
-#include "DataFormats/L1TMuon/interface/EMTFHitExtra.h"
-#include "DataFormats/L1TMuon/interface/EMTFTrackExtra.h"
+#include "DataFormats/L1TMuon/interface/EMTFHit.h"
+#include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
 // === My Functions ====
 #include "EMTFAnalyzer/NTupleMaker/interface/fillAllLCTs.h"
@@ -140,9 +140,9 @@ private:
   
   // Get the tokem for all input collections
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> cscTPTag_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFHitExtra>> emtfTPTag_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFHitExtra>> emtfTPTagRPC_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFTrackExtra>> emtfTag_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>> emtfTPTag_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>> emtfTPTagRPC_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> emtfTag_token;
   edm::EDGetTokenT<reco::MuonCollection> muons_token;
   edm::EDGetTokenT<std::vector<reco::Vertex>> vertex_token;
   edm::EDGetTokenT<CSCSegmentCollection> cscSegs_token;
@@ -180,9 +180,9 @@ private:
  
 NTupleMaker::NTupleMaker(const edm::ParameterSet& iConfig) {
   
-  emtfTag_token = consumes<std::vector<l1t::EMTFTrackExtra>>(iConfig.getParameter<edm::InputTag>("emtfTag"));
-  emtfTPTag_token = consumes<std::vector<l1t::EMTFHitExtra>>(iConfig.getParameter<edm::InputTag>("emtfTPTag"));
-  emtfTPTagRPC_token = consumes<std::vector<l1t::EMTFHitExtra>>(iConfig.getParameter<edm::InputTag>("emtfTPTagRPC"));
+  emtfTag_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTag"));
+  emtfTPTag_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfTPTag"));
+  emtfTPTagRPC_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfTPTagRPC"));
   cscTPTag_token =  consumes<CSCCorrelatedLCTDigiCollection>(iConfig.getParameter<edm::InputTag>("cscTPTag"));
   genTag_token  =  consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genTag"));
   muons_token   =  consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonsTag"));
@@ -313,10 +313,10 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
          <<   "============================================================\n" << endl;
   
 
-  edm::Handle<std::vector<l1t::EMTFHitExtra>> lcts;
+  edm::Handle<std::vector<l1t::EMTFHit>> lcts;
   iEvent.getByToken(emtfTPTag_token, lcts);	 
   
-  edm::Handle<std::vector<l1t::EMTFHitExtra>> RPC_lcts;
+  edm::Handle<std::vector<l1t::EMTFHit>> RPC_lcts;
   iEvent.getByToken(emtfTPTagRPC_token, RPC_lcts);
   
   edm::Handle<CSCCorrelatedLCTDigiCollection> csctf_lcts;
@@ -338,7 +338,7 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     auto chend  = lcts->end();
     for( ; chamber != chend; ++chamber ) {
       auto digi = (*chamber).second.first;
-      edm::Handle<std::vector<l1t::EMTFTrackExtra> > tracks;      auto dend = (*chamber).second.second;
+      edm::Handle<std::vector<l1t::EMTFTrack> > tracks;      auto dend = (*chamber).second.second;
       for( ; digi != dend; ++digi ) {
 	TriggerPrimitive trigPrimTemp = TriggerPrimitive((*chamber).first,*digi);
 	//trigPrimTemp.setCMSGlobalPhi( geom->calculateGlobalPhi(trigPrimTemp) );
@@ -374,7 +374,7 @@ void NTupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     cout << "\n===================== FILLING All EMTF Emulator Tracks ========================\n"
          <<   "=======================================================================\n" << endl;
   
-  edm::Handle<std::vector<l1t::EMTFTrackExtra> > tracks;
+  edm::Handle<std::vector<l1t::EMTFTrack> > tracks;
   iEvent.getByToken(emtfTag_token, tracks);
   
   if ( tracks.isValid() )

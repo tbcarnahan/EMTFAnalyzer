@@ -16,8 +16,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 // EMTF classes
-#include "DataFormatsSep2016/L1TMuon/interface/EMTFHitExtra.h"
-#include "DataFormatsSep2016/L1TMuon/interface/EMTFTrackExtra.h"
+#include "DataFormats/L1TMuon/interface/EMTFHit.h"
+#include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
 // Output tree branches
 #include "EMTFAnalyzer/NTupleMaker/interface/PtLutInputBranches.hh"
@@ -60,8 +60,8 @@ class PtLutInput : public edm::EDAnalyzer {
   
   // EDM Tokens
   edm::EDGetTokenT<std::vector<reco::GenParticle>> GenMuon_token;
-  edm::EDGetTokenT<std::vector<L1TMuonEndCap::EMTFHitExtra>> EMTFHit_token;
-  edm::EDGetTokenT<std::vector<L1TMuonEndCap::EMTFTrackExtra>> EMTFTrack_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>> EMTFHit_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFTrack_token;
   
 }; // End class PtLutInput public edm::EDAnalyzer
 

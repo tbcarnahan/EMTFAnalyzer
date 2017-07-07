@@ -91,8 +91,8 @@ def main():
         Event  = tree.EventAuxiliary
         Hits_1 = tree.l1tEMTFHits_emtfStage2Digis__L1TMuonEmulation
         Trks_1 = tree.l1tEMTFTracks_emtfStage2Digis__L1TMuonEmulation
-        Hits_2 = tree.l1tEMTFHitExtras_simEmtfDigis_EMTF_L1TMuonEmulation
-        Trks_2 = tree.l1tEMTFTrackExtras_simEmtfDigis_EMTF_L1TMuonEmulation
+        Hits_2 = tree.l1tEMTFHits_simEmtfDigis_EMTF_L1TMuonEmulation
+        Trks_2 = tree.l1tEMTFTracks_simEmtfDigis_EMTF_L1TMuonEmulation
         
         nHits1 = Hits_1.size()
         nTrks1 = Trks_1.size()

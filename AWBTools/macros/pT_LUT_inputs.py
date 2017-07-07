@@ -98,8 +98,8 @@ def main():
         ## Get branches from the trees
         Event  = in_files.EventAuxiliary
 
-        Hits = in_files.l1tEMTFHitExtras_simEmtfDigis_CSC_L1TMuonEmulation
-        Trks = in_files.l1tEMTFTrackExtras_simEmtfDigis__L1TMuonEmulation
+        Hits = in_files.l1tEMTFHits_simEmtfDigis_CSC_L1TMuonEmulation
+        Trks = in_files.l1tEMTFTracks_simEmtfDigis__L1TMuonEmulation
         Hits_unp = in_files.l1tEMTFHits_emtfStage2Digis__L1TMuonEmulation
         Trks_unp = in_files.l1tEMTFTracks_emtfStage2Digis__L1TMuonEmulation
         
@@ -112,13 +112,13 @@ def main():
             Trk = Trks.at(iTrk)
 
             # disagree = False
-            # for iHit in range(Trk.PtrHitsExtra().size()):
-            #     Hit = Trk.PtrHitsExtra().at(iHit)
+            # for iHit in range(Trk.PtrHits().size()):
+            #     Hit = Trk.PtrHits().at(iHit)
             #     if Hit.Phi_loc_int() != Trk.Phis().at(iHit): disagree = True
 
             # unmatched = False
-            # for iHit in range(Trk.PtrHitsExtra().size()):
-            #     Hit = Trk.PtrHitsExtra().at(iHit)
+            # for iHit in range(Trk.PtrHits().size()):
+            #     Hit = Trk.PtrHits().at(iHit)
             #     no_match = True
             #     for jHit in range(Trk.Phis().size()):
             #         if Hit.Phi_loc_int() == Trk.Phis().at(jHit): no_match = False
@@ -126,16 +126,16 @@ def main():
 
             # if not unmatched: continue
             # print '\ndisagree = %s, unmatched = %s' % (disagree, unmatched)
-            # for iHit in range(Trk.PtrHitsExtra().size()):
-            #     Hit = Trk.PtrHitsExtra().at(iHit)
+            # for iHit in range(Trk.PtrHits().size()):
+            #     Hit = Trk.PtrHits().at(iHit)
             #     print 'Hit hit phi = %d' % Hit.Phi_loc_int()
             # for jHit in range(Trk.Phis().size()):
             #     print 'Trk hit phi = %d' % Trk.Phis().at(jHit)
 
             # PrintEMTFTrack(Trk)
             # PrintPtLUT(Trk)
-            # for iHit in range(Trk.PtrHitsExtra().size()):
-            #     Hit = Trk.PtrHitsExtra().at(iHit)
+            # for iHit in range(Trk.PtrHits().size()):
+            #     Hit = Trk.PtrHits().at(iHit)
             #     print 'Hit %d hit phi (%d) and track hit phi (%d)' % (iHit+1, Hit.Phi_loc_int(), Trk.Phis().at(iHit))
             #     PrintEMTFHitExtra(Hit)
 
@@ -144,8 +144,8 @@ def main():
                 Trk = Trks.at(iTrk)
                 if Trk.Mode() != iMode: continue
 
-                for iHit1 in range(Trk.PtrHitsExtra().size()):
-                    Hit1 = Trk.PtrHitsExtra().at(iHit1)
+                for iHit1 in range(Trk.PtrHits().size()):
+                    Hit1 = Trk.PtrHits().at(iHit1)
 
                     for iSt in FRs[iMode].keys():
                         if '1' in iSt and Hit1.Station() == 1: FRs[iMode][iSt].Fill(Hit1.Chamber(), Hit1.Ring()*Hit1.Endcap(), 1.0*Trk.FR_1())
@@ -159,8 +159,8 @@ def main():
                         if '3' in iSt and Hit1.Station() == 3: CLCTs[iMode][iSt].Fill(Hit1.Pattern(), Trk.CLCT_3())
                         if '4' in iSt and Hit1.Station() == 4: CLCTs[iMode][iSt].Fill(Hit1.Pattern(), Trk.CLCT_4())
 
-                    for iHit2 in range(iHit1+1, Trk.PtrHitsExtra().size()):
-                        Hit2 = Trk.PtrHitsExtra().at(iHit2)
+                    for iHit2 in range(iHit1+1, Trk.PtrHits().size()):
+                        Hit2 = Trk.PtrHits().at(iHit2)
                         
                         st = [Hit1.Station(), Hit2.Station()]
                         dPhi = CalcDPhi( Hit2.Phi_glob_rad(), Hit1.Phi_glob_rad() ) * 180.0 / 3.14159
@@ -254,8 +254,8 @@ def main():
                                 # for jTrk in range(nTrks):
                                 #     print ''
                                 #     PrintEMTFTrack(Trks.at(jTrk))
-                                #     for jHit in range(Trks.at(jTrk).PtrHitsExtra().size()):
-                                #         PrintEMTFHitExtra(Trks.at(jTrk).PtrHitsExtra().at(jHit))
+                                #     for jHit in range(Trks.at(jTrk).PtrHits().size()):
+                                #         PrintEMTFHitExtra(Trks.at(jTrk).PtrHits().at(jHit))
 
                                 # print '\n*** All unpacked tracks ***'
                                 # for jTrk in range(nTrks_unp):

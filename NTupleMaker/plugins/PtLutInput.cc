@@ -1,7 +1,7 @@
 
 // Make NTuples for input to BDT training
-// Runs off of Jia Fu's Sep2016 EMTF emultor
-// Andrew Brinkerhoff - 24.10.16
+// Runs off of the new 2017 EMTF emultor
+// Andrew Brinkerhoff - 27.06.17
 
 #include "EMTFAnalyzer/NTupleMaker/plugins/PtLutInput.h"
 
@@ -19,8 +19,8 @@ PtLutInput::PtLutInput(const edm::ParameterSet& iConfig) {
   if (isMC)
     GenMuon_token = consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genMuonTag"));
 
-  EMTFHit_token = consumes<std::vector<L1TMuonEndCap::EMTFHitExtra>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
-  EMTFTrack_token = consumes<std::vector<L1TMuonEndCap::EMTFTrackExtra>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
+  EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
+  EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
 
 } // End PtLutInput::PtLutInput
 
@@ -36,9 +36,9 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if (isMC)
     iEvent.getByToken(GenMuon_token, genMuons);
 
-  edm::Handle<std::vector<L1TMuonEndCap::EMTFHitExtra>> emtfHits;
+  edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
   iEvent.getByToken(EMTFHit_token, emtfHits);
-  edm::Handle<std::vector<L1TMuonEndCap::EMTFTrackExtra>> emtfTracks;
+  edm::Handle<std::vector<l1t::EMTFTrack>> emtfTracks;
   iEvent.getByToken(EMTFTrack_token, emtfTracks);
 
   // Initialize branch values
@@ -78,11 +78,10 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   std::vector<std::tuple<int, int, int, float>> hit_sect_stat_etas;
   if ( emtfHits.isValid() ) {
     int iHit = -1;
-    for (L1TMuonEndCap::EMTFHitExtra emtfHit: *emtfHits) {
+    for (l1t::EMTFHit emtfHit: *emtfHits) {
       iHit += 1;
-      int sector_index = emtfHit.endcap == 1 ? emtfHit.pc_sector : emtfHit.pc_sector + 6;
-      int eta_int      = calc_GMT_eta_from_theta(emtfHit.theta_fp, emtfHit.endcap);
-      hit_sect_stat_etas.push_back(std::make_tuple( iHit, sector_index, emtfHit.station, eta_int * 0.010875));
+      int eta_int = calc_GMT_eta_from_theta(emtfHit.Theta_fp(), emtfHit.Endcap());
+      hit_sect_stat_etas.push_back(std::make_tuple( iHit, emtfHit.Sector_idx(), emtfHit.Station(), eta_int * 0.010875));
     }
     if (iHit == -1 && not isMC)
       return;
@@ -105,10 +104,9 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   std::vector<std::tuple<int, int, float>> trk_sect_etas;
   if ( emtfTracks.isValid() ) {
     int iTrk = -1;
-    for (L1TMuonEndCap::EMTFTrackExtra emtfTrk: *emtfTracks) {
+    for (l1t::EMTFTrack emtfTrk: *emtfTracks) {
       iTrk += 1;
-      int sector_index = emtfTrk.endcap == 1 ? emtfTrk.sector : emtfTrk.sector + 6;
-      trk_sect_etas.push_back(std::make_tuple(iTrk, sector_index, emtfTrk.gmt_eta * 0.010875));
+      trk_sect_etas.push_back(std::make_tuple(iTrk, emtfTrk.Sector_idx(), emtfTrk.Eta()));
     }
   }
   else {
@@ -156,14 +154,14 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if (i < hit_sect_stat_etas.size()) {
       int idx = std::get<0>(hit_sect_stat_etas.at(i));
       int iHit = -1;
-      for (L1TMuonEndCap::EMTFHitExtra emtfHit: *emtfHits) {
+      for (l1t::EMTFHit emtfHit: *emtfHits) {
   	iHit += 1;
   	if (iHit != idx) 
   	  continue;
 
   	_hit.Fill(i, emtfHit);
 
-      } // End for (L1TMuonEndCap::EMTFHitExtra emtfHit: *emtfHits)
+      } // End for (l1t::EMTFHit emtfHit: *emtfHits)
     } // End if (i < hit_sect_stat_etas.size())
   } // End for (uint i = 0; i < N_HIT; i++)
   
@@ -172,14 +170,14 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if (i < trk_sect_etas.size()) {
       int idx = std::get<0>(trk_sect_etas.at(i));
       int iTrk = -1;
-      for (L1TMuonEndCap::EMTFTrackExtra emtfTrk: *emtfTracks) {
+      for (l1t::EMTFTrack emtfTrk: *emtfTracks) {
   	iTrk += 1;
   	if (iTrk != idx) 
   	  continue;
 
   	_track.Fill(i, emtfTrk);
 	
-      } // End for (L1TMuonEndCap::EMTFTrackExtra emtfTrk: *emtfTracks)
+      } // End for (l1t::EMTFTrack emtfTrk: *emtfTracks)
     } // End if (i < trk_sect_etas.size())
   } // End for (uint i = 0; i < N_TRK; i++)
       
@@ -203,10 +201,12 @@ void PtLutInput::beginJob() {
   out_tree->Branch("muon", &_muon, 
 		   "nMuons/I:pt[2]/F:eta[2]/F:theta[2]/F:phi[2]/F:charge[2]/I");
   out_tree->Branch("hit", &_hit, 
-		   "nHits/I:eta[24]/F:theta[24]/F:phi[24]/F:phi_loc[24]/F:eta_int[24]/I:theta_int[24]/I:phi_int[24]/I:"
-		   "endcap[24]/I:sector[24]/I:sector_index[24]/I:station[24]/I:ring[24]/I:"
-		   "CSC_ID[24]/I:chamber[24]/I:FR[24]/I:pattern[24]/I:"
-		   "roll[24]/I:subsector[24]/I:isRPC[24]/I:vetoed[24]/I:BX[24]/I");
+		   "nHits/I:eta[24]/F:theta[24]/F:phi[24]/F:phi_loc[24]/F:"
+		   "eta_int[24]/I:theta_int[24]/I:phi_int[24]/I:"
+		   "endcap[24]/I:sector[24]/I:sector_index[24]/I:station[24]/I:"
+		   "ring[24]/I:CSC_ID[24]/I:chamber[24]/I:FR[24]/I:pattern[24]/I:"
+		   "roll[24]/I:subsector[24]/I:isRPC[24]/I:valid[24]/I:BX[24]/I:"
+		   "strip[24]/I:wire[24]/I");
   out_tree->Branch("track", &_track,
 		   "nTracks/I:pt[4]/F:eta[4]/F:theta[4]/F:phi[4]/F:phi_loc[4]/F:"
 		   "pt_int[4]/I:eta_int[4]/I:theta_int[4]/I:phi_int[4]/I:BX[4]/I:"
@@ -214,9 +214,10 @@ void PtLutInput::beginJob() {
 		   "nHits[4]/I:nRPC[4]/I:"
 		   "hit_eta[4][4]/F:hit_theta[4][4]/F:hit_phi[4][4]/F:hit_phi_loc[4][4]/F:"
 		   "hit_eta_int[4][4]/I:hit_theta_int[4][4]/I:hit_phi_int[4][4]/I:"
-		   "hit_endcap[4][4]/I:hit_sector[4][4]/I:hit_sector_index[4][4]/I:hit_station[4][4]/I:hit_ring[4][4]/I:"
-		   "hit_CSC_ID[4][4]/I:hit_chamber[4][4]/I:hit_FR[4][4]/I:hit_pattern[4][4]/I:"
-		   "hit_roll[4][4]/I:hit_subsector[4][4]/I:hit_isRPC[4][4]/I:hit_vetoed[4][4]/I:hit_BX[4][4]/I");
+		   "hit_endcap[4][4]/I:hit_sector[4][4]/I:hit_sector_index[4][4]/I:hit_station[4][4]/I:"
+		   "hit_ring[4][4]/I:hit_CSC_ID[4][4]/I:hit_chamber[4][4]/I:hit_FR[4][4]/I:hit_pattern[4][4]/I:"
+		   "hit_roll[4][4]/I:hit_subsector[4][4]/I:hit_isRPC[4][4]/I:hit_valid[4][4]/I:hit_BX[4][4]/I:"
+		   "hit_strip[4][4]/I:hit_wire[4][4]/I");
 
 } // End PtLutInput::beginJob
 

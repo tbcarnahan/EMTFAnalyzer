@@ -75,43 +75,43 @@ process.dumpES = cms.EDAnalyzer("PrintEventSetupContent")
 ## Includes L1TRawToDigi, defined in L1Trigger/Configuration/python/L1TRawToDigi_cff.py
 # process.raw2digi_step = cms.Path(process.RawToDigi)
 
-process.load('L1TriggerSep2016.L1TMuonEndCap.simEmtfDigisSep2016_cfi')
+process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
-process.simEmtfDigisSep2016.MinBX = cms.int32(-3)
-process.simEmtfDigisSep2016.MaxBX = cms.int32(+3)
+process.simEmtfDigis.MinBX = cms.int32(-3)
+process.simEmtfDigis.MaxBX = cms.int32(+3)
 
-process.simEmtfDigisSep2016.spPCParams16.FixZonePhi     = cms.bool(True)
-process.simEmtfDigisSep2016.spPCParams16.UseNewZones    = cms.bool(True)
-#process.simEmtfDigisSep2016.spPCParams16.ZoneBoundaries = cms.vint32(0,41,49,87,127)
-process.simEmtfDigisSep2016.spPCParams16.ZoneBoundaries = cms.vint32(0,36,54,96,127)
+process.simEmtfDigis.spPCParams16.FixZonePhi     = cms.bool(True)
+process.simEmtfDigis.spPCParams16.UseNewZones    = cms.bool(True)
+#process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,41,49,87,127)
+process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,36,54,96,127)
 
-process.simEmtfDigisSep2016.spPRParams16.UseSymmetricalPatterns = cms.bool(True)
+process.simEmtfDigis.spPRParams16.UseSymmetricalPatterns = cms.bool(True)
 
-process.simEmtfDigisSep2016.spGCParams16.UseSecondEarliest = cms.bool(True)
+process.simEmtfDigis.spGCParams16.UseSecondEarliest = cms.bool(True)
 
-process.simEmtfDigisSep2016.spPAParams16.FixMode15HighPt = cms.bool(True)
-process.simEmtfDigisSep2016.spPAParams16.Bug9BitDPhi     = cms.bool(False)
-process.simEmtfDigisSep2016.spPAParams16.BugMode7CLCT    = cms.bool(False)
-process.simEmtfDigisSep2016.spPAParams16.BugNegPt        = cms.bool(False)
+process.simEmtfDigis.spPAParams16.FixMode15HighPt = cms.bool(True)
+process.simEmtfDigis.spPAParams16.Bug9BitDPhi     = cms.bool(False)
+process.simEmtfDigis.spPAParams16.BugMode7CLCT    = cms.bool(False)
+process.simEmtfDigis.spPAParams16.BugNegPt        = cms.bool(False)
 
-process.simEmtfDigisSep2016.CSCInput        = cms.InputTag('emtfStage2Digis')
-process.simEmtfDigisSep2016.RPCInput        = cms.InputTag('muonRPCDigis')
-process.simEmtfDigisSep2016.CSCEnable       = cms.bool(True)
-process.simEmtfDigisSep2016.RPCEnable       = cms.bool(False)
-process.simEmtfDigisSep2016.CSCInputBXShift = cms.int32(-6)
-process.simEmtfDigisSep2016.RPCInputBXShift = cms.int32(0)
-process.simEmtfDigisSep2016.verbosity       = cms.untracked.int32(0)
+process.simEmtfDigis.CSCInput        = cms.InputTag('emtfStage2Digis')
+process.simEmtfDigis.RPCInput        = cms.InputTag('muonRPCDigis')
+process.simEmtfDigis.CSCEnable       = cms.bool(True)
+process.simEmtfDigis.RPCEnable       = cms.bool(False)
+process.simEmtfDigis.CSCInputBXShift = cms.int32(-6)
+process.simEmtfDigis.RPCInputBXShift = cms.int32(0)
+process.simEmtfDigis.verbosity       = cms.untracked.int32(0)
 
 ## NTuplizer
 process.ntuple = cms.EDAnalyzer('PtLutInput',
                                 isMC          = cms.bool(False),
                                 genMuonTag    = cms.InputTag(""),                     ## No GEN muons
-                                emtfHitTag    = cms.InputTag("simEmtfDigisSep2016"),  ## EMTF input LCTs
-                                emtfTrackTag  = cms.InputTag("simEmtfDigisSep2016"),  ## EMTF emulator output tracks
+                                emtfHitTag    = cms.InputTag("simEmtfDigis"),  ## EMTF input LCTs
+                                emtfTrackTag  = cms.InputTag("simEmtfDigis"),  ## EMTF emulator output tracks
                                 )
 
 
-RawToDigi_AWB = cms.Sequence(process.muonRPCDigis+process.emtfStage2Digis+process.simEmtfDigisSep2016+process.ntuple)
+RawToDigi_AWB = cms.Sequence(process.muonRPCDigis+process.emtfStage2Digis+process.simEmtfDigis+process.ntuple)
 process.raw2digi_step = cms.Path(RawToDigi_AWB)
 
 ## Defined in Configuration/StandardSequences/python/EndOfProcess_cff.py
@@ -123,7 +123,7 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 #     process.muonRPCDigis +
 #     ## process.esProd + ## What do we loose by not having this? - AWB 18.04.16
 #     process.emtfStage2Digis +
-#     process.simEmtfDigisSep2016
+#     process.simEmtfDigis
 #     ## process.ntuple
 #     )
 
@@ -156,8 +156,7 @@ outCommands = cms.untracked.vstring(
     'keep *_csctfDigis_*_*',
     'keep *_emtfStage2Digis_*_*',
     'keep *_simEmtfDigis_*_*',
-    'keep *_simEmtfDigisSep2016_*_*',
-    'keep *_simEmtfDigisSep2016MC_*_*',
+    'keep *_simEmtfDigisMC_*_*',
     'keep *_gmtStage2Digis_*_*',
     'keep *_simGmtStage2Digis_*_*',
 
