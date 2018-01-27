@@ -1,5 +1,5 @@
 
-#include "EMTFAnalyzer/NTupleMaker/interface/PtLutInputBranches.hh"
+#include "EMTFAnalyzer/NTupleMaker/interface/PtLutInputBranches.h"
 
 void GenMuonBranch::Initialize() {
   nMuons = 0;
@@ -42,10 +42,10 @@ void EMTFTrackBranch::Initialize() {
 }
 
 void GenMuonBranch::Fill(unsigned int i, reco::GenParticle genMuon) {
-  float _theta = genMuon.theta() * 180. / PI;
+  float _theta = genMuon.theta() * 180. / M_PI;
   if (_theta > 180) _theta -= 360;
   if (_theta >  90) _theta  = 180. - _theta;
-  float _phi = genMuon.phi() * 180. / PI;
+  float _phi = genMuon.phi() * 180. / M_PI;
   if (_phi > 180) _phi -= 360;
 
   nMuons    = i+1;
@@ -57,10 +57,11 @@ void GenMuonBranch::Fill(unsigned int i, reco::GenParticle genMuon) {
 }
 
 void EMTFHitBranch::Fill(unsigned int i, l1t::EMTFHit emtfHit) {
-  int   _eta_int = calc_GMT_eta_from_theta(emtfHit.Theta_fp(), emtfHit.Endcap());
+  int   _eta_int = emtf::calc_eta_GMT( emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() ) );
+  float _eta_flt = emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() );
   
   nHits           = i+1;
-  eta[i]          = _eta_int * 0.010875;
+  eta[i]          = _eta_flt;
   theta[i]        = emtfHit.Theta();
   phi[i]          = emtfHit.Phi_glob();
   phi_loc[i]      = emtfHit.Phi_loc();
@@ -110,9 +111,10 @@ void EMTFTrackBranch::Fill(unsigned int i, l1t::EMTFTrack emtfTrk) {
     unsigned int j = trk_hit.Station() - 1;
     assert(j < 4);
 
-    int   _eta_int_hit = calc_GMT_eta_from_theta(trk_hit.Theta_fp(), trk_hit.Endcap());
+    int   _eta_int_hit = emtf::calc_eta_GMT( emtf::calc_eta_from_theta_deg( trk_hit.Theta(), trk_hit.Endcap() ) );
+    float _eta_flt_hit = emtf::calc_eta_from_theta_deg( trk_hit.Theta(), trk_hit.Endcap() );
   
-    hit_eta[i][j]          = _eta_int_hit * 0.010875;
+    hit_eta[i][j]          = _eta_flt_hit;
     hit_theta[i][j]        = trk_hit.Theta();
     hit_phi[i][j]          = trk_hit.Phi_glob();
     hit_phi_loc[i][j]      = trk_hit.Phi_loc();

@@ -20,10 +20,10 @@
 #include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
 // Output tree branches
-#include "EMTFAnalyzer/NTupleMaker/interface/PtLutInputBranches.hh"
+#include "EMTFAnalyzer/NTupleMaker/interface/PtLutInputBranches.h"
 
 // Helpful tools
-#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.hh"
+#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.h"
 
 class PtLutInput : public edm::EDAnalyzer {
 

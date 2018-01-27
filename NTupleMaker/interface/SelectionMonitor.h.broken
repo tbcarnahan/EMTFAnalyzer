@@ -1,5 +1,5 @@
-#ifndef selection_monitor_hh
-#define selection_monitor_hh
+#ifndef selection_monitor_h
+#define selection_monitor_h
 
 
 // system include files

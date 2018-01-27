@@ -80,8 +80,8 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     int iHit = -1;
     for (l1t::EMTFHit emtfHit: *emtfHits) {
       iHit += 1;
-      int eta_int = calc_GMT_eta_from_theta(emtfHit.Theta_fp(), emtfHit.Endcap());
-      hit_sect_stat_etas.push_back(std::make_tuple( iHit, emtfHit.Sector_idx(), emtfHit.Station(), eta_int * 0.010875));
+      float eta_flt = emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() );
+      hit_sect_stat_etas.push_back(std::make_tuple( iHit, emtfHit.Sector_idx(), emtfHit.Station(), eta_flt));
     }
     if (iHit == -1 && not isMC)
       return;
