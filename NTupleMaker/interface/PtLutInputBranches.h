@@ -1,6 +1,6 @@
 
-#ifndef PtLutInputBranches_hh
-#define PtLutInputBranches_hh
+#ifndef PtLutInputBranches_h
+#define PtLutInputBranches_h
 
 // GEN particles
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -10,7 +10,8 @@
 #include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
 // Helpful tools
-#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.hh"
+#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.h"
+#include "L1Trigger/L1TMuonEndCap/interface/TrackTools.h"
 
 
 // Size of branches
@@ -62,4 +63,4 @@ typedef struct {
 } EMTFTrackBranch;
 
 
-#endif /* define PtLutInputBranches_hh */
+#endif /* define PtLutInputBranches_h */
