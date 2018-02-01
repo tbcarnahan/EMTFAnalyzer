@@ -21,8 +21,8 @@
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 
-#include "DataFormats/L1TMuon/interface/EMTFHitExtra.h"
-#include "DataFormats/L1TMuon/interface/EMTFTrackExtra.h"
+#include "DataFormats/L1TMuon/interface/EMTFHit.h"
+#include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
 using namespace std;
 //using namespace L1TMuon;
@@ -47,7 +47,7 @@ class SegmentLCTMatchBox {
 
   // bool isMatched ( const CSCSegment &segment, const edm::Handle<CSCCorrelatedLCTDigiCollection>, int *match_analysis = 0 );
   // bool isMatched ( const CSCSegment &segment, CSCCorrelatedLCTDigiCollection, int *match_analysis = 0 );
-  std::vector<int> lctsMatch ( const CSCSegment &segment, const edm::Handle<std::vector<l1t::EMTFHitExtra>> LCTs, int *match_analysis = 0 );
+  std::vector<int> lctsMatch ( const CSCSegment &segment, const edm::Handle<std::vector<l1t::EMTFHit>> LCTs, int *match_analysis = 0 );
 
   /*
   bool belongsToTrigger ( const CSCSegment &segment, 

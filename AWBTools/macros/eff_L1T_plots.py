@@ -16,234 +16,142 @@ from matplotlib import interactive
 from ROOT import gROOT
 from eff_modules import *
 
-
-title = '_runs_272750_273020'
-
-file = '_req_L1_dEta'
-
 # Root file of Histograms
-file16 = TFile('plots/L1T_analysis_singleMu16'+file+'.root')
-# file0 = TFile('plots/L1T_analysis_singleMu0'+file+'.root')
-# file5 = TFile('plots/L1T_analysis_singleMu5'+file+'.root')
-# file12 = TFile('plots/L1T_analysis_singleMu12'+file+'.root')
+pt_cut = 'Pt12'
+suffix = ''
+#suffix = '_sectM6'
 
+# in_file = TFile( 'plots/L1T_eff_%s_297606_dEta_BX0_uGMT_HLT%s.root' % (pt_cut, suffix) )
+in_file = TFile( 'plots/L1T_eff_%s_2017B_dEta_BX0_uGMT_HLT%s.root' % (pt_cut, suffix) )
 
+WPs = {}
+WPs['SingleMu']  = [kRed]
+WPs['SingleMu7'] = [kGreen]
+WPs['DoubleMu']  = [kBlue]
+WPs['MuOpen']    = [kBlack]
 
-# ==================   16 GeV ======================
-eta16 = file16.Get('heta')
-eta_tr16 = file16.Get('heta_trigger')
-tg_eta16  = TGraphAsymmErrors(eta_tr16, eta16, '')
+TFs = ['uGMT', 'EMTF']
 
-pt16 = file16.Get('hpt')
-pt_tr16 = file16.Get('hpt_trigger')
-tg_pt16  = TGraphAsymmErrors(pt_tr16, pt16, '')
+for TF in TFs: 
+    h_pt  = in_file.Get('h_pt_%s' % TF)
+    h_eta = in_file.Get('h_eta_%s' % TF)
+    h_phi = in_file.Get('h_phi_%s' % TF)
 
+    c_pt  = TCanvas('c_pt')
+    c_eta = TCanvas('c_eta')
+    c_phi = TCanvas('c_phi')
+    
+    c_pt.SetGridx()
+    c_pt.SetGridy()
+    c_eta.SetGridx()
+    c_eta.SetGridy()
+    c_phi.SetGridx()
+    c_phi.SetGridy()
+    
+    mg_pt  = TMultiGraph()
+    mg_eta = TMultiGraph()
+    mg_phi = TMultiGraph()
 
-cEta16 = TCanvas('cEta16')
-cEta16.cd()
-tg_eta16.SetLineColor(kRed)
-tg_eta16.SetLineWidth(2)
-tg_eta16.SetMarkerStyle(23)
-tg_eta16.SetMarkerSize(0.8)
-tg_eta16.SetTitle('16 GeV')
-tg_eta16.GetXaxis().SetTitle("|#eta(Probe Reco #mu)|")
-tg_eta16.GetYaxis().SetTitle("TF Efficiency")
-tg_eta16.GetYaxis().SetTitleOffset(1.35)
-tg_eta16.GetXaxis().SetNdivisions(509)
-tg_eta16.GetYaxis().SetNdivisions(514)
-cEta16.SetGridx()
-cEta16.SetGridy()
-tg_eta16.SetMinimum(0)
-tg_eta16.SetMaximum(1.02)
-tg_eta16.Draw('AP')
+    nWPs = 0
+    for WP in WPs.keys():
+        nWPs += 1
+        key = '%s_%s' % (TF, WP)
+        h_pt_trg  = in_file.Get('h_pt_%s' % key)
+        h_eta_trg = in_file.Get('h_eta_%s' % key)
+        h_phi_trg = in_file.Get('h_phi_%s' % key)
 
+        eff_pt  = TGraphAsymmErrors(h_pt_trg, h_pt, '')
+        eff_eta = TGraphAsymmErrors(h_eta_trg, h_eta, '')
+        eff_phi = TGraphAsymmErrors(h_phi_trg, h_phi, '')
 
+        eff_pt.SetLineColor(WPs[WP][0])
+        eff_pt.SetMarkerColor(WPs[WP][0])
+        eff_pt.SetLineWidth(1)
+        eff_pt.SetMarkerStyle(23)
+        eff_pt.SetMarkerSize(0.8)
+        eff_pt.SetTitle(' GeV')
+        eff_pt.GetXaxis().SetTitle("p_{T}(Probe Reco #mu)")
+        eff_pt.GetYaxis().SetTitle("TF Efficiency")
+        eff_pt.GetYaxis().SetTitleOffset(1.35)
+        eff_pt.GetXaxis().SetNdivisions(509)
+        eff_pt.GetYaxis().SetNdivisions(514)
+        eff_pt.SetMinimum(0)
+        eff_pt.SetMaximum(1.02)
+        mg_pt.Add(eff_pt)
 
-cEta16.SaveAs('plots/png/16_eta_eff'+title+'.pdf')
-cEta16.SaveAs('plots/pdf/16_eta_eff'+title+'.png')
+        eff_eta.SetLineColor(WPs[WP][0])
+        eff_eta.SetMarkerColor(WPs[WP][0])
+        eff_eta.SetLineWidth(1)
+        eff_eta.SetMarkerStyle(23)
+        eff_eta.SetMarkerSize(0.8)
+        eff_eta.SetTitle(' GeV')
+        eff_eta.GetXaxis().SetTitle("|#eta(Probe Reco #mu)|")
+        eff_eta.GetYaxis().SetTitle("TF Efficiency")
+        eff_eta.GetYaxis().SetTitleOffset(1.35)
+        eff_eta.GetXaxis().SetNdivisions(509)
+        eff_eta.GetYaxis().SetNdivisions(514)
+        eff_eta.SetMinimum(0)
+        eff_eta.SetMaximum(1.02)
+        mg_eta.Add(eff_eta)
 
-# PT
-cPt16 = TCanvas('cPt16')
-cPt16.cd()
-tg_pt16.SetLineColor(kRed)
-tg_pt16.SetLineWidth(2)
-tg_pt16.SetMarkerStyle(23)
-tg_pt16.SetMarkerSize(0.8)
-tg_pt16.SetTitle('16 GeV')
-tg_pt16.GetXaxis().SetTitle("p_{T}(Probe Reco #mu)")
-tg_pt16.GetYaxis().SetTitle("TF Efficiency")
-tg_pt16.GetYaxis().SetTitleOffset(1.35)
-tg_pt16.GetXaxis().SetNdivisions(509)
-tg_pt16.GetYaxis().SetNdivisions(514)
-cPt16.SetGridx()
-cPt16.SetGridy()
-tg_pt16.SetMinimum(0)
-tg_pt16.SetMaximum(1.02)
-tg_pt16.Draw('AP')
+        eff_phi.SetLineColor(WPs[WP][0])
+        eff_phi.SetMarkerColor(WPs[WP][0])
+        eff_phi.SetLineWidth(1)
+        eff_phi.SetMarkerStyle(23)
+        eff_phi.SetMarkerSize(0.8)
+        eff_phi.SetTitle(' GeV')
+        eff_phi.GetXaxis().SetTitle("|#phi(Probe Reco #mu)|")
+        eff_phi.GetYaxis().SetTitle("TF Efficiency")
+        eff_phi.GetYaxis().SetTitleOffset(1.35)
+        eff_phi.GetXaxis().SetNdivisions(509)
+        eff_phi.GetYaxis().SetNdivisions(514)
+        eff_phi.SetMinimum(0)
+        eff_phi.SetMaximum(1.02)
+        mg_phi.Add(eff_phi)
 
-cPt16.SaveAs('plots/pdf/16_pt_eff'+title+'.pdf')
-cPt16.SaveAs('plots/png/16_pt_eff'+title+'.png')
-
-# # ====================================================================
-
-
-# eta0 = file0.Get('heta')
-# eta_tr0 = file0.Get('heta_trigger')
-# tg_eta0  = TGraphAsymmErrors(eta_tr0, eta0, '')
-
-# pt0 = file0.Get('hpt')
-# pt_tr0 = file0.Get('hpt_trigger')
-# tg_pt0  = TGraphAsymmErrors(pt_tr0, pt0, '')
-
-
-# cEta0 = TCanvas('cEta0')
-# cEta0.cd()
-# tg_eta0.SetLineColor(kRed)
-# tg_eta0.SetLineWidth(2)
-# tg_eta0.SetMarkerStyle(23)
-# tg_eta0.SetMarkerSize(0.8)
-# tg_eta0.SetTitle('0 GeV')
-# tg_eta0.GetXaxis().SetTitle("|#eta(Probe Reco #mu)|")
-# tg_eta0.GetYaxis().SetTitle("TF Efficiency")
-# tg_eta0.GetYaxis().SetTitleOffset(1.35)
-# tg_eta0.GetXaxis().SetNdivisions(509)
-# tg_eta0.GetYaxis().SetNdivisions(514)
-# cEta0.SetGridx()
-# cEta0.SetGridy()
-# tg_eta0.SetMinimum(0)
-# tg_eta0.SetMaximum(1.02)
-# tg_eta0.Draw('AP')
-
-
-
-# cEta0.SaveAs('plots/pdf/0_eta_eff'+title+'.pdf')
-# cEta0.SaveAs('plots/png/0_eta_eff'+title+'.png')
-
-# # PT
-# cPt0 = TCanvas('cPt0')
-# cPt0.cd()
-# tg_pt0.SetLineColor(kRed)
-# tg_pt0.SetLineWidth(2)
-# tg_pt0.SetMarkerStyle(23)
-# tg_pt0.SetMarkerSize(0.8)
-# tg_pt0.SetTitle('0 GeV')
-# tg_pt0.GetXaxis().SetTitle("p_{T}(Probe Reco #mu)")
-# tg_pt0.GetYaxis().SetTitle("TF Efficiency")
-# tg_pt0.GetYaxis().SetTitleOffset(1.35)
-# tg_pt0.GetXaxis().SetNdivisions(509)
-# tg_pt0.GetYaxis().SetNdivisions(514)
-# cPt0.SetGridx()
-# cPt0.SetGridy()
-# tg_pt0.SetMinimum(0)
-# tg_pt0.SetMaximum(1.02)
-# tg_pt0.Draw('AP')
-
-# cPt0.SaveAs('plots/pdf/0_pt_eff'+title+'.pdf')
-# cPt0.SaveAs('plots/png/0_pt_eff'+title+'.png')
-
-# # ============================================================
-
-# # ====================================================================
-
-
-# eta5 = file5.Get('heta')
-# eta_tr5 = file5.Get('heta_trigger')
-# tg_eta5  = TGraphAsymmErrors(eta_tr5, eta5, '')
-
-# pt5 = file5.Get('hpt')
-# pt_tr5 = file5.Get('hpt_trigger')
-# tg_pt5  = TGraphAsymmErrors(pt_tr5, pt5, '')
-
-
-# cEta5 = TCanvas('cEta5')
-# cEta5.cd()
-# tg_eta5.SetLineColor(kRed)
-# tg_eta5.SetLineWidth(2)
-# tg_eta5.SetMarkerStyle(23)
-# tg_eta5.SetMarkerSize(0.8)
-# tg_eta5.SetTitle('5 GeV')
-# tg_eta5.GetXaxis().SetTitle("|#eta(Probe Reco #mu)|")
-# tg_eta5.GetYaxis().SetTitle("TF Efficiency")
-# tg_eta5.GetYaxis().SetTitleOffset(1.35)
-# tg_eta5.GetXaxis().SetNdivisions(509)
-# tg_eta5.GetYaxis().SetNdivisions(514)
-# cEta5.SetGridx()
-# cEta5.SetGridy()
-# tg_eta5.SetMinimum(0)
-# tg_eta5.SetMaximum(1.02)
-# tg_eta5.Draw('AP')
-
-
-
-# cEta5.SaveAs('plots/pdf/5_eta_eff'+title+'.pdf')
-# cEta5.SaveAs('plots/png/5_eta_eff'+title+'.png')
-
-# # ==============================================================
-
-# # ====================================================================
-
-
-# eta12 = file12.Get('heta')
-# eta_tr12 = file12.Get('heta_trigger')
-# tg_eta12  = TGraphAsymmErrors(eta_tr12, eta12, '')
-
-# pt12 = file12.Get('hpt')
-# pt_tr12 = file12.Get('hpt_trigger')
-# tg_pt12  = TGraphAsymmErrors(pt_tr12, pt12, '')
-
-
-# cEta12 = TCanvas('cEta12')
-# cEta12.cd()
-# tg_eta12.SetLineColor(kRed)
-# tg_eta12.SetLineWidth(2)
-# tg_eta12.SetMarkerStyle(23)
-# tg_eta12.SetMarkerSize(0.8)
-# tg_eta12.SetTitle('12 GeV')
-# tg_eta12.GetXaxis().SetTitle("|#eta(Probe Reco #mu)|")
-# tg_eta12.GetYaxis().SetTitle("TF Efficiency")
-# tg_eta12.GetYaxis().SetTitleOffset(1.35)
-# tg_eta12.GetXaxis().SetNdivisions(509)
-# tg_eta12.GetYaxis().SetNdivisions(514)
-# cEta12.SetGridx()
-# cEta12.SetGridy()
-# tg_eta12.SetMinimum(0)
-# tg_eta12.SetMaximum(1.02)
-# tg_eta12.Draw('AP')
-
-# cEta12.SaveAs('plots/pdf/12_eta_eff'+title+'.pdf')
-# cEta12.SaveAs('plots/png/12_eta_eff'+title+'.png')
+    c_pt.cd()
+    mg_pt.Draw('APLX')  ## APLX
+    c_pt. SaveAs('plots/png/%s_eff_pt_%s%s.png' % (TF, pt_cut, suffix))
+    c_pt. SaveAs('plots/pdf/%s_eff_pt_%s%s.pdf' % (TF, pt_cut, suffix))
+    
+    c_eta.cd()
+    mg_eta.Draw('APLX')  ## APLX
+    c_eta.SaveAs('plots/png/%s_eff_eta_%s%s.png' % (TF, pt_cut, suffix))
+    c_eta.SaveAs('plots/pdf/%s_eff_eta_%s%s.pdf' % (TF, pt_cut, suffix))
+    
+    c_phi.cd()
+    mg_phi.Draw('APLX')  ## APLX
+    c_phi.SaveAs('plots/png/%s_eff_phi_%s%s.png' % (TF, pt_cut, suffix))
+    c_phi.SaveAs('plots/pdf/%s_eff_phi_%s%s.pdf' % (TF, pt_cut, suffix))
 
 
 # # ===============================================================
 
-variable_list = [
-    ['hpt_emtf', 'EMTF p_{T}', 50, 0, 150],
-    ['hpt_bmtf', 'BMTF p_{T}', 50, 0, 150],
-    ['hpt_omtf', 'OMTF p_{T}', 50, 0, 150]
-    ]
+# variable_list = [
+#     ['hpt_emtf', 'EMTF p_{T}', 50, 0, 150],
+#     ['hpt_bmtf', 'BMTF p_{T}', 50, 0, 150],
+#     ['hpt_omtf', 'OMTF p_{T}', 50, 0, 150]
+#     ]
 
-def doPlot(variable, xaxis, nbins, bin_low, bin_high):
+# def doPlot(variable, xaxis, nbins, bin_low, bin_high):
 
-    canvas = TCanvas('canvas')
-    hist = file16.Get(variable)
-    hist.GetXaxis().SetLimits(bin_low, bin_high)
-    hist.GetXaxis().SetTitle(xaxis)
+#     canvas = TCanvas('canvas')
+#     hist = in_file.Get(variable)
+#     hist.GetXaxis().SetLimits(bin_low, bin_high)
+#     hist.GetXaxis().SetTitle(xaxis)
 
-    hist.SetFillColor(kYellow)
-    hist.SetStats(0)
-    hist.Draw()
+#     hist.SetFillColor(kYellow)
+#     hist.SetStats(0)
+#     hist.Draw()
 
-    #raw_input('Press return to continue...')
+#     canvas.SaveAs('plots/pdf/'+variable+'.pdf')
+#     canvas.SaveAs('plots/png/'+variable+'.png')
 
-    canvas.SaveAs('plots/pdf/'+variable+'.pdf')
-    canvas.SaveAs('plots/png/'+variable+'.png')
-
-    canvas.IsA().Destructor(canvas)
-    hist.IsA().Destructor(hist)
+#     canvas.IsA().Destructor(canvas)
+#     hist.IsA().Destructor(hist)
 
 
 #for variable in variable_list:
 #    doPlot(variable[0], variable[1], variable[2], variable[3], variable[4])
 
 
-raw_input('Press return to continue...')

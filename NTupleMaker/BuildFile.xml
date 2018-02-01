@@ -1,7 +1,8 @@
 
-<use   name="L1Trigger/L1TMuonEndCap"/>
-<use   name="root"/>
+<use name="L1Trigger/L1TMuonEndCap"/>
+<use name="root"/>
 
 <export>
   <lib name="1"/>
 </export>
+<flags ADD_SUBDIR="1"/>  <!-- For the src/FlatNtupleBranches/ subdirectory -->

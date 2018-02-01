@@ -129,10 +129,10 @@ def main():
 
         ## Get branches from the trees
         Event  = tree_1.EventAuxiliary
-        Hits_1 = tree_1.l1tEMTFHitExtras_simEmtfDigis_CSC_L1TMuonEmulation
-        Trks_1 = tree_1.l1tEMTFTrackExtras_simEmtfDigis__L1TMuonEmulation
-        Hits_2 = tree_2.l1tEMTFHitExtras_simEmtfDigis_CSC_L1TMuonEmulation
-        Trks_2 = tree_2.l1tEMTFTrackExtras_simEmtfDigis__L1TMuonEmulation
+        Hits_1 = tree_1.l1tEMTFHits_simEmtfDigis_CSC_L1TMuonEmulation
+        Trks_1 = tree_1.l1tEMTFTracks_simEmtfDigis__L1TMuonEmulation
+        Hits_2 = tree_2.l1tEMTFHits_simEmtfDigis_CSC_L1TMuonEmulation
+        Trks_2 = tree_2.l1tEMTFTracks_simEmtfDigis__L1TMuonEmulation
         
         nHits1 = Hits_1.size()
         nTrks1 = Trks_1.size()
