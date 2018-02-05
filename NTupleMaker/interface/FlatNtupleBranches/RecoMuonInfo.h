@@ -11,7 +11,7 @@
 #include "JetMETCorrections/JetCorrector/interface/JetCorrector.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/JetID.h"
-#include "L1AnalysisRecoMuon2DataFormat.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonDataFormat.h"
 
 //muons
 #include "DataFormats/MuonReco/interface/Muon.h"
@@ -31,7 +31,7 @@
 //vertices bp
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoVertexDataFormat.h"
 
 // track extrapolation
 #include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
@@ -52,11 +52,11 @@
                  const edm::Handle<reco::VertexCollection> vertices,
                  unsigned maxMuon);
 
-    L1AnalysisRecoMuon2DataFormat * getData() {return &recoMuon_;}
+    RecoMuonDataFormat * getData() {return &recoMuon_;}
     void Reset() {recoMuon_.Reset();}
 
   private :
-    L1AnalysisRecoMuon2DataFormat recoMuon_;
+    RecoMuonDataFormat recoMuon_;
 
     PropagateToMuon muPropagator1st_;
     PropagateToMuon muPropagator2nd_;
