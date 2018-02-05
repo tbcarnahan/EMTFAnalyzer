@@ -16,13 +16,12 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
   isMC = iConfig.getParameter<bool>("isMC");
 
   // Input collections
-  if (isMC)
-    GenMuon_token = consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genMuonTag"));
+  if (isMC) GenMuon_token = consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genMuonTag"));
 
   EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
   EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
   EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
-  RECOMuon_token = consumes<std::vector<L1Analysis::L1AnalysisRecoMuon2>>(iConfig.getParameter<edm::InputTag>("recoMuonTag"));
+  RecoMuon_token = consumes<std::vector<L1Analysis::L1AnalysisRecoMuon2>>(iConfig.getParameter<edm::InputTag>("recoMuonTag"));
 
 } // End FlatNtuple::FlatNtuple
 
@@ -46,7 +45,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
   iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
   edm::Handle<std::vector<L1Analysis::L1AnalysisRecoMuon2>> recoMuons;
-  iEvent.getByToken(RECOMuon_token, recoMuons);
+  iEvent.getByToken(RecoMuon_token, recoMuons);
 
   // Reset branch values
   eventInfo.Reset();
@@ -54,6 +53,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   emtfHitInfo.Reset();
   emtfTrackInfo.Reset();
   emtfUnpTrackInfo.Reset();
+  recoMuonInfo.Reset();
 
   // std::cout << "About to fill event info" << std::endl;
 
@@ -248,7 +248,8 @@ void FlatNtuple::beginJob() {
   emtfHitInfo.Initialize();
   emtfTrackInfo.Initialize();
   emtfUnpTrackInfo.Initialize();
-
+  recoMuonInfo.Initialize();
+	
   ////////////////////////////////////////////////
   ////   WARNING!!! CONSTRUCTION OF STRUCTS   ////
   ////////////////////////////////////////////////
@@ -276,6 +277,10 @@ void FlatNtuple::beginJob() {
   for (auto & it : emtfTrackInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
   for (auto & it : emtfTrackInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
   for (auto & it : emtfTrackInfo.mVVInt) out_tree->Branch(it.first, (std::vector<std::vector<int> >*) &it.second);
+  
+  for (auto & it : recoMuonInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
+  for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+  for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
 
   if (not isMC) {
     for (auto & it : emtfUnpTrackInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
