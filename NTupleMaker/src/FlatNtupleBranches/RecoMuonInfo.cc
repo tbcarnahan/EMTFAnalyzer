@@ -7,14 +7,12 @@ void RecoMuonInfo::Initialize() {
   for (auto & str : ints)  mInts .insert( std::pair<TString, int>(str, DINT) );
   for (auto & str : vFlt)  mVFlt .insert( std::pair<TString, std::vector<float> >(str, DVFLT) );
   for (auto & str : vInt)  mVInt .insert( std::pair<TString, std::vector<int> >  (str, DVINT) );
-  for (auto & str : vvInt) mVVInt.insert( std::pair<TString, std::vector<std::vector<int> > >(str, DVVINT) );
 }
 
 void RecoMuonInfo::Reset(){
 	for (auto & it : mInts)  it.second = DINT;
 	for (auto & it : mVFlt)  it.second.clear();
 	for (auto & it : mVInt)  it.second.clear();
-	for (auto & it : mVVInt) it.second.clear();
 	INSERT(mInts, "nRecoMuons", 0);
 }
 
