@@ -22,6 +22,7 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFHitInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 
 class FlatNtuple : public edm::EDAnalyzer {
 
@@ -47,6 +48,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   EMTFHitInfo emtfHitInfo;
   EMTFTrackInfo emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
+  RecoMuonInfo recoMuonInfo;
 
   // Output tree
   TTree * out_tree;
@@ -69,6 +71,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>> EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFUnpTrack_token;
+  edm::EDGetTokenT<std::vector<L1Analysis::L1AnalysisRecoMuon2>> RecoMuon_token;
   
 }; // End class FlatNtuple public edm::EDAnalyzer
 
