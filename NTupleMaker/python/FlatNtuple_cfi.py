@@ -14,5 +14,5 @@ FlatNtupleData = cms.EDAnalyzer('FlatNtuple',
                                 emtfHitTag    = cms.InputTag("simEmtfDigisData"),
                                 emtfTrackTag  = cms.InputTag("simEmtfDigisData"),
                                 emtfUnpTrackTag  = cms.InputTag("emtfStage2DigisData"),
+                                recoMuonTag  = cms.InputTag("muons"),
                                 )
-
