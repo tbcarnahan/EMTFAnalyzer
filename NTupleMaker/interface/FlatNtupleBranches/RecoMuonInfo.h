@@ -1,10 +1,12 @@
-#ifndef __L1Analysis_L1AnalysisRecoMuon2_H__
-#define __L1Analysis_L1AnalysisRecoMuon2_H__
+#ifndef FlatNtupleBranchesRecoMuonInfo_h
+#define FlatNtupleBranchesRecoMuonInfo_h
 
 //-------------------------------------------------------------------------------
 // Adapted from cmssw/L1Trigger/L1TNtuples/interface/L1AnalysisRecoMuon2.h
 // Wei Shi
 //-------------------------------------------------------------------------------
+// Common branch info
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
 #include "JetMETCorrections/JetCorrector/interface/JetCorrector.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
@@ -35,13 +37,11 @@
 #include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
-namespace L1Analysis
-{
-  class L1AnalysisRecoMuon2
+  class RecoMuonInfo
   {
   public:
-    L1AnalysisRecoMuon2(const edm::ParameterSet& pset);
-    ~L1AnalysisRecoMuon2();
+    RecoMuonInfo(const edm::ParameterSet& pset);
+    ~RecoMuonInfo();
     
     void init(const edm::EventSetup &eventSetup);
 
@@ -50,11 +50,7 @@ namespace L1Analysis
                  const edm::EventSetup& setup,
                  const edm::Handle<reco::MuonCollection> muons,
                  const edm::Handle<reco::VertexCollection> vertices,
-		 double METx, double METy,
                  unsigned maxMuon);
-
-    /* bool isMediumMuon(const reco::Muon & recoMu) ; */
-    /* bool isLooseMuon (const reco::Muon & recoMu); */
 
     L1AnalysisRecoMuon2DataFormat * getData() {return &recoMuon_;}
     void Reset() {recoMuon_.Reset();}
@@ -65,5 +61,5 @@ namespace L1Analysis
     PropagateToMuon muPropagator1st_;
     PropagateToMuon muPropagator2nd_;
   }; 
-}
+
 #endif
