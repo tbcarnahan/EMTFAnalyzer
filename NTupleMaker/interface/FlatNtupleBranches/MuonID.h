@@ -15,7 +15,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 //local  data formats
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/L1AnalysisRecoVertexDataFormat.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoVertexDataFormat.h"
 
 
 bool isLooseMuonCustom(const reco::Muon & recoMu)
