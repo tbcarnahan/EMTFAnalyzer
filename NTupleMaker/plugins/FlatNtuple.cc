@@ -230,6 +230,11 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     } // End for (uint i = 0; i < nTRK; i++)
   }
 
+        // Fill RECO mu branches
+	for (L1Analysis::L1AnalysisRecoMuon2 recoMuon: *recoMuons) {
+		recoMuonInfo.Fill(recoMuon);    
+	} // End for (L1Analysis::L1AnalysisRecoMuon2)
+  
   // std::cout << "About to fill output tree" << std::endl;
   if (passesSingleMu16 || true) {
     out_tree->Fill();
