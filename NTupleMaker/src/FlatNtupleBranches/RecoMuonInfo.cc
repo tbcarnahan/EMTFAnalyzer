@@ -1,5 +1,4 @@
-//Adapted from cmssw/L1Trigger/L1TNtuples/src/L1AnalysisRecoMuon2.cc
-//Wei Shi
+//Added by Wei Shi
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 
