@@ -1,5 +1,5 @@
-#ifndef __L1Analysis_L1AnalysisRecoVertexDataFormat_H__
-#define __L1Analysis_L1AnalysisRecoVertexDataFormat_H__
+#ifndef RecoVertexDataFormat_h
+#define RecoVertexDataFormat_h
 
 //-------------------------------------------------------------------------------
 // Adapted from cmssw/L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h
@@ -8,12 +8,10 @@
 
 #include <vector>
 
-namespace L1Analysis
-{
-  struct L1AnalysisRecoVertexDataFormat
+  struct RecoVertexDataFormat
   {
-    L1AnalysisRecoVertexDataFormat(){};
-    ~L1AnalysisRecoVertexDataFormat(){};
+    RecoVertexDataFormat(){};
+    ~RecoVertexDataFormat(){};
     
     void Reset()
     {
@@ -29,5 +27,5 @@ namespace L1Analysis
     std::vector<double>       Rho;
     
   }; 
-}
+
 #endif
