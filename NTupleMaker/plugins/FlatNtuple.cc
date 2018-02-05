@@ -22,6 +22,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
   EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
   EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
   EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
+  RECOMuon_token = consumes<std::vector<L1Analysis::L1AnalysisRecoMuon2>>(iConfig.getParameter<edm::InputTag>("recoMuonTag"));
 
 } // End FlatNtuple::FlatNtuple
 
@@ -44,6 +45,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(EMTFTrack_token, emtfTracks);
   edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
   iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
+  edm::Handle<std::vector<L1Analysis::L1AnalysisRecoMuon2>> recoMuons;
+  iEvent.getByToken(RECOMuon_token, recoMuons);
 
   // Reset branch values
   eventInfo.Reset();
