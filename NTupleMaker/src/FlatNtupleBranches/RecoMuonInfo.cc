@@ -2,82 +2,33 @@
 //Wei Shi
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
-#include "JetMETCorrections/JetCorrector/interface/JetCorrector.h"
-#include <DataFormats/PatCandidates/interface/Muon.h>
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/MuonID.h"
 
-using namespace std;
-using namespace muon;
-
-RecoMuonInfo::RecoMuonInfo(const edm::ParameterSet& pset) :
-  muPropagator1st_(pset.getParameter<edm::ParameterSet>("muProp1st")),
-  muPropagator2nd_(pset.getParameter<edm::ParameterSet>("muProp2nd"))
-{
+void RecoMuonInfo::Initialize() {
+  for (auto & str : ints)  mInts .insert( std::pair<TString, int>(str, DINT) );
+  for (auto & str : vFlt)  mVFlt .insert( std::pair<TString, std::vector<float> >(str, DVFLT) );
+  for (auto & str : vInt)  mVInt .insert( std::pair<TString, std::vector<int> >  (str, DVINT) );
+  for (auto & str : vvInt) mVVInt.insert( std::pair<TString, std::vector<std::vector<int> > >(str, DVVINT) );
 }
 
-
-RecoMuonInfo::~RecoMuonInfo()
-{
+void RecoMuonInfo::Reset(){
+	for (auto & it : mInts)  it.second = DINT;
+	for (auto & it : mVFlt)  it.second.clear();
+	for (auto & it : mVInt)  it.second.clear();
+	for (auto & it : mVVInt) it.second.clear();
+	INSERT(mInts, "nRecoMuons", 0);
 }
 
-void RecoMuonInfo::SetMuon(const edm::Event& event,
-					      const edm::EventSetup& setup,
-					      edm::Handle<reco::MuonCollection> muons,
-					      edm::Handle<reco::VertexCollection> vertices, 
-                unsigned maxMuon)
-{
-
-  recoMuon_.nMuons=0;
-  
-  for(reco::MuonCollection::const_iterator it=muons->begin();
-      it!=muons->end() && recoMuon_.nMuons < maxMuon;
-      ++it) {
-
-    recoMuon_.pt.push_back(it->pt()); 
-    recoMuon_.eta.push_back(it->eta());
-    recoMuon_.phi.push_back(it->phi());
-    recoMuon_.charge.push_back(it->charge());
-    
-    //RecoMu quality
-    //check isLooseMuon
-    bool flagLoose = isLooseMuonCustom(*it);
-    recoMuon_.isLooseMuon.push_back(flagLoose);
-
-    //check isMediumMuon
-     bool flagMedium = isMediumMuonCustom(*it);
-    recoMuon_.isMediumMuon.push_back(flagMedium);
-
-    //check isTightMuon
-    bool flagTight = false;
-    if (vertices.isValid())
-      flagTight = isTightMuonCustom(*it, (*vertices)[0]);
-    recoMuon_.isTightMuon.push_back(flagTight);
-
-    recoMuon_.nMuons++;
-
-    // extrapolation of track coordinates
-    TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
-    if (stateAtMuSt1.isValid()) {
-      recoMuon_.etaSt1.push_back(stateAtMuSt1.globalPosition().eta());
-      recoMuon_.phiSt1.push_back(stateAtMuSt1.globalPosition().phi());
-    } else {
-      recoMuon_.etaSt1.push_back(-9999);
-      recoMuon_.phiSt1.push_back(-9999);
-    }
-
-    TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*it);
-    if (stateAtMuSt2.isValid()) {
-      recoMuon_.etaSt2.push_back(stateAtMuSt2.globalPosition().eta());
-      recoMuon_.phiSt2.push_back(stateAtMuSt2.globalPosition().phi());
-    } else {
-      recoMuon_.etaSt2.push_back(-9999);
-      recoMuon_.phiSt2.push_back(-9999);
-    }
-  }
-}
-
-void RecoMuonInfo::init(const edm::EventSetup &eventSetup)
-{
-  muPropagator1st_.init(eventSetup);
-  muPropagator2nd_.init(eventSetup);
+void RecoMuonInfo::Fill(const L1Analysis::L1AnalysisRecoMuon2 & recoMuon_){
+	INSERT(mInts, "nRecoMuons", ACCESS(mInts, "nRecoMuons") + 1 );
+	INSERT(mVFlt, "reco_pt", recoMuon_.pt() );
+	INSERT(mVFlt, "reco_eta", recoMuon_.eta() );
+	INSERT(mVFlt, "reco_phi", recoMuon_.phi() );
+	INSERT(mVInt, "reco_charge", recoMuon_.charge() );
+	INSERT(mVInt, "reco_loose", recoMuon_.isLooseMuon() );
+	INSERT(mVInt, "reco_medium", recoMuon_.isMediumMuon() );
+	INSERT(mVInt, "reco_tight", recoMuon_.isTightMuon() );
+	INSERT(mVFlt, "reco_St1_eta", recoMuon_.etaSt1() );//initial -9999
+	INSERT(mVFlt, "reco_St1_phi", recoMuon_.phiSt1() );
+	INSERT(mVFlt, "reco_St2_eta", recoMuon_.etaSt2() );
+	INSERT(mVFlt, "reco_St2_phi", recoMuon_.phiSt2() );
 }
