@@ -7,11 +7,11 @@
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
-// EMTF classes
+// RECO muon classes
 #include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMuon2.h"
 
 ////////////////////////////////
-///  EMTF track information  ///
+///  RECO muon  information  ///
 ////////////////////////////////
 struct RecoMuonInfo {
   std::vector<TString> ints = {{"nRecoMuons"}};
