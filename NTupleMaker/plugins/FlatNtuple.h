@@ -25,6 +25,13 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/PFMETCollection.h"
+//local  data formats
+#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMuon2.h"
+#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMet.h"
+//vertices
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
 
 class FlatNtuple : public edm::EDAnalyzer {
 
