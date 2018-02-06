@@ -49,6 +49,9 @@ class FlatNtuple : public edm::EDAnalyzer {
   EMTFTrackInfo emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
   RecoMuonInfo recoMuonInfo;
+ 
+  L1Analysis::L1AnalysisRecoMuon2* muon;
+  L1Analysis::L1AnalysisRecoMuon2DataFormat* muon_data;
 
   // Output tree
   TTree * out_tree;
