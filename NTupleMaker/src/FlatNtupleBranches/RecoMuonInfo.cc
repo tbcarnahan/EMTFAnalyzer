@@ -17,7 +17,7 @@ void RecoMuonInfo::Reset(){
 
 void RecoMuonInfo::Fill(L1Analysis::L1AnalysisRecoMuon2DataFormat* recoMuonData){
 	INSERT(mInts, "nRecoMuons", ACCESS(mVFlt, "reco_pt").size() + 1);
-	INSERT(mVFlt, "reco_pt", recoMuonData->pt.at(1) );
+	INSERT(mVFlt, "reco_pt", recoMuonData->pt );
 	INSERT(mVFlt, "reco_eta", recoMuonData->eta[1] );
 	INSERT(mVFlt, "reco_phi", recoMuonData->phi[1] );
 	INSERT(mVInt, "reco_charge", recoMuonData()->charge[1] );
