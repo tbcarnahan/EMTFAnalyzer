@@ -21,7 +21,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
   EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
   EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
   EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
-  RecoMuon_token = consumes<std::vector<L1Analysis::L1AnalysisRecoMuon2>>(iConfig.getParameter<edm::InputTag>("recoMuonTag"));
+  RecoMuon_token = consumes<std::vector<L1Analysis::L1AnalysisRecoMuon2::L1AnalysisRecoMuon2DataFormat>>(iConfig.getParameter<edm::InputTag>("recoMuonTag"));
 
 } // End FlatNtuple::FlatNtuple
 
