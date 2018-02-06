@@ -17,9 +17,9 @@ void RecoMuonInfo::Reset(){
 
 void RecoMuonInfo::Fill(const L1Analysis::L1AnalysisRecoMuon2 & recoMuon){
 	INSERT(mInts, "nRecoMuons", ACCESS(mInts, "nRecoMuons") + 1 );
-	INSERT(mVFlt, "reco_pt", recoMuon.getData().pt.at(1) );
-	INSERT(mVFlt, "reco_eta", recoMuon.getData().eta[1] );
-	INSERT(mVFlt, "reco_phi", recoMuon.getData().phi[1] );
+	INSERT(mVFlt, "reco_pt", recoMuon.getData()->pt.at(1) );
+	INSERT(mVFlt, "reco_eta", recoMuon.getData()->eta[1] );
+	INSERT(mVFlt, "reco_phi", recoMuon.getData()->phi[1] );
 	INSERT(mVInt, "reco_charge", recoMuon.getData().charge[1] );
 	INSERT(mVInt, "reco_loose", recoMuon.getData().isLooseMuon[1] );
 	INSERT(mVInt, "reco_medium", recoMuon.getData().isMediumMuon[1] );
