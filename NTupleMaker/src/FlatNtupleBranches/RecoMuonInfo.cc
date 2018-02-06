@@ -15,17 +15,17 @@ void RecoMuonInfo::Reset(){
 	INSERT(mInts, "nRecoMuons", 0);
 }
 
-void RecoMuonInfo::Fill(L1Analysis::L1AnalysisRecoMuon2 & recoMuon){
+void RecoMuonInfo::Fill(L1Analysis::L1AnalysisRecoMuon2DataFormat* recoMuonData){
 	INSERT(mInts, "nRecoMuons", ACCESS(mVFlt, "reco_pt").size() + 1);
-	INSERT(mVFlt, "reco_pt", recoMuon.getData()->pt.at(1) );
-	INSERT(mVFlt, "reco_eta", recoMuon.getData()->eta[1] );
-	INSERT(mVFlt, "reco_phi", recoMuon.getData()->phi[1] );
-	INSERT(mVInt, "reco_charge", recoMuon.getData()->charge[1] );
-	INSERT(mVInt, "reco_loose", recoMuon.getData()->isLooseMuon[1] );
-	INSERT(mVInt, "reco_medium", recoMuon.getData()->isMediumMuon[1] );
-	INSERT(mVInt, "reco_tight", recoMuon.getData()->isTightMuon[1] );
-	INSERT(mVFlt, "reco_St1_eta", recoMuon.getData()->etaSt1[1] );//initial -9999
-	INSERT(mVFlt, "reco_St1_phi", recoMuon.getData()->phiSt1[1] );
-	INSERT(mVFlt, "reco_St2_eta", recoMuon.getData()->etaSt2[1] );
-	INSERT(mVFlt, "reco_St2_phi", recoMuon.getData()->phiSt2[1] );
+	INSERT(mVFlt, "reco_pt", recoMuonData->pt.at(1) );
+	INSERT(mVFlt, "reco_eta", recoMuonData->eta[1] );
+	INSERT(mVFlt, "reco_phi", recoMuonData->phi[1] );
+	INSERT(mVInt, "reco_charge", recoMuonData()->charge[1] );
+	INSERT(mVInt, "reco_loose", recoMuonData()->isLooseMuon[1] );
+	INSERT(mVInt, "reco_medium", recoMuonData()->isMediumMuon[1] );
+	INSERT(mVInt, "reco_tight", recoMuonData()->isTightMuon[1] );
+	INSERT(mVFlt, "reco_St1_eta", recoMuonData()->etaSt1[1] );//initial -9999
+	INSERT(mVFlt, "reco_St1_phi", recoMuonData()->phiSt1[1] );
+	INSERT(mVFlt, "reco_St2_eta", recoMuonData()->etaSt2[1] );
+	INSERT(mVFlt, "reco_St2_phi", recoMuonData()->phiSt2[1] );
 }
