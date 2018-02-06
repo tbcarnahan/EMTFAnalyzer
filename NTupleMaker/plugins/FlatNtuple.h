@@ -71,7 +71,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>> EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFUnpTrack_token;
-  edm::EDGetTokenT<L1Analysis::L1AnalysisRecoMuon2&> RecoMuon_token;
+  edm::EDGetTokenT<std::vector<L1Analysis::L1AnalysisRecoMuon2>> RecoMuon_token;
   
 }; // End class FlatNtuple public edm::EDAnalyzer
 
