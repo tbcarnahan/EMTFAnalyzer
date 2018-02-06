@@ -253,11 +253,12 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       } // End for (l1t::EMTFTrack emtfTrk: *emtfUnpTracks)
     } // End for (uint i = 0; i < nTRK; i++)
   }
-
-        // Fill RECO mu branches
-	for (L1Analysis::L1AnalysisRecoMuon2 recoMuon: *recoMuons) {
-		recoMuonInfo.Fill(recoMuon);    
-	} // End for (L1Analysis)
+	
+	int counter_mu = 0;
+	for(reco::MuonCollection::const_iterator imu = recoMuons->begin(); 
+	    imu != recoMuons->end() && (unsigned) counter_mu < maxMuon_; imu++) {
+		recoMuonInfo.Fill(muon_data);
+	}
   
   // std::cout << "About to fill output tree" << std::endl;
   if (passesSingleMu16 || true) {
