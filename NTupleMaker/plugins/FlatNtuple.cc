@@ -4,8 +4,6 @@
 // Andrew Brinkerhoff - 27.06.17
 
 #include "EMTFAnalyzer/NTupleMaker/plugins/FlatNtuple.h"
-#include "DataFormats/METReco/interface/PFMET.h"
-#include "DataFormats/METReco/interface/PFMETCollection.h"
 
 // Constructor
 FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
