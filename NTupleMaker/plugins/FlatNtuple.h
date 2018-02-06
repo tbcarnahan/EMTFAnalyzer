@@ -23,6 +23,8 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
+#include "DataFormats/METReco/interface/PFMET.h"
+#include "DataFormats/METReco/interface/PFMETCollection.h"
 
 class FlatNtuple : public edm::EDAnalyzer {
 
