@@ -44,7 +44,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(EMTFTrack_token, emtfTracks);
   edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
   iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
-  edm::Handle<std::vector<L1Analysis::L1AnalysisRecoMuon2>> recoMuons;
+  edm::Handle<std::vector<L1Analysis::L1AnalysisRecoMuon2::L1AnalysisRecoMuon2DataFormat>> recoMuons;
   iEvent.getByToken(RecoMuon_token, recoMuons);
 
   // Reset branch values
@@ -231,9 +231,9 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
 
         // Fill RECO mu branches
-	for (L1Analysis::L1AnalysisRecoMuon2 recoMuon: *recoMuons) {
+	for (L1Analysis::L1AnalysisRecoMuon2::L1AnalysisRecoMuon2DataFormat recoMuon: *recoMuons) {
 		recoMuonInfo.Fill(recoMuon);    
-	} // End for (L1Analysis::L1AnalysisRecoMuon2)
+	} // End for (L1Analysis)
   
   // std::cout << "About to fill output tree" << std::endl;
   if (passesSingleMu16 || true) {
