@@ -49,6 +49,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	double METx = 0.;
         double METy = 0.; 
+	int counter_met = 0;
 	
 	for(reco::PFMETCollection::const_iterator imet = metLabel_->begin(); 
 	    imet != metLabel_->end() && (unsigned) counter_met < 1; imet++) {
