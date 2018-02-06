@@ -4,7 +4,6 @@
 // Andrew Brinkerhoff - 27.06.17
 
 #include "EMTFAnalyzer/NTupleMaker/plugins/FlatNtuple.h"
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMuon2.h"
 
 // Constructor
 FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
