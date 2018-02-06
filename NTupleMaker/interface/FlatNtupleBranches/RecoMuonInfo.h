@@ -23,7 +23,7 @@ struct RecoMuonInfo {
 
   void Initialize();
   void Reset();
-  void Fill(L1Analysis::L1AnalysisRecoMuon2 & recoMuon);
+  void Fill(L1Analysis::L1AnalysisRecoMuon2DataFormat * recoMuonData);
 };
 
 #endif
