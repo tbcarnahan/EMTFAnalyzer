@@ -8,7 +8,6 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
 // RECO muon class
-#include "L1Trigger/L1TNtuples/interface/MuonID.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -19,10 +18,11 @@
 #include "DataFormats/MuonReco/interface/MuonTime.h"
 #include "CondFormats/AlignmentRecord/interface/TrackerSurfaceDeformationRcd.h"
 
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 //vertices bp
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
 
 // track extrapolation
 #include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
@@ -31,6 +31,20 @@
 ////////////////////////////////
 ///  RECO muon  information  ///
 ////////////////////////////////
+class RecoMuon
+  {
+  public:
+    RecoMuon(const edm::ParameterSet& pset);
+    ~RecoMuon();
+    
+    void init(const edm::EventSetup &eventSetup);
+
+  private :
+
+    PropagateToMuon muPropagator1st_;
+    PropagateToMuon muPropagator2nd_;
+  }; 
+
 struct RecoMuonInfo {
   std::vector<TString> ints = {{"nRecoMuons"}};
   std::vector<TString> vFlt = {{"reco_pt", "reco_eta", "reco_phi", "reco_St1_eta", "reco_St1_phi", "reco_St2_eta", "reco_St2_phi"}};
