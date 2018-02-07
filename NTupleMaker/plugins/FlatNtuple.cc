@@ -59,7 +59,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	
 	// Fill recoMu info
 	if (recoMuons.isValid()) {
-		for(reco::Muon it: *recoMuons) {
+		for(reco::MuonCollection::const_iterator it=recoMuons->begin();it!=recoMuons->end();++it) {
 			recoMuonInfo.Fill(it, vertices);
 		}
 	}
