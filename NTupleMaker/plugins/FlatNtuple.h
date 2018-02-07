@@ -23,15 +23,6 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
-#include "DataFormats/METReco/interface/PFMET.h"
-#include "DataFormats/METReco/interface/PFMETCollection.h"
-//local  data formats
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMuon2.h"
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMet.h"
-//vertices
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
 
 class FlatNtuple : public edm::EDAnalyzer {
 
@@ -58,9 +49,6 @@ class FlatNtuple : public edm::EDAnalyzer {
   EMTFTrackInfo emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
   RecoMuonInfo recoMuonInfo;
- 
-  L1Analysis::L1AnalysisRecoMuon2* muon;
-  L1Analysis::L1AnalysisRecoMuon2DataFormat* muon_data;
 
   // Output tree
   TTree * out_tree;
@@ -85,9 +73,6 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFUnpTrack_token;
   edm::EDGetTokenT<reco::MuonCollection>       MuonToken_;//RECO muon
   edm::EDGetTokenT<reco::VertexCollection>      VtxToken_;
-  edm::EDGetTokenT<reco::PFMETCollection>      metToken_;
- 
-  unsigned int maxMuon_=20;
 }; // End class FlatNtuple public edm::EDAnalyzer
 
 // Define as a plugin
