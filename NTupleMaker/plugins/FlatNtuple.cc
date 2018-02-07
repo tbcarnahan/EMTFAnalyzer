@@ -20,13 +20,8 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
 	EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
         EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
         EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
-  
 	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("recoMuTag"));
 	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("verticesTag")); 
-	metToken_  = consumes<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("MetTag"));
-	
-	//muon           = new L1Analysis::L1AnalysisRecoMuon2(iConfig);
-	//muon_data      = muon->getData();
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
@@ -45,31 +40,10 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	iEvent.getByToken(EMTFTrack_token, emtfTracks);
 	edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
 	iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
-	
-	muon->Reset();
         edm::Handle<reco::MuonCollection> recoMuons;
         iEvent.getByToken(MuonToken_, recoMuons);
         edm::Handle<reco::VertexCollection> vertices;
         iEvent.getByToken(VtxToken_, vertices);
-        edm::Handle<reco::PFMETCollection> metLabel_;
-        iEvent.getByToken(metToken_, metLabel_);
-
-	double METx = 0.;
-        double METy = 0.; 
-	
-	for(reco::PFMET imet: *metLabel_) {
-		METx = imet.px();
-		METy = imet.py();   
-	}
-	
-	if (recoMuons.isValid()) {
-		muon->SetMuon(iEvent, iSetup, recoMuons, vertices, METx, METy, maxMuon_);
-		muon_data = muon->getData();
-	}
-	else {
-		std::cout << "ERROR: could not get recoMuons from event!!!" << std::endl;
-		return;
-	}
 	
 	// Reset branch values
   	eventInfo.Reset();
@@ -84,7 +58,15 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   	eventInfo.Fill(iEvent);
 	
 	// Fill recoMu info
-	recoMuonInfo.Fill(muon_data);
+	if (recoMuons.isValid()) {
+		for(reco::MuonCollection::const_iterator it=muons->begin();it!=muons->end();++it) {
+			recoMuonInfo.Fill(it);
+		}
+	}
+	else {
+		std::cout << "ERROR: could not get recoMuons from event!!!" << std::endl;
+		return;
+	}
 
   	// Get indices of GEN muons in event
 	std::vector<std::pair<int, float>> gen_etas;
