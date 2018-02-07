@@ -2,6 +2,23 @@
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 
+RecoMuon::RecoMuon(const edm::ParameterSet& pset) :
+  muPropagator1st_(pset.getParameter<edm::ParameterSet>("muProp1st")),
+  muPropagator2nd_(pset.getParameter<edm::ParameterSet>("muProp2nd"))
+{
+}
+
+
+RecoMuon::~RecoMuon()
+{
+}
+
+RecoMuon::init(const edm::EventSetup &eventSetup)
+{
+  muPropagator1st_.init(eventSetup);
+  muPropagator2nd_.init(eventSetup);
+}
+
 void RecoMuonInfo::Initialize() {
   for (auto & str : ints)  mInts .insert( std::pair<TString, int>(str, DINT) );
   for (auto & str : vFlt)  mVFlt .insert( std::pair<TString, std::vector<float> >(str, DVFLT) );
