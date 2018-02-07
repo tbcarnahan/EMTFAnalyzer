@@ -7,9 +7,6 @@
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
-//RECO
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/MuonReco/interface/Muon.h"
 ////////////////////////////////
 ///  RECO muon  information  ///
 ////////////////////////////////
