@@ -83,9 +83,9 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>> EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFUnpTrack_token;
-  edm::EDGetTokenT<reco::MuonCollection>       MuonToken_;//RECO muon
-  edm::EDGetTokenT<reco::VertexCollection>      VtxToken_;
-  edm::EDGetTokenT<reco::PFMETCollection>      metToken_;
+  edm::EDGetTokenT<std::vector<reco::MuonCollection>>       MuonToken_;//RECO muon
+  edm::EDGetTokenT<std::vector<reco::VertexCollection>>      VtxToken_;
+  edm::EDGetTokenT<std::vector<reco::PFMETCollection>>      metToken_;
  
   unsigned int maxMuon_=20;
 }; // End class FlatNtuple public edm::EDAnalyzer
