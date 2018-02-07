@@ -4,6 +4,8 @@
 // Andrew Brinkerhoff - 27.06.17
 
 #include "EMTFAnalyzer/NTupleMaker/plugins/FlatNtuple.h"
+#include <DataFormats/PatCandidates/interface/Muon.h>
+#include "L1Trigger/L1TNtuples/interface/MuonID.h"
 
 // Constructor
 FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
@@ -63,7 +65,42 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	// Fill recoMu info
 	if (recoMuons.isValid()) {
 		for(reco::MuonCollection::const_iterator it=recoMuons->begin();it!=recoMuons->end();++it) {
-			recoMuonInfo.Fill(it, vertices);
+			float reco_pt = it->pt();
+			float reco_eta = it->eta();
+			float reco_phi = it->phi();
+			int reco_charge = it->charge();
+			//check isLooseMuon
+        		bool flagLoose = isLooseMuonCustom(*it);
+			int reco_loose = 0;
+			if (flagLoose) reco_loose = 1;
+
+     			//check isMediumMuon
+     			bool flagMedium = isMediumMuonCustom(*it);
+			int reco_medium = 0;
+    			if (flagMedium) reco_medium = 1;
+      
+    			//check isTightMuon
+    			bool flagTight = false;
+    			if (vertices.isValid()) flagTight = isTightMuonCustom(*it, (*vertices)[0]);
+			int reco_tight = 0;
+			if (flagTight) reco_tight = 1;
+	
+			// extrapolation of track coordinates
+    			TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
+    			if (stateAtMuSt1.isValid()) {
+				reco_St1_eta = stateAtMuSt1.globalPosition().eta();
+				reco_St1_phi = stateAtMuSt1.globalPosition().phi();
+			}
+
+    			TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*it);
+    			if (stateAtMuSt2.isValid()) {
+				reco_St2_eta = stateAtMuSt2.globalPosition().eta();
+				reco_St2_phi = stateAtMuSt2.globalPosition().phi();
+    			}
+			recoMuonInfo.Fill(reco_pt, reco_eta, reco_phi, reco_charge, 
+			reco_loose, reco_medium, reco_tight, 
+			reco_St1_eta, reco_St1_phi,
+		        reco_St2_eta, reco_St2_phi);
 		}
 	}
 	else {
