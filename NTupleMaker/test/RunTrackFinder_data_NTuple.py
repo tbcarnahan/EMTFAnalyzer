@@ -290,7 +290,9 @@ process.ntuple = cms.EDAnalyzer('FlatNtuple',
                                 # emtfHitTag       = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked input LCTs and hits
                                 emtfTrackTag     = cms.InputTag("simEmtfDigis"),     ## EMTF emulator output tracks
                                 emtfUnpTrackTag  = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked output tracks
-                                recoMuonTag      = cms.InputTag("muons"),
+                                recoMuTag  = cms.InputTag("muons"),
+                                verticesTag = cms.InputTag("offlinePrimaryVertices"),
+                                MetTag = cms.InputTag("pfMet"),
                                 )
 
 RawToDigi_AWB = cms.Sequence(
