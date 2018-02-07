@@ -21,7 +21,10 @@ struct RecoMuonInfo {
 
   void Initialize();
   void Reset();
-  void Fill(reco::MuonCollection::const_iterator it, edm::Handle<reco::VertexCollection> vertices);
+  void Fill(float reco_pt, float reco_eta, float reco_phi, int reco_charge, 
+			      int reco_loose, int reco_medium, int reco_tight, 
+			      float reco_St1_eta, float reco_St1_phi,
+		        float reco_St2_eta, float reco_St2_phi);
 };
 
 #endif
