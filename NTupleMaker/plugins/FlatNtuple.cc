@@ -58,6 +58,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		muon->SetMuon(iEvent, iSetup, recoMuons, vertices, METx, METy, maxMuon_);
 	}
 	else {
+		std::cout << "ERROR: could not get recoMuons from event!!!" << std::endl;
+		return;
 	}
 	
 	edm::Handle<std::vector<reco::GenParticle>> genMuons;
