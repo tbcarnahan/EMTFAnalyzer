@@ -326,6 +326,8 @@ process.TFileService = cms.Service(
 outCommands = cms.untracked.vstring(
 
     'keep recoMuons_muons__*',
+    'keep recoPFMETs_pfMet__*',
+    'keep recoVertexs_offlinePrimaryVertices__*',
     'keep *Gen*_*_*_*',
     'keep *_*Gen*_*_*',
     'keep *gen*_*_*_*',
