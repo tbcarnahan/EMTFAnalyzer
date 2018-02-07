@@ -22,6 +22,9 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
         EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
 	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("recoMuTag"));
 	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("verticesTag")); 
+	
+	muPropagator1st_(iConfig.getParameter<edm::ParameterSet>("muProp1st")),
+        muPropagator2nd_(iConfig.getParameter<edm::ParameterSet>("muProp2nd"))
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
@@ -246,6 +249,11 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       
 } // End FlatNtuple::analyze
 
+void FlatNtuple::init(const edm::EventSetup &eventSetup)
+{
+  muPropagator1st_.init(eventSetup);
+  muPropagator2nd_.init(eventSetup);
+}
 
 // Called once per job before starting event loop
 void FlatNtuple::beginJob() {
