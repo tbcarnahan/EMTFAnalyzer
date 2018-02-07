@@ -8,7 +8,10 @@
 #include "L1Trigger/L1TNtuples/interface/MuonID.h"
 
 // Constructor
-FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
+FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
+        muPropagator1st_(iConfig.getParameter<edm::ParameterSet>("muProp1st")),
+        muPropagator2nd_(iConfig.getParameter<edm::ParameterSet>("muProp2nd"))
+{
 	// Output file
 	edm::Service<TFileService> fs;
 	out_tree = fs->make<TTree>("tree","FlatNtupleTree");
@@ -25,8 +28,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
 	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("recoMuTag"));
 	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("verticesTag")); 
 	
-	muPropagator1st_(iConfig.getParameter<edm::ParameterSet>("muProp1st")),
-        muPropagator2nd_(iConfig.getParameter<edm::ParameterSet>("muProp2nd"))
+	
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
