@@ -48,10 +48,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	double METx = 0.;
         double METy = 0.; 
-	int counter_met = 0;
 	
-	for(reco::PFMETCollection::const_iterator imet = metLabel_->begin(); 
-	    imet != metLabel_->end() && (unsigned) counter_met < 1; imet++) {
+	for(reco::PFMETCollection imet: *metLabel_) {
 		METx = imet->px();
 		METy = imet->py();   
 	}
@@ -253,11 +251,9 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       } // End for (l1t::EMTFTrack emtfTrk: *emtfUnpTracks)
     } // End for (uint i = 0; i < nTRK; i++)
   }
-	
-	int counter_mu = 0;
-	for(reco::MuonCollection::const_iterator imu = recoMuons->begin(); 
-	    imu != recoMuons->end() && (unsigned) counter_mu < maxMuon_; imu++) {
-		recoMuonInfo.Fill(muon_data);
+
+	for(reco::MuonCollection imu: *recoMuons) {
+		recoMuonInfo.Fill(imu);
 	}
   
   // std::cout << "About to fill output tree" << std::endl;
