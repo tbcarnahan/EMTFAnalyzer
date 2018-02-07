@@ -1,6 +1,8 @@
 //Added by Wei Shi
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
+#include <DataFormats/PatCandidates/interface/Muon.h>
+#include "L1Trigger/L1TNtuples/interface/MuonID.h"
 
 void RecoMuonInfo::Initialize() {
   for (auto & str : ints)  mInts .insert( std::pair<TString, int>(str, DINT) );
