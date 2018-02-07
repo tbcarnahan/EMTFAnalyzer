@@ -6,9 +6,27 @@
 //-------------------------------------------------------------------------------
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
+
 // RECO muon class
-#include <DataFormats/PatCandidates/interface/Muon.h>
 #include "L1Trigger/L1TNtuples/interface/MuonID.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/MuonReco/interface/MuonEnergy.h"
+#include "DataFormats/MuonReco/interface/MuonTime.h"
+#include "CondFormats/AlignmentRecord/interface/TrackerSurfaceDeformationRcd.h"
+
+//vertices bp
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
+
+// track extrapolation
+#include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
 ////////////////////////////////
 ///  RECO muon  information  ///
