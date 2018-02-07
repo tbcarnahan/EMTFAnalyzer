@@ -13,8 +13,6 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
 	
 	// Config parameters  
 	isMC = iConfig.getParameter<bool>("isMC");
-	muPropagator1st_(iConfig.getParameter<edm::ParameterSet>("muProp1st")),
-        muPropagator2nd_(iConfig.getParameter<edm::ParameterSet>("muProp2nd"))
 	
 	// Input collections
 	if (isMC) GenMuon_token = consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genMuonTag"));
