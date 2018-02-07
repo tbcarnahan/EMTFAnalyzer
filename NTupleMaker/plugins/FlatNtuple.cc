@@ -21,9 +21,9 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
         EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
         EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
   
-	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
-	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("offlinePrimaryVertices")); 
-	metToken_  = consumes<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("pfMet"));
+	MuonToken_ = consumes<std::vector<reco::MuonCollection>>(iConfig.getParameter<edm::InputTag>("muons"));
+	VtxToken_  = consumes<std::vector<reco::VertexCollection>>(iConfig.getParameter<edm::InputTag>("offlinePrimaryVertices")); 
+	metToken_  = consumes<std::vector<reco::PFMETCollection>>(iConfig.getParameter<edm::InputTag>("pfMet"));
 	
 	muon           = new L1Analysis::L1AnalysisRecoMuon2(iConfig);
 	muon_data      = muon->getData();
@@ -37,13 +37,13 @@ FlatNtuple::~FlatNtuple() {}
 void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	// std::cout << "\nCalling analyze" << std::endl;
 	muon->Reset();
-        edm::Handle<reco::MuonCollection> recoMuons;
+        edm::Handle<std::vector<reco::MuonCollection>> recoMuons;
         iEvent.getByToken(MuonToken_, recoMuons);
 
-        edm::Handle<reco::VertexCollection> vertices;
+        edm::Handle<std::vector<reco::VertexCollection>> vertices;
         iEvent.getByToken(VtxToken_, vertices);
 
-        edm::Handle<reco::PFMETCollection> metLabel_;
+        edm::Handle<std::vector<reco::PFMETCollection>> metLabel_;
         iEvent.getByToken(metToken_, metLabel_);
 
 	double METx = 0.;
