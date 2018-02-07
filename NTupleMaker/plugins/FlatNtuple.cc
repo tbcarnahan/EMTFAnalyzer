@@ -75,7 +75,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			int reco_tight = 0;
 			float reco_St1_eta = -9999;
 		        float reco_St1_phi = -9999;
-			float reco_St2_phi = -9999;
+			float reco_St2_eta = -9999;
 			float reco_St2_phi = -9999;	
 			
 			reco_pt = it->pt();
