@@ -51,7 +51,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   // Constructor/destructor
   explicit FlatNtuple(const edm::ParameterSet&);
   ~FlatNtuple();
-  void init(const edm::EventSetup &eventSetup);
+  //void init(const edm::EventSetup &eventSetup);
 
   /* // Default constants */
   /* const int   DINT = -999; */
