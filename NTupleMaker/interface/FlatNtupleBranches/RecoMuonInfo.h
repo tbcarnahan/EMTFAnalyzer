@@ -23,7 +23,7 @@ struct RecoMuonInfo {
 
   void Initialize();
   void Reset();
-  void Fill(reco::Muon & it, <reco::VertexCollection> vertices);
+  void Fill(reco::Muon it, reco::VertexCollection vertices);
 };
 
 #endif
