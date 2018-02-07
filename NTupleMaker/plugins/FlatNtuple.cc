@@ -25,8 +25,8 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
 	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("verticesTag")); 
 	metToken_  = consumes<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("MetTag"));
 	
-	muon           = new L1Analysis::L1AnalysisRecoMuon2(iConfig);
-	muon_data      = muon->getData();
+	//muon           = new L1Analysis::L1AnalysisRecoMuon2(iConfig);
+	//muon_data      = muon->getData();
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
@@ -64,6 +64,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	
 	if (recoMuons.isValid()) {
 		muon->SetMuon(iEvent, iSetup, recoMuons, vertices, METx, METy, maxMuon_);
+		muon_data = muon->getData();
 	}
 	else {
 		std::cout << "ERROR: could not get recoMuons from event!!!" << std::endl;
