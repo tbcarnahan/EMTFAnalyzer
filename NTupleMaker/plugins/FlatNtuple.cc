@@ -36,13 +36,21 @@ FlatNtuple::~FlatNtuple() {}
 // Called once per event
 void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	// std::cout << "\nCalling analyze" << std::endl;
+	edm::Handle<std::vector<reco::GenParticle>> genMuons;
+	if (isMC) iEvent.getByToken(GenMuon_token, genMuons);
+	
+	edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
+	iEvent.getByToken(EMTFHit_token, emtfHits);
+	edm::Handle<std::vector<l1t::EMTFTrack>> emtfTracks;
+	iEvent.getByToken(EMTFTrack_token, emtfTracks);
+	edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
+	iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
+	
 	muon->Reset();
         edm::Handle<std::vector<reco::MuonCollection>> recoMuons;
         iEvent.getByToken(MuonToken_, recoMuons);
-
         edm::Handle<std::vector<reco::VertexCollection>> vertices;
         iEvent.getByToken(VtxToken_, vertices);
-
         edm::Handle<std::vector<reco::PFMETCollection>> metLabel_;
         iEvent.getByToken(metToken_, metLabel_);
 
@@ -62,16 +70,6 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		return;
 	}
 	
-	edm::Handle<std::vector<reco::GenParticle>> genMuons;
-	if (isMC) iEvent.getByToken(GenMuon_token, genMuons);
-	
-	edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
-	iEvent.getByToken(EMTFHit_token, emtfHits);
-	edm::Handle<std::vector<l1t::EMTFTrack>> emtfTracks;
-	iEvent.getByToken(EMTFTrack_token, emtfTracks);
-	edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
-	iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
-	
 	// Reset branch values
   	eventInfo.Reset();
   	genMuonInfo.Reset();
@@ -80,10 +78,12 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   	emtfUnpTrackInfo.Reset();
   	recoMuonInfo.Reset();
 
-  	// std::cout << "About to fill event info" << std::endl;
-
+  	// std::cout << "About to fill event info" << std::endl;	
   	// Fill event info
   	eventInfo.Fill(iEvent);
+	
+	// Fill recoMu info
+	recoMuonInfo.Fill(muon_data);
 
   	// Get indices of GEN muons in event
 	std::vector<std::pair<int, float>> gen_etas;
@@ -253,10 +253,6 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       } // End for (l1t::EMTFTrack emtfTrk: *emtfUnpTracks)
     } // End for (uint i = 0; i < nTRK; i++)
   }
-
-	for(reco::MuonCollection imu: *recoMuons) {
-		recoMuonInfo.Fill(imu);
-	}
   
   // std::cout << "About to fill output tree" << std::endl;
   if (passesSingleMu16 || true) {
