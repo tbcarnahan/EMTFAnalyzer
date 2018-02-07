@@ -7,9 +7,6 @@
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
-// RECO muon classes
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoMuon2.h"
-
 ////////////////////////////////
 ///  RECO muon  information  ///
 ////////////////////////////////
@@ -23,7 +20,7 @@ struct RecoMuonInfo {
 
   void Initialize();
   void Reset();
-  void Fill(L1Analysis::L1AnalysisRecoMuon2DataFormat * recoMuonData);
+  void Fill(reco::Muon & it);
 };
 
 #endif
