@@ -59,7 +59,10 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   	emtfTrackInfo.Reset();
   	emtfUnpTrackInfo.Reset();
   	recoMuonInfo.Reset();
-
+        
+	muPropagator1st_.init(iSetup);
+        muPropagator2nd_.init(iSetup);
+	
   	// std::cout << "About to fill event info" << std::endl;	
   	// Fill event info
   	eventInfo.Fill(iEvent);
@@ -299,15 +302,15 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       
 } // End FlatNtuple::analyze
 
-void FlatNtuple::init(const edm::EventSetup &eventSetup)
-{
-  muPropagator1st_.init(eventSetup);
-  muPropagator2nd_.init(eventSetup);
-}
+//void FlatNtuple::init(const edm::EventSetup &eventSetup)
+//{
+  //muPropagator1st_.init(eventSetup);
+  //muPropagator2nd_.init(eventSetup);
+//}
 
 // Called once per job before starting event loop
 void FlatNtuple::beginJob() {
-
+  
   eventInfo.Initialize();
   genMuonInfo.Initialize();
   emtfHitInfo.Initialize();
