@@ -58,8 +58,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         double METy = 0.; 
 	
 	for(reco::PFMET imet: *metLabel_) {
-		METx = imet->px();
-		METy = imet->py();   
+		METx = imet.px();
+		METy = imet.py();   
 	}
 	
 	if (recoMuons.isValid()) {
