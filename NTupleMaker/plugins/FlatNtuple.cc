@@ -60,8 +60,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   	emtfUnpTrackInfo.Reset();
   	recoMuonInfo.Reset();
         
-	muPropagator1st_.init(iSetup);
-        muPropagator2nd_.init(iSetup);
+	//muPropagator1st_.init(iSetup);
+        //muPropagator2nd_.init(iSetup);
 	
   	// std::cout << "About to fill event info" << std::endl;	
   	// Fill event info
@@ -82,7 +82,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		        float reco_St1_phi = -9999;
 			float reco_St2_eta = -9999;
 			float reco_St2_phi = -9999;	
-			
+			muPropagator1st_.init(iSetup);
+                        muPropagator2nd_.init(iSetup);
 			reco_pt = it->pt();
 			reco_eta = it->eta();
 			reco_phi = it->phi();
