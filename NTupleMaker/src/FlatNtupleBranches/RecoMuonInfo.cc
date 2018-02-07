@@ -1,8 +1,6 @@
 //Added by Wei Shi
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
-#include <DataFormats/PatCandidates/interface/Muon.h>
-#include "L1Trigger/L1TNtuples/interface/MuonID.h"
 
 void RecoMuonInfo::Initialize() {
   for (auto & str : ints)  mInts .insert( std::pair<TString, int>(str, DINT) );
@@ -17,42 +15,20 @@ void RecoMuonInfo::Reset(){
 	INSERT(mInts, "nRecoMuons", 0);
 }
 
-void RecoMuonInfo::Fill(reco::MuonCollection::const_iterator it, edm::Handle<reco::VertexCollection> vertices){
+void RecoMuonInfo::Fill(float reco_pt, float reco_eta, float reco_phi, int reco_charge, 
+			int reco_loose, int reco_medium, int reco_tight, 
+			float reco_St1_eta, float reco_St1_phi,
+		        float reco_St2_eta, float reco_St2_phi){
 	INSERT(mInts, "nRecoMuons", ACCESS(mVFlt, "reco_pt").size() + 1);
-	INSERT(mVFlt, "reco_pt", it->pt() );
-	INSERT(mVFlt, "reco_eta", it->eta() );
-	INSERT(mVFlt, "reco_phi", it->phi() );
-	INSERT(mVInt, "reco_charge", it->charge() );
-	//check isLooseMuon
-        bool flagLoose = isLooseMuonCustom(*it);
-	if (flagLoose) INSERT(mVInt, "reco_loose", 1 );
-
-     	//check isMediumMuon
-     	bool flagMedium = isMediumMuonCustom(*it);
-    	if (flagMedium) INSERT(mVInt, "reco_medium", 1 );
-      
-    	//check isTightMuon
-    	bool flagTight = false;
-    	if (vertices.isValid()) flagTight = isTightMuonCustom(*it, (*vertices)[0]);
-	if (flagTight) INSERT(mVInt, "reco_tight", 1 );
-	
-	// extrapolation of track coordinates
-    	TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
-    	if (stateAtMuSt1.isValid()) {
-		INSERT(mVFlt, "reco_St1_eta", stateAtMuSt1.globalPosition().eta() );
-		INSERT(mVFlt, "reco_St1_phi", stateAtMuSt1.globalPosition().phi() );
-    	} else {
-		INSERT(mVFlt, "reco_St1_eta", -9999 );
-		INSERT(mVFlt, "reco_St1_phi", -9999 );
-    	}
-
-    	TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*it);
-    	if (stateAtMuSt2.isValid()) {
-		INSERT(mVFlt, "reco_St2_eta", stateAtMuSt2.globalPosition().eta() );
-		INSERT(mVFlt, "reco_St2_phi", stateAtMuSt2.globalPosition().phi() );
-    	} else {
-		INSERT(mVFlt, "reco_St2_eta", -9999 );
-		INSERT(mVFlt, "reco_St2_phi", -9999 );
-    	}
-	
+	INSERT(mVFlt, "reco_pt", reco_pt );
+	INSERT(mVFlt, "reco_eta", reco_eta );
+	INSERT(mVFlt, "reco_phi", reco_phi );
+	INSERT(mVInt, "reco_charge", reco_charge );
+	INSERT(mVInt, "reco_loose", reco_loose );
+	INSERT(mVInt, "reco_medium", reco_medium );
+	INSERT(mVInt, "reco_tight", reco_tight );
+        INSERT(mVFlt, "reco_St1_eta", reco_St1_eta );
+        INSERT(mVFlt, "reco_St1_phi", reco_St1_phi );
+	INSERT(mVFlt, "reco_St2_eta", reco_St2_eta );
+	INSERT(mVFlt, "reco_St2_phi", reco_St2_phi );
 }
