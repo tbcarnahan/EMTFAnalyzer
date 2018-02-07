@@ -292,7 +292,22 @@ process.ntuple = cms.EDAnalyzer('FlatNtuple',
                                 emtfUnpTrackTag  = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked output tracks
                                 recoMuTag  = cms.InputTag("muons"),
                                 verticesTag = cms.InputTag("offlinePrimaryVertices"),
-                                )
+                                # muon track extrapolation to 1st station
+                                muProp1st = cms.PSet(
+                                  useTrack = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'
+                                  useState = cms.string("atVertex"), # 'innermost' and 'outermost' require the TrackExtra
+                                  useSimpleGeometry = cms.bool(True),
+                                  useStation2 = cms.bool(False),
+                                ),
+                                # muon track extrapolation to 2nd station
+                                muProp2nd = cms.PSet(
+                                  useTrack = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'
+                                  useState = cms.string("atVertex"), # 'innermost' and 'outermost' require the TrackExtra
+                                  useSimpleGeometry = cms.bool(True),
+                                  useStation2 = cms.bool(True),
+                                  fallbackToME1 = cms.bool(False),
+                                ),
+                               )
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
