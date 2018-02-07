@@ -21,10 +21,9 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
         EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
         EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
   
-        maxMuon_   = iConfig.getParameter<unsigned int>("maxMuon");
-	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getUntrackedParameter("MuonToken",edm::InputTag("muons")));
-	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter("VertexToken",edm::InputTag("offlinePrimaryVertices"))); 
-	metToken_  = consumes<reco::PFMETCollection>(iConfig.getUntrackedParameter("metToken",edm::InputTag("pfMet")));
+	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
+	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("offlinePrimaryVertices")); 
+	metToken_  = consumes<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("pfMet"));
 	
 	muon           = new L1Analysis::L1AnalysisRecoMuon2(iConfig);
 	muon_data      = muon->getData();
