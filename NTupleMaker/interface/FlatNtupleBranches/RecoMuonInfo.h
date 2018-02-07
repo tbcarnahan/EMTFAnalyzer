@@ -6,6 +6,9 @@
 //-------------------------------------------------------------------------------
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
+// RECO muon class
+#include <DataFormats/PatCandidates/interface/Muon.h>
+#include "L1Trigger/L1TNtuples/interface/MuonID.h"
 
 ////////////////////////////////
 ///  RECO muon  information  ///
