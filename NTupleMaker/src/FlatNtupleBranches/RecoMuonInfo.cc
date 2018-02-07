@@ -15,7 +15,7 @@ void RecoMuonInfo::Reset(){
 	INSERT(mInts, "nRecoMuons", 0);
 }
 
-void RecoMuonInfo::Fill(reco::Muon & it, <reco::VertexCollection> vertices){
+void RecoMuonInfo::Fill(reco::Muon it, reco::VertexCollection vertices){
 	INSERT(mInts, "nRecoMuons", ACCESS(mVFlt, "reco_pt").size() + 1);
 	INSERT(mVFlt, "reco_pt", it->pt() );
 	INSERT(mVFlt, "reco_eta", it->eta() );
