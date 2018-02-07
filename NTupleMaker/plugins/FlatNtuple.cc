@@ -88,14 +88,14 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			// extrapolation of track coordinates
     			TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
     			if (stateAtMuSt1.isValid()) {
-				reco_St1_eta = stateAtMuSt1.globalPosition().eta();
-				reco_St1_phi = stateAtMuSt1.globalPosition().phi();
+				float reco_St1_eta = stateAtMuSt1.globalPosition().eta();
+				float reco_St1_phi = stateAtMuSt1.globalPosition().phi();
 			}
 
     			TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*it);
     			if (stateAtMuSt2.isValid()) {
-				reco_St2_eta = stateAtMuSt2.globalPosition().eta();
-				reco_St2_phi = stateAtMuSt2.globalPosition().phi();
+				float reco_St2_eta = stateAtMuSt2.globalPosition().eta();
+				float reco_St2_phi = stateAtMuSt2.globalPosition().phi();
     			}
 			recoMuonInfo.Fill(reco_pt, reco_eta, reco_phi, reco_charge, 
 			reco_loose, reco_medium, reco_tight, 
