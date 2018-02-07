@@ -1,25 +1,6 @@
 //Added by Wei Shi
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
-#include "L1Trigger/L1TNtuples/interface/MuonID.h"
-#include <DataFormats/PatCandidates/interface/Muon.h>
-
-RecoMuon::RecoMuon(const edm::ParameterSet& pset) :
-  muPropagator1st_(pset.getParameter<edm::ParameterSet>("muProp1st")),
-  muPropagator2nd_(pset.getParameter<edm::ParameterSet>("muProp2nd"))
-{
-}
-
-
-RecoMuon::~RecoMuon()
-{
-}
-
-RecoMuon::init(const edm::EventSetup &eventSetup)
-{
-  muPropagator1st_.init(eventSetup);
-  muPropagator2nd_.init(eventSetup);
-}
 
 void RecoMuonInfo::Initialize() {
   for (auto & str : ints)  mInts .insert( std::pair<TString, int>(str, DINT) );
