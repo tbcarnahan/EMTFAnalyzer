@@ -87,7 +87,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<reco::VertexCollection>      VtxToken_;
   edm::EDGetTokenT<reco::PFMETCollection>      metToken_;
  
-  unsigned int maxMuon_;
+  unsigned int maxMuon_=20;
 }; // End class FlatNtuple public edm::EDAnalyzer
 
 // Define as a plugin
