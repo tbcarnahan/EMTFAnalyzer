@@ -65,37 +65,48 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	// Fill recoMu info
 	if (recoMuons.isValid()) {
 		for(reco::MuonCollection::const_iterator it=recoMuons->begin();it!=recoMuons->end();++it) {
-			float reco_pt = it->pt();
-			float reco_eta = it->eta();
-			float reco_phi = it->phi();
-			int reco_charge = it->charge();
+			
+			float reco_pt = -9999;
+			float reco_eta = -9999;
+			float reco_phi = -9999;
+			int reco_charge = -9999;
+			int reco_loose = 0;
+			int reco_medium = 0;
+			int reco_tight = 0;
+			float reco_St1_eta = -9999;
+		        float reco_St1_phi = -9999;
+			float reco_St2_phi = -9999;
+			float reco_St2_phi = -9999;	
+			
+			reco_pt = it->pt();
+			reco_eta = it->eta();
+			reco_phi = it->phi();
+			reco_charge = it->charge();
+			
 			//check isLooseMuon
         		bool flagLoose = isLooseMuonCustom(*it);
-			int reco_loose = 0;
 			if (flagLoose) reco_loose = 1;
 
      			//check isMediumMuon
      			bool flagMedium = isMediumMuonCustom(*it);
-			int reco_medium = 0;
     			if (flagMedium) reco_medium = 1;
       
     			//check isTightMuon
     			bool flagTight = false;
     			if (vertices.isValid()) flagTight = isTightMuonCustom(*it, (*vertices)[0]);
-			int reco_tight = 0;
 			if (flagTight) reco_tight = 1;
 	
 			// extrapolation of track coordinates
     			TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
     			if (stateAtMuSt1.isValid()) {
-				float reco_St1_eta = stateAtMuSt1.globalPosition().eta();
-				float reco_St1_phi = stateAtMuSt1.globalPosition().phi();
+				reco_St1_eta = stateAtMuSt1.globalPosition().eta();
+				reco_St1_phi = stateAtMuSt1.globalPosition().phi();
 			}
 
     			TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*it);
     			if (stateAtMuSt2.isValid()) {
-				float reco_St2_eta = stateAtMuSt2.globalPosition().eta();
-				float reco_St2_phi = stateAtMuSt2.globalPosition().phi();
+				reco_St2_eta = stateAtMuSt2.globalPosition().eta();
+				reco_St2_phi = stateAtMuSt2.globalPosition().phi();
     			}
 			recoMuonInfo.Fill(reco_pt, reco_eta, reco_phi, reco_charge, 
 			reco_loose, reco_medium, reco_tight, 
