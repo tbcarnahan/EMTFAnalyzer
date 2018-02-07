@@ -25,16 +25,16 @@ void RecoMuonInfo::Fill(reco::Muon & it, <reco::VertexCollection> vertices){
 	INSERT(mVInt, "reco_charge", it->charge() );
 	//check isLooseMuon
         bool flagLoose = isLooseMuonCustom(*it);
-	INSERT(mVInt, "reco_loose", flagLoose );
+	if (flagLoose) INSERT(mVInt, "reco_loose", 1 );
 
      	//check isMediumMuon
      	bool flagMedium = isMediumMuonCustom(*it);
-    	INSERT(mVInt, "reco_medium", flagMedium );
+    	if (flagMedium) INSERT(mVInt, "reco_medium", 1 );
       
     	//check isTightMuon
     	bool flagTight = false;
     	if (vertices.isValid()) flagTight = isTightMuonCustom(*it, (*vertices)[0]);
-	INSERT(mVInt, "reco_tight", flagTight );
+	if (flagTight) INSERT(mVInt, "reco_tight", 1 );
 	
 	// extrapolation of track coordinates
     	TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
