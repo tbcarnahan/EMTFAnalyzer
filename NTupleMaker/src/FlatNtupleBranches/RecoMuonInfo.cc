@@ -1,6 +1,8 @@
 //Added by Wei Shi
 
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
+#include "L1Trigger/L1TNtuples/interface/MuonID.h"
+#include <DataFormats/PatCandidates/interface/Muon.h>
 
 RecoMuon::RecoMuon(const edm::ParameterSet& pset) :
   muPropagator1st_(pset.getParameter<edm::ParameterSet>("muProp1st")),
