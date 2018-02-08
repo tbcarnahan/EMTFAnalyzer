@@ -1,5 +1,6 @@
 
 <use name="L1Trigger/L1TMuonEndCap"/>
+<use name="MuonAnalysis/MuonAssociators"/>
 <use name="root"/>
 
 <export>

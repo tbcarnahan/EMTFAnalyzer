@@ -290,7 +290,24 @@ process.ntuple = cms.EDAnalyzer('FlatNtuple',
                                 # emtfHitTag       = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked input LCTs and hits
                                 emtfTrackTag     = cms.InputTag("simEmtfDigis"),     ## EMTF emulator output tracks
                                 emtfUnpTrackTag  = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked output tracks
-                                )
+                                recoMuTag  = cms.InputTag("muons"),
+                                verticesTag = cms.InputTag("offlinePrimaryVertices"),
+                                # muon track extrapolation to 1st station
+                                muProp1st = cms.PSet(
+                                  useTrack = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'
+                                  useState = cms.string("atVertex"), # 'innermost' and 'outermost' require the TrackExtra
+                                  useSimpleGeometry = cms.bool(True),
+                                  useStation2 = cms.bool(False),
+                                ),
+                                # muon track extrapolation to 2nd station
+                                muProp2nd = cms.PSet(
+                                  useTrack = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'
+                                  useState = cms.string("atVertex"), # 'innermost' and 'outermost' require the TrackExtra
+                                  useSimpleGeometry = cms.bool(True),
+                                  useStation2 = cms.bool(True),
+                                  fallbackToME1 = cms.bool(False),
+                                ),
+                               )
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
@@ -323,6 +340,8 @@ process.TFileService = cms.Service(
 outCommands = cms.untracked.vstring(
 
     'keep recoMuons_muons__*',
+    'keep recoPFMETs_pfMet__*',
+    'keep recoVertexs_offlinePrimaryVertices__*',
     'keep *Gen*_*_*_*',
     'keep *_*Gen*_*_*',
     'keep *gen*_*_*_*',

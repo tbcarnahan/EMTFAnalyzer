@@ -4,25 +4,31 @@
 // Andrew Brinkerhoff - 27.06.17
 
 #include "EMTFAnalyzer/NTupleMaker/plugins/FlatNtuple.h"
+#include <DataFormats/PatCandidates/interface/Muon.h>
+#include "L1Trigger/L1TNtuples/interface/MuonID.h"
 
 // Constructor
-FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig) {
-
-  // Output file
-  edm::Service<TFileService> fs;
-  out_tree = fs->make<TTree>("tree","FlatNtupleTree");
-
-  // Config parameters
-  isMC = iConfig.getParameter<bool>("isMC");
-
-  // Input collections
-  if (isMC)
-    GenMuon_token = consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genMuonTag"));
-
-  EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
-  EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
-  EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
-
+FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
+        muPropagator1st_(iConfig.getParameter<edm::ParameterSet>("muProp1st")),
+        muPropagator2nd_(iConfig.getParameter<edm::ParameterSet>("muProp2nd"))
+{
+	// Output file
+	edm::Service<TFileService> fs;
+	out_tree = fs->make<TTree>("tree","FlatNtupleTree");
+	
+	// Config parameters  
+	isMC = iConfig.getParameter<bool>("isMC");
+	
+	// Input collections
+	if (isMC) GenMuon_token = consumes<std::vector<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genMuonTag"));
+	
+	EMTFHit_token = consumes<std::vector<l1t::EMTFHit>>(iConfig.getParameter<edm::InputTag>("emtfHitTag"));
+        EMTFTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
+        EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>>(iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
+	MuonToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("recoMuTag"));
+	VtxToken_  = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("verticesTag")); 
+	
+	
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
@@ -31,48 +37,109 @@ FlatNtuple::~FlatNtuple() {}
 
 // Called once per event
 void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+	// std::cout << "\nCalling analyze" << std::endl;
+	edm::Handle<std::vector<reco::GenParticle>> genMuons;
+	if (isMC) iEvent.getByToken(GenMuon_token, genMuons);
+	
+	edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
+	iEvent.getByToken(EMTFHit_token, emtfHits);
+	edm::Handle<std::vector<l1t::EMTFTrack>> emtfTracks;
+	iEvent.getByToken(EMTFTrack_token, emtfTracks);
+	edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
+	iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
+        edm::Handle<reco::MuonCollection> recoMuons;
+        iEvent.getByToken(MuonToken_, recoMuons);
+        edm::Handle<reco::VertexCollection> vertices;
+        iEvent.getByToken(VtxToken_, vertices);
+	
+	// Reset branch values
+  	eventInfo.Reset();
+  	genMuonInfo.Reset();
+  	emtfHitInfo.Reset();
+  	emtfTrackInfo.Reset();
+  	emtfUnpTrackInfo.Reset();
+  	recoMuonInfo.Reset();
+        
+	//muPropagator1st_.init(iSetup);
+        //muPropagator2nd_.init(iSetup);
+	
+  	// std::cout << "About to fill event info" << std::endl;	
+  	// Fill event info
+  	eventInfo.Fill(iEvent);
+	
+	// Fill recoMu info
+	if (recoMuons.isValid()) {
+		for(reco::MuonCollection::const_iterator it=recoMuons->begin();it!=recoMuons->end();++it) {
+			
+			float reco_pt = -9999;
+			float reco_eta = -9999;
+			float reco_phi = -9999;
+			int reco_charge = -9999;
+			int reco_loose = 0;
+			int reco_medium = 0;
+			int reco_tight = 0;
+			float reco_St1_eta = -9999;
+		        float reco_St1_phi = -9999;
+			float reco_St2_eta = -9999;
+			float reco_St2_phi = -9999;	
+			muPropagator1st_.init(iSetup);
+                        muPropagator2nd_.init(iSetup);
+			reco_pt = it->pt();
+			reco_eta = it->eta();
+			reco_phi = it->phi();
+			reco_charge = it->charge();
+			
+			//check isLooseMuon
+        		bool flagLoose = isLooseMuonCustom(*it);
+			if (flagLoose) reco_loose = 1;
 
-  // std::cout << "\nCalling analyze" << std::endl;
+     			//check isMediumMuon
+     			bool flagMedium = isMediumMuonCustom(*it);
+    			if (flagMedium) reco_medium = 1;
+      
+    			//check isTightMuon
+    			bool flagTight = false;
+    			if (vertices.isValid()) flagTight = isTightMuonCustom(*it, (*vertices)[0]);
+			if (flagTight) reco_tight = 1;
+	
+			// extrapolation of track coordinates
+    			TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*it);
+    			if (stateAtMuSt1.isValid()) {
+				reco_St1_eta = stateAtMuSt1.globalPosition().eta();
+				reco_St1_phi = stateAtMuSt1.globalPosition().phi();
+			}
 
-  edm::Handle<std::vector<reco::GenParticle>> genMuons;
-  if (isMC)
-    iEvent.getByToken(GenMuon_token, genMuons);
+    			TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*it);
+    			if (stateAtMuSt2.isValid()) {
+				reco_St2_eta = stateAtMuSt2.globalPosition().eta();
+				reco_St2_phi = stateAtMuSt2.globalPosition().phi();
+    			}
+			recoMuonInfo.Fill(reco_pt, reco_eta, reco_phi, reco_charge, 
+			reco_loose, reco_medium, reco_tight, 
+			reco_St1_eta, reco_St1_phi,
+		        reco_St2_eta, reco_St2_phi);
+		}
+	}
+	else {
+		std::cout << "ERROR: could not get recoMuons from event!!!" << std::endl;
+		return;
+	}
 
-  edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
-  iEvent.getByToken(EMTFHit_token, emtfHits);
-  edm::Handle<std::vector<l1t::EMTFTrack>> emtfTracks;
-  iEvent.getByToken(EMTFTrack_token, emtfTracks);
-  edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
-  iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
-
-  // Reset branch values
-  eventInfo.Reset();
-  genMuonInfo.Reset();
-  emtfHitInfo.Reset();
-  emtfTrackInfo.Reset();
-  emtfUnpTrackInfo.Reset();
-
-  // std::cout << "About to fill event info" << std::endl;
-
-  // Fill event info
-  eventInfo.Fill(iEvent);
-
-  // Get indices of GEN muons in event
-  std::vector<std::pair<int, float>> gen_etas;
-  if ( isMC && genMuons.isValid() ) {
-    int iGen = -1;
-    for (reco::GenParticle genMuon: *genMuons) {
-      iGen += 1;
-      if (abs(genMuon.pdgId()) != 13) continue; // Must be a muon
-
-      if ( (fabs(genMuon.eta()) > MIN_GEN_ETA) && (fabs(genMuon.eta()) < MAX_GEN_ETA) )
-  	gen_etas.push_back(std::make_pair(iGen, genMuon.eta()));
-    }
-  }
-  else if (isMC) {
-    std::cout << "ERROR: could not get genMuons from event!!!" << std::endl;
-    return;
-  }
+  	// Get indices of GEN muons in event
+	std::vector<std::pair<int, float>> gen_etas;
+	if ( isMC && genMuons.isValid() ) {
+		int iGen = -1;
+		for (reco::GenParticle genMuon: *genMuons) {
+			iGen += 1;
+			if (abs(genMuon.pdgId()) != 13) continue; // Must be a muon
+			if ( (fabs(genMuon.eta()) > MIN_GEN_ETA) && (fabs(genMuon.eta()) < MAX_GEN_ETA) )
+				gen_etas.push_back(std::make_pair(iGen, genMuon.eta()));
+		}
+	}
+  	else if (isMC) {
+		std::cout << "ERROR: could not get genMuons from event!!!" << std::endl;
+		return;
+	}
 
   // Skip event if there are no GEN muons within acceptance
   if (isMC && gen_etas.size() == 0) {
@@ -226,7 +293,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       } // End for (l1t::EMTFTrack emtfTrk: *emtfUnpTracks)
     } // End for (uint i = 0; i < nTRK; i++)
   }
-
+  
   // std::cout << "About to fill output tree" << std::endl;
   if (passesSingleMu16 || true) {
     out_tree->Fill();
@@ -236,16 +303,22 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       
 } // End FlatNtuple::analyze
 
+//void FlatNtuple::init(const edm::EventSetup &eventSetup)
+//{
+  //muPropagator1st_.init(eventSetup);
+  //muPropagator2nd_.init(eventSetup);
+//}
 
 // Called once per job before starting event loop
 void FlatNtuple::beginJob() {
-
+  
   eventInfo.Initialize();
   genMuonInfo.Initialize();
   emtfHitInfo.Initialize();
   emtfTrackInfo.Initialize();
   emtfUnpTrackInfo.Initialize();
-
+  recoMuonInfo.Initialize();
+	
   ////////////////////////////////////////////////
   ////   WARNING!!! CONSTRUCTION OF STRUCTS   ////
   ////////////////////////////////////////////////
@@ -273,6 +346,10 @@ void FlatNtuple::beginJob() {
   for (auto & it : emtfTrackInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
   for (auto & it : emtfTrackInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
   for (auto & it : emtfTrackInfo.mVVInt) out_tree->Branch(it.first, (std::vector<std::vector<int> >*) &it.second);
+  
+  for (auto & it : recoMuonInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
+  for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+  for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
 
   if (not isMC) {
     for (auto & it : emtfUnpTrackInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);

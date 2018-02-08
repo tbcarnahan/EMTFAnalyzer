@@ -22,6 +22,27 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFHitInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
+
+//muons
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/MuonReco/interface/MuonEnergy.h"
+#include "DataFormats/MuonReco/interface/MuonTime.h"
+#include "CondFormats/AlignmentRecord/interface/TrackerSurfaceDeformationRcd.h"
+
+//vertices bp
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
+
+// track extrapolation
+#include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
 class FlatNtuple : public edm::EDAnalyzer {
 
@@ -30,6 +51,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   // Constructor/destructor
   explicit FlatNtuple(const edm::ParameterSet&);
   ~FlatNtuple();
+  //void init(const edm::EventSetup &eventSetup);
 
   /* // Default constants */
   /* const int   DINT = -999; */
@@ -47,10 +69,11 @@ class FlatNtuple : public edm::EDAnalyzer {
   EMTFHitInfo emtfHitInfo;
   EMTFTrackInfo emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
+  RecoMuonInfo recoMuonInfo;
 
   // Output tree
   TTree * out_tree;
-
+ 
  private:
   
   // Inherited from EDAnalyzer
@@ -69,7 +92,11 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>> EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFUnpTrack_token;
-  
+  edm::EDGetTokenT<reco::MuonCollection>       MuonToken_;//RECO muon
+  edm::EDGetTokenT<reco::VertexCollection>      VtxToken_;
+ 
+  PropagateToMuon muPropagator1st_;
+  PropagateToMuon muPropagator2nd_;
 }; // End class FlatNtuple public edm::EDAnalyzer
 
 // Define as a plugin
