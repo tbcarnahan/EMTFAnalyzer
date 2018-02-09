@@ -253,7 +253,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   
   // std::cout << "About to fill output tree" << std::endl;
-  if (passesSingleMu16 || true) {
+  if (passesSingleMu16 || true) { // No filter for now
     out_tree->Fill();
   }
   // std::cout << "All done with this event!\n" << std::endl;

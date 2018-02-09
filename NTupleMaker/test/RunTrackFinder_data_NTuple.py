@@ -43,7 +43,7 @@ import FWCore.PythonUtilities.LumiList as LumiList
 
 ## Message Logger and Event range
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.options = cms.untracked.PSet(
@@ -141,8 +141,8 @@ for in_file_name in subprocess.check_output([eos_cmd, 'ls', in_dir_name]).splitl
 # for in_file_name in fileList:
     if not ('.root' in in_file_name): continue
     iFile += 1
-    if iFile < 10: continue  ## Skip earliest files in run
-    if iFile > 21: break
+    # if iFile < 10: continue  ## Skip earliest files in run
+    if iFile > 31: break
     print in_file_name
     readFiles.extend( cms.untracked.vstring(in_dir_name+in_file_name) )
     # in_dir_name_T0 = in_dir_name.replace('/eos/cms/tier0/', 'root://cms-xrd-tzero.cern.ch//')
@@ -181,9 +181,9 @@ process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
 process.simEmtfDigis.verbosity = cms.untracked.int32(0)
-process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
-# process.simEmtfDigis.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
-# process.simEmtfDigis.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+# process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
+process.simEmtfDigis.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
+process.simEmtfDigis.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
 process.simEmtfDigis.RPCInput  = cms.InputTag('muonRPCDigis')
 
 
@@ -308,7 +308,7 @@ out_dir_name = './'
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_10k.root')
+    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_simLCT_test.root')
     )
 
 
