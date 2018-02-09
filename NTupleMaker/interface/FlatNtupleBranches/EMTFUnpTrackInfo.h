@@ -5,13 +5,12 @@
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
+// Helpful tools
+#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.h"
+
 // EMTF classes
 #include "DataFormats/L1TMuon/interface/EMTFHit.h"
 #include "DataFormats/L1TMuon/interface/EMTFTrack.h"
-
-// Helpful tools
-#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.h"
-#include "L1Trigger/L1TMuonEndCap/interface/TrackTools.h"
 
 /* // Default values for maps */
 /* int       DINT  = -999; */
