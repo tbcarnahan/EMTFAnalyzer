@@ -42,8 +42,8 @@ import FWCore.PythonUtilities.LumiList as LumiList
 # process.source.lumisToProcess = LumiList.LumiList(filename = 'goodList.json').getVLuminosityBlockRange()
 
 ## Message Logger and Event range
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(10)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.options = cms.untracked.PSet(
@@ -140,10 +140,10 @@ iFile = 0
 for in_file_name in subprocess.check_output([eos_cmd, 'ls', in_dir_name]).splitlines():
 # for in_file_name in fileList:
     if not ('.root' in in_file_name): continue
-    print in_file_name
     iFile += 1
     if iFile < 10: continue  ## Skip earliest files in run
-    if iFile > 11: break
+    if iFile > 21: break
+    print in_file_name
     readFiles.extend( cms.untracked.vstring(in_dir_name+in_file_name) )
     # in_dir_name_T0 = in_dir_name.replace('/eos/cms/tier0/', 'root://cms-xrd-tzero.cern.ch//')
     # readFiles.extend( cms.untracked.vstring(in_dir_name_T0+in_file_name) )
@@ -181,9 +181,9 @@ process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
 process.simEmtfDigis.verbosity = cms.untracked.int32(0)
-# process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
-process.simEmtfDigis.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
-process.simEmtfDigis.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
+# process.simEmtfDigis.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
+# process.simEmtfDigis.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
 process.simEmtfDigis.RPCInput  = cms.InputTag('muonRPCDigis')
 
 
@@ -282,42 +282,18 @@ process.simEmtfDigis.RPCEnable = cms.bool(True)
 ###################
 ###  NTuplizer  ###
 ###################
-# process.ntuple = cms.EDAnalyzer('PtLutInput',
-process.ntuple = cms.EDAnalyzer('FlatNtuple',
-                                isMC          = cms.bool(False),
-                                genMuonTag    = cms.InputTag(""),                    ## No GEN muons
-                                emtfHitTag       = cms.InputTag("simEmtfDigis"),     ## EMTF emulator input LCTs and hits
-                                # emtfHitTag       = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked input LCTs and hits
-                                emtfTrackTag     = cms.InputTag("simEmtfDigis"),     ## EMTF emulator output tracks
-                                emtfUnpTrackTag  = cms.InputTag("emtfStage2Digis"),  ## EMTF unpacked output tracks
-                                recoMuTag  = cms.InputTag("muons"),
-                                verticesTag = cms.InputTag("offlinePrimaryVertices"),
-                                # muon track extrapolation to 1st station
-                                muProp1st = cms.PSet(
-                                  useTrack = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'
-                                  useState = cms.string("atVertex"), # 'innermost' and 'outermost' require the TrackExtra
-                                  useSimpleGeometry = cms.bool(True),
-                                  useStation2 = cms.bool(False),
-                                ),
-                                # muon track extrapolation to 2nd station
-                                muProp2nd = cms.PSet(
-                                  useTrack = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'
-                                  useState = cms.string("atVertex"), # 'innermost' and 'outermost' require the TrackExtra
-                                  useSimpleGeometry = cms.bool(True),
-                                  useStation2 = cms.bool(True),
-                                  fallbackToME1 = cms.bool(False),
-                                ),
-                               )
+
+process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
+# process.FlatNtupleData.emtfHitTag = cms.InputTag("simEmtfDigis")
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
     process.muonCSCDigis             + ## Unpacked CSC LCTs (and raw strip and wire?) from TMB
-    process.csctfDigis               + ## Necessary for legacy studies, or if you use csctfDigis as input
     process.cscTriggerPrimitiveDigis + ## To get re-emulated CSC LCTs
-    ## process.esProd                  + ## What do we loose by not having this? - AWB 18.04.16
+    # process.csctfDigis               + ## Necessary for legacy studies, or if you use csctfDigis as input
     process.emtfStage2Digis          + 
     process.simEmtfDigis             + 
-    process.ntuple
+    process.FlatNtupleData
     )
 
 process.raw2digi_step = cms.Path(RawToDigi_AWB)
@@ -332,7 +308,7 @@ out_dir_name = './'
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_test.root')
+    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_10k.root')
     )
 
 
@@ -340,8 +316,6 @@ process.TFileService = cms.Service(
 outCommands = cms.untracked.vstring(
 
     'keep recoMuons_muons__*',
-    'keep recoPFMETs_pfMet__*',
-    'keep recoVertexs_offlinePrimaryVertices__*',
     'keep *Gen*_*_*_*',
     'keep *_*Gen*_*_*',
     'keep *gen*_*_*_*',

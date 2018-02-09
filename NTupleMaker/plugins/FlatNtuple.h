@@ -24,23 +24,13 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 
-//muons
-#include "DataFormats/MuonReco/interface/Muon.h"
+// RECO muons
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/GeometrySurface/interface/Cylinder.h"
-#include "DataFormats/GeometrySurface/interface/Plane.h"
-#include "DataFormats/MuonReco/interface/MuonEnergy.h"
-#include "DataFormats/MuonReco/interface/MuonTime.h"
-#include "CondFormats/AlignmentRecord/interface/TrackerSurfaceDeformationRcd.h"
 
-//vertices bp
-#include "DataFormats/VertexReco/interface/Vertex.h"
+// RECO vertices
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "L1Trigger/L1TNtuples/interface/L1AnalysisRecoVertexDataFormat.h"
 
-// track extrapolation
+// RECO muon track extrapolation
 #include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
@@ -58,18 +48,20 @@ class FlatNtuple : public edm::EDAnalyzer {
   /* const float DFLT = -999.; */
   
   // Default parameters
-  const float MIN_GEN_ETA   = 1.0;
-  const float MAX_GEN_ETA   = 2.5;
+  const float MIN_GEN_ETA  = 1.0;
+  const float MAX_GEN_ETA  = 2.5;
+  const float MIN_RECO_ETA = 1.0;
+  const float MAX_RECO_ETA = 2.5;
 
   ///////////////////////////////////
   ///  Output branch information  ///
   ///////////////////////////////////
-  EventInfo eventInfo;
-  GenMuonInfo genMuonInfo;
-  EMTFHitInfo emtfHitInfo;
-  EMTFTrackInfo emtfTrackInfo;
+  EventInfo        eventInfo;
+  GenMuonInfo      genMuonInfo;
+  RecoMuonInfo     recoMuonInfo;
+  EMTFHitInfo      emtfHitInfo;
+  EMTFTrackInfo    emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
-  RecoMuonInfo recoMuonInfo;
 
   // Output tree
   TTree * out_tree;
@@ -86,17 +78,18 @@ class FlatNtuple : public edm::EDAnalyzer {
   
   // Config parameters
   bool isMC;
+  bool isReco;
   
   // EDM Tokens
   edm::EDGetTokenT<std::vector<reco::GenParticle>> GenMuon_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFHit>> EMTFHit_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFTrack_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>> EMTFUnpTrack_token;
-  edm::EDGetTokenT<reco::MuonCollection>       MuonToken_;//RECO muon
-  edm::EDGetTokenT<reco::VertexCollection>      VtxToken_;
+  edm::EDGetTokenT<reco::MuonCollection>           RecoMuon_token;
+  edm::EDGetTokenT<reco::VertexCollection>         RecoVertex_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFHit_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFTrack_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFUnpTrack_token;
  
-  PropagateToMuon muPropagator1st_;
-  PropagateToMuon muPropagator2nd_;
+  PropagateToMuon muProp1st_;
+  PropagateToMuon muProp2nd_;
 }; // End class FlatNtuple public edm::EDAnalyzer
 
 // Define as a plugin
