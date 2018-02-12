@@ -19,11 +19,6 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   INSERT(mVFlt, "reco_match_trk_dEta", DFLT);
   INSERT(mVInt, "reco_match_iTrk", DINT ); 
   
-  INSERT(mVFlt, "trk_match_reco_dR", DFLT);
-  INSERT(mVFlt, "trk_match_reco_dPhi", DFLT);
-  INSERT(mVFlt, "trk_match_reco_dEta", DFLT);
-  INSERT(mVInt, "trk_match_iReco", DINT ); 
-  
   const size_t n1 = recoMuons.size();
   const size_t n2 = emtfTrks.size();
   
@@ -77,5 +72,12 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     }
   }//end for k
   return result;
+  for (size_t k = 0; k < n1; k++) {
+	  INSERT(mVFlt, "reco_match_trk_dR", deltaRMatrix[k][result[k]]);
+          INSERT(mVFlt, "reco_match_trk_dPhi", deltaPhiMatrix[k][result[k]]);
+          INSERT(mVFlt, "reco_match_trk_dEta", deltaEtaMatrix[k][result[k]]);
+          INSERT(mVInt, "reco_match_iTrk", result[k]); 
 	
+  }
+  
 }//end Fill
