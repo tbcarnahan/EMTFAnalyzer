@@ -15,8 +15,6 @@ void RecoTrkMatcher::Reset() {
 void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & emtfTrks, const float min_eta, const float max_eta) {
   
   const double NOMATCH = -999.;
-  const float MIN_RECO_ETA = 1.0;
-  const float MAX_RECO_ETA = 2.5;
 	
   INSERT(mVFlt, "reco_match_trk_dR", DFLT);
   INSERT(mVFlt, "reco_match_trk_dPhi", DFLT);
