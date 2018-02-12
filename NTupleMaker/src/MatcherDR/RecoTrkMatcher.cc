@@ -1,5 +1,6 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/MatcherDR/RecoTrkMatcher.h"
 #include "TMath.h"
+#include <iostream>
 #include <vector>
 
 void RecoTrkMatcher::Initialize() {
@@ -24,16 +25,16 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   const int n1 = ACCESS(recoMuons.mInts, "nRecoMuons");
   const int n2 = ACCESS(emtfTrks.mInts, "nTracks");
   
-  vector<int> result(n1, -1);
-  vector<double> reco_eta_St2(n1, NOMATCH);
-  vector<double> reco_phi_St2(n1, NOMATCH);
-  vector<double> reco_eta_St1(n1, NOMATCH);
-  vector<double> reco_phi_St1(n1, NOMATCH);
-  vector<double> recoEta(n1, NOMATCH);
-  vector<double> recoPhi(n1, NOMATCH);
-  vector<vector<double> > deltaRMatrix(n1, vector<double>(n2, NOMATCH));
-  vector<vector<double> > deltaEtaMatrix(n1, vector<double>(n2, NOMATCH));
-  vector<vector<double> > deltaPhiMatrix(n1, vector<double>(n2, NOMATCH));
+  std::vector<int> result(n1, -1);
+  std::vector<double> reco_eta_St2(n1, NOMATCH);
+  std::vector<double> reco_phi_St2(n1, NOMATCH);
+  std::vector<double> reco_eta_St1(n1, NOMATCH);
+  std::vector<double> reco_phi_St1(n1, NOMATCH);
+  std::vector<double> recoEta(n1, NOMATCH);
+  std::vector<double> recoPhi(n1, NOMATCH);
+  std::vector<std::vector<double> > deltaRMatrix(n1, std::vector<double>(n2, NOMATCH));
+  std::vector<std::vector<double> > deltaEtaMatrix(n1, std::vector<double>(n2, NOMATCH));
+  std::vector<std::vector<double> > deltaPhiMatrix(n1, std::vector<double>(n2, NOMATCH));
   
   for (int i = 0; i < n1; i++){
     for (int j = 0; j < n2; j++) {
