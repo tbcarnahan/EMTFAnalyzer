@@ -4,9 +4,6 @@
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
 
-// Helpful tools
-#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.h"
-
 // Input
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
