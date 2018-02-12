@@ -11,9 +11,12 @@ void RecoTrkMatcher::Reset() {
   for (auto & it : mVInt)  it.second.clear();
 }
 
-void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & emtfTrks) {
+void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & emtfTrks, const float min_eta, const float max_eta) {
   
   const double NOMATCH = -999.;
+  const float MIN_RECO_ETA = 1.0;
+  const float MAX_RECO_ETA = 2.5;
+	
   INSERT(mVFlt, "reco_match_trk_dR", DFLT);
   INSERT(mVFlt, "reco_match_trk_dPhi", DFLT);
   INSERT(mVFlt, "reco_match_trk_dEta", DFLT);
@@ -32,7 +35,8 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   for (size_t i = 0; i < n1; i++){
     for (size_t j = 0; j < n2; j++) {
       //Use reco mu extrapolated coordinates 
-      if(  fabs(reco_eta_St2[i]) < 2.5 && fabs(reco_eta_St2[i]) > 1.0
+      ACCESS(*iHit, "hit_isCSC").at(i);
+      if(  fabs(reco_eta_St2[i]) < max_eta && fabs(reco_eta_St2[i]) > min_eta
         && fabs(reco_phi_St2[i]*TMath::Pi()/180.) < TMath::Pi() 
 	&& fabs(reco_phi_St2[i]*TMath::Pi()/180.) > -1.0*TMath::Pi() ){
 	      recoEta[i] = reco_eta_St2[i];
