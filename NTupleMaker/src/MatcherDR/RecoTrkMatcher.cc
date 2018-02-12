@@ -22,10 +22,10 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   INSERT(mVFlt, "reco_match_trk_dEta", DFLT);
   INSERT(mVInt, "reco_match_iTrk", DINT ); 
   
-  const size_t n1 = ACCESS(recoMuons.mInts, "nRecoMuons");
-  const size_t n2 = ACCESS(emtfTrks.mInts, "nTracks");
+  const int n1 = ACCESS(recoMuons.mInts, "nRecoMuons");
+  const int n2 = ACCESS(emtfTrks.mInts, "nTracks");
   
-  vector<size_t> result(n1, -1);
+  vector<int> result(n1, -1);
   vector<double> reco_eta_St2(n1, NOMATCH);
   vector<double> reco_phi_St2(n1, NOMATCH);
   vector<double> reco_eta_St1(n1, NOMATCH);
