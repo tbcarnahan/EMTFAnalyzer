@@ -234,7 +234,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     } // End for (l1t::EMTFTrack emtfTrk: *emtfTracks)
   } // End for (uint i = 0; i < nTRK; i++)
 
-  recoTrkMatcher.Fill(recoMuonInfo, emtfTrackInfo);
+  recoTrkMatcher.Fill(recoMuonInfo, emtfTrackInfo, MIN_RECO_ETA, MAX_RECO_ETA);
 
   // std::cout << "About to fill unpacked EMTF track branches" << std::endl;
 
