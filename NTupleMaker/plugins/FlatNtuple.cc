@@ -314,7 +314,7 @@ void FlatNtuple::beginJob() {
   for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
 
   for (auto & it : recoTrkMatcher.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
-  for (auto & it : recoTrkMatcher.mVVInt) out_tree->Branch(it.first, (std::vector<std::vector<int> >*) &it.second);
+  for (auto & it : recoTrkMatcher.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
 	
   if (not isMC) {
     for (auto & it : emtfUnpTrackInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
