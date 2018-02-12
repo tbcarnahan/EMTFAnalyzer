@@ -60,6 +60,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   emtfTrackInfo.Reset();
   emtfUnpTrackInfo.Reset();
   recoMuonInfo.Reset();
+  RecoTrkMatcher.Reset();
   
   // std::cout << "About to fill event info" << std::endl;	
   // Fill event info
@@ -233,6 +234,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     } // End for (l1t::EMTFTrack emtfTrk: *emtfTracks)
   } // End for (uint i = 0; i < nTRK; i++)
 
+  recoTrkMatcher.Fill(recoMuons, emtfTracks);
+
   // std::cout << "About to fill unpacked EMTF track branches" << std::endl;
 
   if (not isMC) {
@@ -276,6 +279,7 @@ void FlatNtuple::beginJob() {
   emtfTrackInfo.Initialize();
   emtfUnpTrackInfo.Initialize();
   recoMuonInfo.Initialize();
+  recoTrkMatcher.Initialize();
 	
   ////////////////////////////////////////////////
   ////   WARNING!!! CONSTRUCTION OF STRUCTS   ////
@@ -309,6 +313,9 @@ void FlatNtuple::beginJob() {
   for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
   for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
 
+  for (auto & it : recoTrkMatcher.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+  for (auto & it : recoTrkMatcher.mVVInt) out_tree->Branch(it.first, (std::vector<std::vector<int> >*) &it.second);
+	
   if (not isMC) {
     for (auto & it : emtfUnpTrackInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
     for (auto & it : emtfUnpTrackInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
