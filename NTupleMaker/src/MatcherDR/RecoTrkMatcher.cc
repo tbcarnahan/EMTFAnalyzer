@@ -93,7 +93,6 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
           INSERT(mVFlt, "reco_match_trk_dPhi", deltaPhiMatrix[k][result[k]]);
           INSERT(mVFlt, "reco_match_trk_dEta", deltaEtaMatrix[k][result[k]]);
           INSERT(mVInt, "reco_match_iTrk", result[k]); 
-	
   }
   
 }//end Fill
