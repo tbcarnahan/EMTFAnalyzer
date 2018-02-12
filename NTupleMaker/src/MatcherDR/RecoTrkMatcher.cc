@@ -2,12 +2,12 @@
 
 void RecoTrkMatcher::Initialize() {
   for (auto & str : vFlt)  mVFlt .insert( std::pair<TString, std::vector<float> >(str, DVFLT) );
-  for (auto & str : vvInt) mVVInt.insert( std::pair<TString, std::vector<std::vector<int> > >(str, DVVINT) );
+  for (auto & str : vInt)  mVInt .insert( std::pair<TString, std::vector<int> >  (str, DVINT) );
 }
 
 void RecoTrkMatcher::Reset() {
   for (auto & it : mVFlt)  it.second.clear();
-  for (auto & it : mVVInt) it.second.clear();
+  for (auto & it : mVInt)  it.second.clear();
 }
 
 void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & emtfTrks) {
