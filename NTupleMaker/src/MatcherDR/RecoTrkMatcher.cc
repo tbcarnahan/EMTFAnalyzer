@@ -32,6 +32,8 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   std::vector<double> reco_phi_St1(n1, NOMATCH);
   std::vector<double> recoEta(n1, NOMATCH);
   std::vector<double> recoPhi(n1, NOMATCH);
+  std::vector<double> trkEta(n2, NOMATCH);
+  std::vector<double> trkPhi(n2, NOMATCH);
   std::vector<std::vector<double> > deltaRMatrix(n1, std::vector<double>(n2, NOMATCH));
   std::vector<std::vector<double> > deltaEtaMatrix(n1, std::vector<double>(n2, NOMATCH));
   std::vector<std::vector<double> > deltaPhiMatrix(n1, std::vector<double>(n2, NOMATCH));
@@ -41,10 +43,13 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
 	    
       //Use reco mu extrapolated coordinates
       const std::map<TString, std::vector<int> > * imu = &(recoMuons.mVInt);
+      const std::map<TString, std::vector<int> > * itrk = &(emtfTrks.mVInt);
       reco_eta_St2[i] = ACCESS(*imu, "reco_eta_St2").at(i);
       reco_phi_St2[i] = ACCESS(*imu, "reco_phi_St2").at(i);
       reco_eta_St1[i] = ACCESS(*imu, "reco_eta_St1").at(i);
       reco_phi_St1[i] = ACCESS(*imu, "reco_phi_St1").at(i);
+      trkEta[j] = ACCESS(*itrk, "trk_eta").at(j);
+      trkPhi[j] = ACCESS(*itrk, "trk_phi").at(j);
 	    
       //2nd station higher priority    
       if(  fabs(reco_eta_St2[i] ) < max_eta && fabs(reco_eta_St2[i]) > min_eta
@@ -57,9 +62,9 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
 	      recoEta[i] = reco_eta_St1[i];
 	      recoPhi[i] = reco_phi_St1[i]*TMath::Pi()/180.;
       }
-	    
-      deltaEtaMatrix[i][j] = recoEta[i]-emtfTrks[j].Eta();
-      deltaPhiMatrix[i][j] = recoPhi[i]-emtfTrks[j].Phi_glob()*TMath::Pi()/180.;
+     
+      deltaEtaMatrix[i][j] = recoEta[i]-trkEta[j];
+      deltaPhiMatrix[i][j] = recoPhi[i]-trkPhi[j]*TMath::Pi()/180.;
       deltaRMatrix[i][j] = sqrt( pow(deltaEtaMatrix[i][j],2) + pow(deltaPhiMatrix[i][j],2) );
     }//end for i
   }//end for j
@@ -83,8 +88,8 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     //removed matched pairs
     if (minDeltaR < -1.0*NOMATCH) {
       result[i_min] = j_min;
-      deltaRMatrix[i_min] = vector<double>(n2, NOMATCH);
-      for (size_t i = 0; i < n1; i++) deltaRMatrix[i][j_min] = NOMATCH;
+      deltaRMatrix[i_min] = std::vector<double>(n2, NOMATCH);
+      for (int i = 0; i < n1; i++) deltaRMatrix[i][j_min] = NOMATCH;
     }
   }//end for k
   
