@@ -26,6 +26,10 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   const size_t n2 = emtfTrks.size();
   
   vector<size_t> result(n1, -1);
+  vector<double> reco_eta_St2(n1, NOMATCH);
+  vector<double> reco_phi_St2(n1, NOMATCH);
+  vector<double> reco_eta_St1(n1, NOMATCH);
+  vector<double> reco_phi_St1(n1, NOMATCH);
   vector<double> recoEta(n1, NOMATCH);
   vector<double> recoPhi(n1, NOMATCH);
   vector<vector<double> > deltaRMatrix(n1, vector<double>(n2, NOMATCH));
@@ -35,8 +39,12 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   for (size_t i = 0; i < n1; i++){
     for (size_t j = 0; j < n2; j++) {
       //Use reco mu extrapolated coordinates 
-      ACCESS(*iHit, "hit_isCSC").at(i);
-      if(  fabs(reco_eta_St2[i]) < max_eta && fabs(reco_eta_St2[i]) > min_eta
+      reco_eta_St2[i] = ACCESS(*iHit, "reco_eta_St2").at(i);
+      reco_phi_St2[i] = ACCESS(*iHit, "reco_phi_St2").at(i);
+      reco_eta_St1[i] = ACCESS(*iHit, "reco_eta_St1").at(i);
+      reco_phi_St1[i] = ACCESS(*iHit, "reco_phi_St1").at(i);
+      //2nd station higher priority    
+      if(  fabs(reco_eta_St2[i] ) < max_eta && fabs(reco_eta_St2[i]) > min_eta
         && fabs(reco_phi_St2[i]*TMath::Pi()/180.) < TMath::Pi() 
 	&& fabs(reco_phi_St2[i]*TMath::Pi()/180.) > -1.0*TMath::Pi() ){
 	      recoEta[i] = reco_eta_St2[i];
@@ -49,8 +57,8 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
       deltaEtaMatrix[i][j] = recoEta[i]-emtfTrks[j].Eta();
       deltaPhiMatrix[i][j] = recoPhi[i]-emtfTrks[j].Phi_glob()*TMath::Pi()/180.;
       deltaRMatrix[i][j] = sqrt( pow(deltaEtaMatrix[i][j],2) + pow(deltaPhiMatrix[i][j],2) );
-    }
-  }
+    }//end for i
+  }//end for j
   
   // Run through the matrix n1 times to make sure we've found all matches.
   for (size_t k = 0; k < n1; k++) {
@@ -75,7 +83,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
       for (size_t i = 0; i < n1; i++) deltaRMatrix[i][j_min] = NOMATCH;
     }
   }//end for k
-  return result;
+  
   for (size_t k = 0; k < n1; k++) {
 	  INSERT(mVFlt, "reco_match_trk_dR", deltaRMatrix[k][result[k]]);
           INSERT(mVFlt, "reco_match_trk_dPhi", deltaPhiMatrix[k][result[k]]);
