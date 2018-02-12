@@ -28,22 +28,27 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   const size_t n2 = emtfTrks.size();
   
   vector<size_t> result(n1, -1);
-  vector
+  vector<double> recoEta(n1, NOMATCH);
+  vector<double> recoPhi(n1, NOMATCH);
   vector<vector<double> > deltaRMatrix(n1, vector<double>(n2, NOMATCH));
   vector<vector<double> > deltaEtaMatrix(n1, vector<double>(n2, NOMATCH));
   vector<vector<double> > deltaPhiMatrix(n1, vector<double>(n2, NOMATCH));
   
   for (size_t i = 0; i < n1; i++){
     for (size_t j = 0; j < n2; j++) {
-      if(  fabs(recoMuons[i].eta()) < 2.5 && fabs(recoMuons[i].eta()) > 1.0
-        && fabs(recoMuons[i].phi()) < TMath::Pi() && fabs(recoMuons[i].phi()) > -1.0*TMath::Pi()){
-        
+      //Use reco mu extrapolated coordinates 
+      if(  fabs(reco_eta_St2[i]) < 2.5 && fabs(reco_eta_St2[i]) > 1.0
+        && fabs(reco_phi_St2[i]*TMath::Pi()/180.) < TMath::Pi() 
+	&& fabs(reco_phi_St2[i]*TMath::Pi()/180.) > -1.0*TMath::Pi() ){
+	      recoEta[i] = reco_eta_St2[i];
+	      recoPhi[i] = reco_phi_St2[i]*TMath::Pi()/180.;
       }
       else{
-        
+	      recoEta[i] = reco_eta_St1[i];
+	      recoPhi[i] = reco_phi_St1[i]*TMath::Pi()/180.;
       }
-      deltaEtaMatrix[i][j] = recoMuons[i].eta()-emtfTrks[j].Eta();
-      deltaPhiMatrix[i][j] = recoMuons[i].phi()-emtfTrks[j].Phi_glob()*TMath::Pi()/180.;
+      deltaEtaMatrix[i][j] = recoEta[i]-emtfTrks[j].Eta();
+      deltaPhiMatrix[i][j] = recoPhi[i]-emtfTrks[j].Phi_glob()*TMath::Pi()/180.;
       deltaRMatrix[i][j] = sqrt( pow(deltaEtaMatrix[i][j],2) + pow(deltaPhiMatrix[i][j],2) );
     }
   }
@@ -52,23 +57,25 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   for (size_t k = 0; k < n1; k++) {
     size_t i_min = -1;
     size_t j_min = -1;
-    double minDeltaR = maxDeltaR;
+    double minDeltaR = -1.0*NOMATCH;
     // find the smallest deltaR
-    for (size_t i = 0; i < n1; i++)
-      for (size_t j = 0; j < n2; j++)
+    for (size_t i = 0; i < n1; i++){
+      for (size_t j = 0; j < n2; j++){
 	if (deltaRMatrix[i][j] < minDeltaR) {
 	  i_min = i;
 	  j_min = j;
 	  minDeltaR = deltaRMatrix[i][j];
 	}
-    
+      }
+    }
+	  
+    //removed matched pairs
     if (minDeltaR < maxDeltaR) {
       result[i_min] = j_min;
       deltaRMatrix[i_min] = vector<double>(n2, NOMATCH);
-      for (size_t i = 0; i < n1; i++)
-	deltaRMatrix[i][j_min] = NOMATCH;
+      for (size_t i = 0; i < n1; i++) deltaRMatrix[i][j_min] = NOMATCH;
     }
-  }
+  }//end for k
   return result;
-
-}
+	
+}//end Fill
