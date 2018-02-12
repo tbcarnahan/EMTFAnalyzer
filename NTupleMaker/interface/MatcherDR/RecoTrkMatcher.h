@@ -24,9 +24,7 @@ struct RecoTrkMatcher {
 
   void Initialize();
   void Reset();
-  void Fill(const reco::Muon mu, const reco::Vertex vertex, 
-	    PropagateToMuon muProp1st, PropagateToMuon muProp2nd,
-	    const float min_eta, const float max_eta);
+  void Fill(const reco::Muon mu, const l1t::EMTFTrack & emtfTrk);
 };
 
 #endif
