@@ -15,10 +15,10 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   INSERT(mVFlt, "reco_match_trk_dR", DFLT);
   INSERT(mVFlt, "reco_match_trk_dPhi", DFLT);
   INSERT(mVFlt, "reco_match_trk_dEta", DFLT);
-  INSERT(mVVInt, "reco_match_iTrk", DINT ); 
+  INSERT(mVInt, "reco_match_iTrk", DINT ); 
   
   INSERT(mVFlt, "trk_match_reco_dR", DFLT);
   INSERT(mVFlt, "trk_match_reco_dPhi", DFLT);
   INSERT(mVFlt, "trk_match_reco_dEta", DFLT);
-  INSERT(mVVInt, "trk_match_iReco", DINT ); 
+  INSERT(mVInt, "trk_match_iReco", DINT ); 
 }
