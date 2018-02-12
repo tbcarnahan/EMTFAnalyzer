@@ -35,8 +35,8 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   vector<vector<double> > deltaEtaMatrix(n1, vector<double>(n2, NOMATCH));
   vector<vector<double> > deltaPhiMatrix(n1, vector<double>(n2, NOMATCH));
   
-  for (size_t i = 0; i < n1; i++){
-    for (size_t j = 0; j < n2; j++) {
+  for (int i = 0; i < n1; i++){
+    for (int j = 0; j < n2; j++) {
 	    
       //Use reco mu extrapolated coordinates
       const std::map<TString, std::vector<int> > * imu = &(recoMuons.mVInt);
@@ -64,13 +64,13 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   }//end for j
   
   // Run through the matrix n1 times to make sure we've found all matches.
-  for (size_t k = 0; k < n1; k++) {
-    size_t i_min = -1;
-    size_t j_min = -1;
+  for (int k = 0; k < n1; k++) {
+    int i_min = -1;
+    int j_min = -1;
     double minDeltaR = -1.0*NOMATCH;
     // find the smallest deltaR b/t reco muons and trks
-    for (size_t i = 0; i < n1; i++){
-      for (size_t j = 0; j < n2; j++){
+    for (int i = 0; i < n1; i++){
+      for (int j = 0; j < n2; j++){
 	if (deltaRMatrix[i][j] < minDeltaR) {
 	  i_min = i;
 	  j_min = j;
@@ -87,7 +87,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     }
   }//end for k
   
-  for (size_t k = 0; k < n1; k++) {
+  for (int k = 0; k < n1; k++) {
 	  INSERT(mVFlt, "reco_match_trk_dR", deltaRMatrix[k][result[k]]);
           INSERT(mVFlt, "reco_match_trk_dPhi", deltaPhiMatrix[k][result[k]]);
           INSERT(mVFlt, "reco_match_trk_dEta", deltaEtaMatrix[k][result[k]]);
