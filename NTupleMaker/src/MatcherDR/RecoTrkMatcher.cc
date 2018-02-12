@@ -41,10 +41,10 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
 	    
       //Use reco mu extrapolated coordinates
       const std::map<TString, std::vector<int> > * imu = &(recoMuons.mVInt);
-      reco_eta_St2[i] = ACCESS(mVFlt, "reco_eta_St2").at(i);
-      reco_phi_St2[i] = ACCESS(mVFlt, "reco_phi_St2").at(i);
-      reco_eta_St1[i] = ACCESS(mVFlt, "reco_eta_St1").at(i);
-      reco_phi_St1[i] = ACCESS(mVFlt, "reco_phi_St1").at(i);
+      reco_eta_St2[i] = ACCESS(*imu, "reco_eta_St2").at(i);
+      reco_phi_St2[i] = ACCESS(*imu, "reco_phi_St2").at(i);
+      reco_eta_St1[i] = ACCESS(*imu, "reco_eta_St1").at(i);
+      reco_phi_St1[i] = ACCESS(*imu, "reco_phi_St1").at(i);
 	    
       //2nd station higher priority    
       if(  fabs(reco_eta_St2[i] ) < max_eta && fabs(reco_eta_St2[i]) > min_eta
