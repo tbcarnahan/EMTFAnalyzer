@@ -42,14 +42,20 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     for (int j = 0; j < n2; j++) {
 	    
       //Use reco mu extrapolated coordinates
-      const std::map<TString, std::vector<float> > * imu = &(recoMuons.mVFlt);
-      const std::map<TString, std::vector<float> > * itrk = &(emtfTrks.mVFlt);
-      reco_eta_St2[i] = ACCESS(*imu, "reco_eta_St2").at(i);
-      reco_phi_St2[i] = ACCESS(*imu, "reco_phi_St2").at(i);
-      reco_eta_St1[i] = ACCESS(*imu, "reco_eta_St1").at(i);
-      reco_phi_St1[i] = ACCESS(*imu, "reco_phi_St1").at(i);
-      trkEta[j] = ACCESS(*itrk, "trk_eta").at(j);
-      trkPhi[j] = ACCESS(*itrk, "trk_phi").at(j);
+      //const std::map<TString, std::vector<float> > * imu = &(recoMuons.mVFlt);
+      //const std::map<TString, std::vector<float> > * itrk = &(emtfTrks.mVFlt);
+      //reco_eta_St2[i] = ACCESS(*imu, "reco_eta_St2").at(i);
+      //reco_phi_St2[i] = ACCESS(*imu, "reco_phi_St2").at(i);
+      //reco_eta_St1[i] = ACCESS(*imu, "reco_eta_St1").at(i);
+      //reco_phi_St1[i] = ACCESS(*imu, "reco_phi_St1").at(i);
+      reco_eta_St2[i] = ACCESS(recoMuons.mVFlt, "reco_eta_St2").at(i);
+      reco_phi_St2[i] = ACCESS(recoMuons.mVFlt, "reco_phi_St2").at(i);
+      reco_eta_St1[i] = ACCESS(recoMuons.mVFlt, "reco_eta_St1").at(i);
+      reco_phi_St1[i] = ACCESS(recoMuons.mVFlt, "reco_phi_St1").at(i);
+      //trkEta[j] = ACCESS(*itrk, "trk_eta").at(j);
+      //trkPhi[j] = ACCESS(*itrk, "trk_phi").at(j);
+      trkEta[j] = ACCESS(emtfTrks.mVFlt, "trk_eta").at(j);
+      trkPhi[j] = ACCESS(emtfTrks.mVFlt, "trk_phi").at(j);
 	    
       //2nd station higher priority    
       if(  fabs(reco_eta_St2[i] ) < max_eta && fabs(reco_eta_St2[i]) > min_eta
