@@ -38,11 +38,14 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   
   for (size_t i = 0; i < n1; i++){
     for (size_t j = 0; j < n2; j++) {
-      //Use reco mu extrapolated coordinates 
-      reco_eta_St2[i] = ACCESS(*iHit, "reco_eta_St2").at(i);
-      reco_phi_St2[i] = ACCESS(*iHit, "reco_phi_St2").at(i);
-      reco_eta_St1[i] = ACCESS(*iHit, "reco_eta_St1").at(i);
-      reco_phi_St1[i] = ACCESS(*iHit, "reco_phi_St1").at(i);
+	    
+      //Use reco mu extrapolated coordinates
+      const std::map<TString, std::vector<int> > * imu = &(recoMuons.mVInt);
+      reco_eta_St2[i] = ACCESS(mVFlt, "reco_eta_St2").at(i);
+      reco_phi_St2[i] = ACCESS(mVFlt, "reco_phi_St2").at(i);
+      reco_eta_St1[i] = ACCESS(mVFlt, "reco_eta_St1").at(i);
+      reco_phi_St1[i] = ACCESS(mVFlt, "reco_phi_St1").at(i);
+	    
       //2nd station higher priority    
       if(  fabs(reco_eta_St2[i] ) < max_eta && fabs(reco_eta_St2[i]) > min_eta
         && fabs(reco_phi_St2[i]*TMath::Pi()/180.) < TMath::Pi() 
@@ -54,6 +57,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
 	      recoEta[i] = reco_eta_St1[i];
 	      recoPhi[i] = reco_phi_St1[i]*TMath::Pi()/180.;
       }
+	    
       deltaEtaMatrix[i][j] = recoEta[i]-emtfTrks[j].Eta();
       deltaPhiMatrix[i][j] = recoPhi[i]-emtfTrks[j].Phi_glob()*TMath::Pi()/180.;
       deltaRMatrix[i][j] = sqrt( pow(deltaEtaMatrix[i][j],2) + pow(deltaPhiMatrix[i][j],2) );
@@ -65,7 +69,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     size_t i_min = -1;
     size_t j_min = -1;
     double minDeltaR = -1.0*NOMATCH;
-    // find the smallest deltaR
+    // find the smallest deltaR b/t reco muons and trks
     for (size_t i = 0; i < n1; i++){
       for (size_t j = 0; j < n2; j++){
 	if (deltaRMatrix[i][j] < minDeltaR) {
@@ -77,7 +81,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     }
 	  
     //removed matched pairs
-    if (minDeltaR < maxDeltaR) {
+    if (minDeltaR < -1.0*NOMATCH) {
       result[i_min] = j_min;
       deltaRMatrix[i_min] = vector<double>(n2, NOMATCH);
       for (size_t i = 0; i < n1; i++) deltaRMatrix[i][j_min] = NOMATCH;
