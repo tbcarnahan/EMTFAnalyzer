@@ -1,5 +1,6 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/MatcherDR/RecoTrkMatcher.h"
 #include "TMath.h"
+#include <vector>
 
 void RecoTrkMatcher::Initialize() {
   for (auto & str : vFlt)  mVFlt .insert( std::pair<TString, std::vector<float> >(str, DVFLT) );
