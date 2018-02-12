@@ -1,0 +1,32 @@
+#ifndef MatcherDRRecoTrkMatcher_h
+#define MatcherDRRecoTrkMatcher_h
+
+// Common branch info
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
+
+// Helpful tools
+#include "EMTFAnalyzer/NTupleMaker/interface/HelperFunctions.h"
+
+// Input
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
+
+////////////////////////////////
+///  Matching variables      ///
+////////////////////////////////
+
+struct RecoTrkMatcher {
+  std::vector<TString> vFlt = {{"reco_match_trk_dR", "reco_match_trk_dPhi", "reco_match_trk_dEta",
+                                "trk_match_reco_dR", "trk_match_reco_dPhi", "trk_match_reco_dEta"}};
+  std::vector<TString> vvInt = {{"reco_match_iTrk", "trk_match_iReco"}};
+  std::map<TString, std::vector<float> > mVFlt;
+  std::map<TString, std::vector<std::vector<int> > > mVVInt;
+
+  void Initialize();
+  void Reset();
+  void Fill(const reco::Muon mu, const reco::Vertex vertex, 
+	    PropagateToMuon muProp1st, PropagateToMuon muProp2nd,
+	    const float min_eta, const float max_eta);
+};
+
+#endif
