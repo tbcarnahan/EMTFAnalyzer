@@ -28,6 +28,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   const size_t n2 = emtfTrks.size();
   
   vector<size_t> result(n1, -1);
+  vector
   vector<vector<double> > deltaRMatrix(n1, vector<double>(n2, NOMATCH));
   vector<vector<double> > deltaEtaMatrix(n1, vector<double>(n2, NOMATCH));
   vector<vector<double> > deltaPhiMatrix(n1, vector<double>(n2, NOMATCH));
