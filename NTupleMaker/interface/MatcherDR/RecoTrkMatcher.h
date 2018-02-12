@@ -21,7 +21,7 @@ struct RecoTrkMatcher {
 
   void Initialize();
   void Reset();
-  void Fill(const reco::Muon mu, const l1t::EMTFTrack & emtfTrk);
+  void Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & emtfTrks);
 };
 
 #endif
