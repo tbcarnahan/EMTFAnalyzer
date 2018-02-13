@@ -79,7 +79,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   for (int k = 0; k < n1; k++) {
     int i_min = -1;
     int j_min = -1;
-    double minDeltaR = -1.0*NOMATCH;
+    float minDeltaR = -1.0*NOMATCH;
     // find the smallest deltaR b/t reco muons and trks
     for (int i = 0; i < n1; i++){
       for (int j = 0; j < n2; j++){
