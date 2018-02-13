@@ -100,10 +100,17 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   }//end for k
   
   for (int k = 0; k < n1; k++) {
-          INSERT(mVFlt, "reco_match_trk_dPhi", deltaPhiMatrix[k][result[k]]);
-          INSERT(mVFlt, "reco_match_trk_dEta", deltaEtaMatrix[k][result[k]]);
-	  INSERT(mVFlt, "reco_match_trk_dR", sqrt( pow(deltaEtaMatrix[k][result[k]],2) + pow(deltaPhiMatrix[k][result[k]],2) ) );
-          INSERT(mVInt, "reco_match_iTrk", result[k]); 
+	  if(result[k]!=-1){
+		  INSERT(mVFlt, "reco_match_trk_dPhi", deltaPhiMatrix[k][result[k]]);
+                  INSERT(mVFlt, "reco_match_trk_dEta", deltaEtaMatrix[k][result[k]]);
+	          INSERT(mVFlt, "reco_match_trk_dR", sqrt( pow(deltaEtaMatrix[k][result[k]],2) + pow(deltaPhiMatrix[k][result[k]],2) ) );       
+	  }
+	  else{//didn't find a match
+		  INSERT(mVFlt, "reco_match_trk_dPhi", NOMATCH);
+                  INSERT(mVFlt, "reco_match_trk_dEta", NOMATCH);
+	          INSERT(mVFlt, "reco_match_trk_dR", NOMATCH);
+	  }
+	  INSERT(mVInt, "reco_match_iTrk", result[k]); 
   }
   
 }//end Fill
