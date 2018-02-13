@@ -106,9 +106,9 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
 	          INSERT(mVFlt, "reco_match_trk_dR", sqrt( pow(deltaEtaMatrix[k][result[k]],2) + pow(deltaPhiMatrix[k][result[k]],2) ) );       
 	  }
 	  else{//didn't find a match
-		  INSERT(mVFlt, "reco_match_trk_dPhi", NOMATCH);
-                  INSERT(mVFlt, "reco_match_trk_dEta", NOMATCH);
-	          INSERT(mVFlt, "reco_match_trk_dR", NOMATCH);
+		  INSERT(mVFlt, "reco_match_trk_dPhi", NOMATCH/10.);
+                  INSERT(mVFlt, "reco_match_trk_dEta", NOMATCH/10.);
+	          INSERT(mVFlt, "reco_match_trk_dR", NOMATCH/10.);
 	  }
 	  INSERT(mVInt, "reco_match_iTrk", result[k]); 
   }
