@@ -15,7 +15,7 @@ void RecoTrkMatcher::Reset() {
 
 void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & emtfTrks, const float min_eta, const float max_eta) {
   
-  const double NOMATCH = -999.;
+  const float NOMATCH = -999.;
 	
   INSERT(mVFlt, "reco_match_trk_dR", DFLT);
   INSERT(mVFlt, "reco_match_trk_dPhi", DFLT);
@@ -26,17 +26,17 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
   const int n2 = ACCESS(emtfTrks.mInts, "nTracks");
   
   std::vector<int> result(n1, -1);
-  std::vector<double> reco_eta_St2(n1, NOMATCH);
-  std::vector<double> reco_phi_St2(n1, NOMATCH);
-  std::vector<double> reco_eta_St1(n1, NOMATCH);
-  std::vector<double> reco_phi_St1(n1, NOMATCH);
-  std::vector<double> recoEta(n1, NOMATCH);
-  std::vector<double> recoPhi(n1, NOMATCH);
-  std::vector<double> trkEta(n2, NOMATCH);
-  std::vector<double> trkPhi(n2, NOMATCH);
-  std::vector<std::vector<double> > deltaRMatrix(n1, std::vector<double>(n2, NOMATCH));
-  std::vector<std::vector<double> > deltaEtaMatrix(n1, std::vector<double>(n2, NOMATCH));
-  std::vector<std::vector<double> > deltaPhiMatrix(n1, std::vector<double>(n2, NOMATCH));
+  std::vector<float> reco_eta_St2(n1, NOMATCH);
+  std::vector<float> reco_phi_St2(n1, NOMATCH);
+  std::vector<float> reco_eta_St1(n1, NOMATCH);
+  std::vector<float> reco_phi_St1(n1, NOMATCH);
+  std::vector<float> recoEta(n1, NOMATCH);
+  std::vector<float> recoPhi(n1, NOMATCH);
+  std::vector<float> trkEta(n2, NOMATCH);
+  std::vector<float> trkPhi(n2, NOMATCH);
+  std::vector<std::vector<float> > deltaRMatrix(n1, std::vector<float>(n2, NOMATCH));
+  std::vector<std::vector<float> > deltaEtaMatrix(n1, std::vector<float>(n2, NOMATCH));
+  std::vector<std::vector<float> > deltaPhiMatrix(n1, std::vector<float>(n2, NOMATCH));
   
   for (int i = 0; i < n1; i++){
     for (int j = 0; j < n2; j++) {
@@ -94,7 +94,7 @@ void RecoTrkMatcher::Fill(const RecoMuonInfo & recoMuons, const EMTFTrackInfo & 
     //removed matched pairs
     if (minDeltaR < -1.0*NOMATCH) {
       result[i_min] = j_min;
-      deltaRMatrix[i_min] = std::vector<double>(n2, NOMATCH);
+      deltaRMatrix[i_min] = std::vector<float>(n2, NOMATCH);
       for (int i = 0; i < n1; i++) deltaRMatrix[i][j_min] = NOMATCH;
     }
   }//end for k
