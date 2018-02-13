@@ -7,3 +7,4 @@
   <lib name="1"/>
 </export>
 <flags ADD_SUBDIR="1"/>  <!-- For the src/FlatNtupleBranches/ subdirectory -->
+<flags ADD_SUBDIR="1"/>  <!-- For the src/MatcherDR/ subdirectory -->
