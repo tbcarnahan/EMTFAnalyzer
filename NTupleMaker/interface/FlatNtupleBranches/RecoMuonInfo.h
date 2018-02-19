@@ -29,7 +29,8 @@ struct RecoMuonInfo {
 				"reco_theta", "reco_theta_St1", "reco_theta_St2", 
 				"reco_phi", "reco_phi_St1", "reco_phi_St2",
                                 "reco_dR_match_dEta", "reco_dR_match_dPhi", "reco_dR_match_dR"}};
-  std::vector<TString> vInt = {{"reco_ID_loose", "reco_ID_medium", "reco_ID_tight", "reco_charge", "reco_dR_match_iTrk"}};
+  std::vector<TString> vInt = {{"reco_ID_loose", "reco_ID_medium", "reco_ID_tight", "reco_charge",
+				"reco_dR_match_iTrk", "reco_dR_match_numTrk", "reco_dR_match_unique"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;
