@@ -59,7 +59,7 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       trkPhi[j] = ACCESS(*iTrk, "trk_phi").at(j) * M_PI / 180.;
 
       dEta_matrix[i][j] = trkEta[j] - recoEta[i];
-      dPhi_matrix[i][j] = calc_dPhi(recoPhi[i], trkPhi[j]);
+      dPhi_matrix[i][j] = calc_dPhi(recoPhi[i], trkPhi[j]) * 180. / M_PI;
       dR_matrix[i][j]   = calc_dR(recoEta[i], recoPhi[i], trkEta[j], trkPhi[j]);
     } // End loop over nTrk (j)
 
