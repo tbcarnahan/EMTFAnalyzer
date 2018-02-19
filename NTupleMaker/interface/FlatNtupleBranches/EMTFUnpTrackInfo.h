@@ -12,13 +12,6 @@
 #include "DataFormats/L1TMuon/interface/EMTFHit.h"
 #include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
-/* // Default values for maps */
-/* int       DINT  = -999; */
-/* float     DFLT  = -999.; */
-/* std::vector<float> DVFLT; */
-/* std::vector<int>   DVINT; */
-/* std::vector<std::vector<int> > DVVINT; */
-
 
 ////////////////////////////////
 ///  EMTF track information  ///

@@ -36,5 +36,19 @@ inline bool isFront(int station, int ring, int chamber, int subsystem) {
   return result;
 }
 
+inline float calc_dPhi(const float phi1, const float phi2) {
+
+  return acos( cos( phi2 - phi1 ) );
+}
+
+inline float calc_dR(const float eta1, const float phi1, const float eta2, const float phi2) {
+
+  float dEta = eta2 - eta1;
+  float dPhi = calc_dPhi(phi1, phi2);
+  float dR = sqrt( pow(dEta, 2) + pow(dPhi, 2) );
+
+  return dR;
+}
+
 
 #endif /* define HelperFunctions_h */

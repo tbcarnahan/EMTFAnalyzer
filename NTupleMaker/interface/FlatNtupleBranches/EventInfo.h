@@ -8,10 +8,6 @@
 // Event info
 #include "FWCore/Framework/interface/Event.h"
 
-/* // Default values for maps */
-/* int       DINT  = -999; */
-/* long long DLONG = -999; */
-
 
 ///////////////////////////
 ///  Event information  ///

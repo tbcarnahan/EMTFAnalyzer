@@ -20,13 +20,19 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EventInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/GenMuonInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFHitInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFSimHitInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/MatcherDR/RecoTrkMatcher.h"
+
+// Object matchers
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/SimUnpHit.h"
 
 // RECO muons
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
+/* #include <DataFormats/PatCandidates/interface/Muon.h> */
+/* #include "L1Trigger/L1TNtuples/interface/MuonID.h" */
 
 // RECO vertices
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -42,17 +48,13 @@ class FlatNtuple : public edm::EDAnalyzer {
   // Constructor/destructor
   explicit FlatNtuple(const edm::ParameterSet&);
   ~FlatNtuple();
-  //void init(const edm::EventSetup &eventSetup);
-
-  /* // Default constants */
-  /* const int   DINT = -999; */
-  /* const float DFLT = -999.; */
   
   // Default parameters
   const float MIN_GEN_ETA  = 1.0;
   const float MAX_GEN_ETA  = 2.5;
   const float MIN_RECO_ETA = 1.0;
   const float MAX_RECO_ETA = 2.5;
+  const float MAX_MATCH_DR = 0.5;
 
   ///////////////////////////////////
   ///  Output branch information  ///
@@ -61,9 +63,15 @@ class FlatNtuple : public edm::EDAnalyzer {
   GenMuonInfo      genMuonInfo;
   RecoMuonInfo     recoMuonInfo;
   EMTFHitInfo      emtfHitInfo;
+  EMTFSimHitInfo   emtfSimHitInfo;
   EMTFTrackInfo    emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
-  RecoTrkMatcher   recoTrkMatcher;
+
+  /////////////////////////
+  ///  Object matchers  ///
+  /////////////////////////
+  RecoTrkDR        recoTrkDR;
+  SimUnpHit        simUnpHit;
  
   // Output tree
   TTree * out_tree;
@@ -87,6 +95,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<reco::MuonCollection>           RecoMuon_token;
   edm::EDGetTokenT<reco::VertexCollection>         RecoVertex_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFHit_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFSimHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFUnpTrack_token;
  

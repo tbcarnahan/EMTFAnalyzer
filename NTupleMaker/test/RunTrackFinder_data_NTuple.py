@@ -42,8 +42,8 @@ import FWCore.PythonUtilities.LumiList as LumiList
 # process.source.lumisToProcess = LumiList.LumiList(filename = 'goodList.json').getVLuminosityBlockRange()
 
 ## Message Logger and Event range
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.options = cms.untracked.PSet(
@@ -141,8 +141,8 @@ for in_file_name in subprocess.check_output([eos_cmd, 'ls', in_dir_name]).splitl
 # for in_file_name in fileList:
     if not ('.root' in in_file_name): continue
     iFile += 1
-    # if iFile < 10: continue  ## Skip earliest files in run
-    if iFile > 31: break
+    if iFile < 10: continue  ## Skip earliest files in run
+    if iFile > 11: break
     print in_file_name
     readFiles.extend( cms.untracked.vstring(in_dir_name+in_file_name) )
     # in_dir_name_T0 = in_dir_name.replace('/eos/cms/tier0/', 'root://cms-xrd-tzero.cern.ch//')
@@ -180,102 +180,15 @@ process.cscTriggerPrimitiveDigis.commonParam = cms.PSet(
 process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
-process.simEmtfDigis.verbosity = cms.untracked.int32(0)
-# process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
-process.simEmtfDigis.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
-process.simEmtfDigis.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
 process.simEmtfDigis.RPCInput  = cms.InputTag('muonRPCDigis')
 
 
-##############################################
-###  Settings for 2016 vs. 2017 emulation  ###
-##############################################
+## EMTF Emulator with re-emulated CSC LCTs as input
+process.simEmtfDigisSimLct = process.simEmtfDigis.clone()
 
-# ## *** 2016 ***
-# ## From python/fakeEmtfParams_cff.py
-# process.emtfParams.PtAssignVersion = cms.int32(5)
-# process.emtfParams.FirmwareVersion = cms.int32(49999) ## Settings as of end-of-year 2016
-# process.emtfParams.PrimConvVersion = cms.int32(0)
-# process.emtfForestsDB.toGet = cms.VPSet(
-#     cms.PSet(
-#         record = cms.string("L1TMuonEndCapForestRcd"),
-#         tag = cms.string("L1TMuonEndCapForest_static_2016_mc")
-#         )
-#     )
-
-# ## From python/simEmtfDigis_cfi.py
-# process.simEmtfDigis.RPCEnable                 = cms.bool(False)
-# process.simEmtfDigis.spTBParams16.ThetaWindow  = cms.int32(4)
-# process.simEmtfDigis.spPCParams16.FixME11Edges = cms.bool(False)
-# process.simEmtfDigis.spPAParams16.PtLUTVersion = cms.int32(5)
-# process.simEmtfDigis.spPAParams16.BugGMTPhi    = cms.bool(True)
-
-
-# ## *** 2017 ***
-# ## From python/fakeEmtfParams_cff.py
-# process.emtfParams.PtAssignVersion = cms.int32(7)
-# process.emtfParams.FirmwareVersion = cms.int32(50001) ## Settings as of beginning-of-year 2017
-# process.emtfParams.PrimConvVersion = cms.int32(1)
-# # process.emtfForestsDB.toGet = cms.VPSet(
-# #     cms.PSet(
-# #         record = cms.string("L1TMuonEndCapForestRcd"),
-# #         tag = cms.string("L1TMuonEndCapForest_static_Sq_20170523_mc")
-# #         )
-# #     )
-
-# ## From python/simEmtfDigis_cfi.py
-# process.simEmtfDigis.RPCEnable                  = cms.bool(True)
-# process.simEmtfDigis.spTBParams16.ThetaWindow   = cms.int32(8)
-# process.simEmtfDigis.spPCParams16.FixME11Edges  = cms.bool(True)
-# process.simEmtfDigis.spPAParams16.PtLUTVersion  = cms.int32(7)
-# process.simEmtfDigis.spPAParams16.BugGMTPhi     = cms.bool(False)
-# process.simEmtfDigis.spPAParams16.ReadPtLUTFile = cms.bool(False)
-
-process.simEmtfDigis.RPCEnable = cms.bool(True)
-
-# # process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,36,54,96,127) ## v1
-# # process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,36,55,94,127) ## v2
-# # process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,38,47,90,127) ## v3
-# # process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,35,51,97,127) ## v4
-# process.simEmtfDigis.spPCParams16.ZoneBoundaries = cms.vint32(0,37,48,93,127) ## v5
-# process.simEmtfDigis.spPCParams16.UseNewZones    = cms.bool(True)
-# process.simEmtfDigis.spPCParams16.ZoneOverlap    = cms.int32(6)
-# process.simEmtfDigis.spPCParams16.ZoneOverlapRPC = cms.int32(6)
-
-# process.simEmtfDigis.spPRParams16.SymPatternDefinitions = cms.vstring(
-#     # straightness, hits in ME1, hits in ME2, hits in ME3, hits in ME4
-#     # ME1 vaues centered at 15, range from 0 - 30
-#     # ME2,3,4 values centered at 7, range from 0 - 14
-#     "4,15:15:15:15,7:7:7:7,8:7:7:6,8:7:7:6",    ## Widened ME3,4 by one unit in each direction
-#     "3,16:16:14:14,7:7:7:7,8:7:7:6,8:7:7:6",    ## Unchanged
-#     "2,18:17:13:12,7:7:7:7,10:7:7:4,10:7:7:4",  ## Unchanged
-#     "1,22:19:11:8,7:7:7:7,10:7:7:4,10:7:7:4",   ## Narrowed ME3,4 by four units from each direction
-#     "0,30:23:7:0,7:7:7:7,14:7:7:0,14:7:7:0",    ## Unchanged
-#     )
-
-# ## "v2"
-# process.simEmtfDigis.spPRParams16.SymPatternDefinitions = cms.vstring(
-#     # straightness, hits in ME1, hits in ME2, hits in ME3, hits in ME4
-#     # ME1 vaues centered at 15, range from 0 - 30
-#     # ME2,3,4 values centered at 7, range from 0 - 14
-#     "6,15:15:15:15,7:7:7:7,8:7:7:6,8:7:7:6",    ## Widened ME3,4 by one unit in each direction
-#     "4,16:16:14:14,7:7:7:7,8:7:7:6,8:7:7:6",    ## Unchanged
-#     "3,18:17:13:12,7:7:7:7,8:7:7:6,8:7:7:6",    ## Narrowed ME3,4 by two units from each direction
-#     "2,22:19:11:8,7:7:7:7,10:7:7:4,10:7:7:4",   ## Narrowed ME3,4 by four units from each direction
-#     "0,30:23:7:0,7:7:7:7,14:7:7:0,14:7:7:0",    ## Unchanged
-#     )
-
-# ## "v3" (re-narrowed straightest pattern, changed straightness codes w.r.t. v2)
-# process.simEmtfDigis.spPRParams16.SymPatternDefinitions = cms.vstring(
-#     # straightness, hits in ME1, hits in ME2, hits in ME3, hits in ME4
-#     # ME1 vaues centered at 15, range from 0 - 30
-#     # ME2,3,4 values centered at 7, range from 0 - 14
-#     "5,15:15:15:15,7:7:7:7,7:7:7:7,7:7:7:7",    ## Unchanged
-#     "4,16:16:14:14,7:7:7:7,8:7:7:6,8:7:7:6",    ## Unchanged
-#     "2,18:17:13:12,7:7:7:7,8:7:7:6,8:7:7:6",    ## Narrowed ME3,4 by two units from each direction
-#     "1,22:19:11:8,7:7:7:7,10:7:7:4,10:7:7:4",   ## Narrowed ME3,4 by four units from each direction
-#     "0,30:23:7:0,7:7:7:7,14:7:7:0,14:7:7:0",    ## Unchanged
-#     )
+process.simEmtfDigisSimLct.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
+process.simEmtfDigisSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
 
 
 
@@ -284,7 +197,6 @@ process.simEmtfDigis.RPCEnable = cms.bool(True)
 ###################
 
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
-# process.FlatNtupleData.emtfHitTag = cms.InputTag("simEmtfDigis")
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
@@ -293,6 +205,7 @@ RawToDigi_AWB = cms.Sequence(
     # process.csctfDigis               + ## Necessary for legacy studies, or if you use csctfDigis as input
     process.emtfStage2Digis          + 
     process.simEmtfDigis             + 
+    process.simEmtfDigisSimLct       +
     process.FlatNtupleData
     )
 

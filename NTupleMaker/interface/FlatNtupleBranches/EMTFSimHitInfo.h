@@ -1,6 +1,6 @@
 
-#ifndef FlatNtupleBranchesEMTFHitInfo_h
-#define FlatNtupleBranchesEMTFHitInfo_h
+#ifndef FlatNtupleBranchesEMTFSimHitInfo_h
+#define FlatNtupleBranchesEMTFSimHitInfo_h
 
 // Common branch info
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/Common.h"
@@ -15,13 +15,14 @@
 //////////////////////////////
 ///  EMTF hit information  ///
 //////////////////////////////
-struct EMTFHitInfo {
-  std::vector<TString> ints = {{"nHits", "nHitsCSC", "nHitsRPC", "nHitsBX0", "nHitsCSCBX0", "nHitsRPCBX0"}};
-  std::vector<TString> vFlt = {{"hit_eta", "hit_theta", "hit_phi", "hit_phi_loc"}};
-  std::vector<TString> vInt = {{"hit_eta_int", "hit_theta_int", "hit_phi_int", "hit_endcap", "hit_sector", "hit_sector_index", "hit_station", 
-				"hit_ring", "hit_CSC_ID", "hit_chamber", "hit_FR", "hit_pattern", "hit_quality", "hit_roll", "hit_subsector", 
-				"hit_isCSC", "hit_isRPC", "hit_valid", "hit_BX", "hit_strip", "hit_strip_hi", "hit_strip_low", "hit_wire", "hit_neighbor",
-                                "hit_match_iSimHit"}};
+struct EMTFSimHitInfo {
+  std::vector<TString> ints = {{"nSimHits", "nSimHitsCSC", "nSimHitsRPC", "nSimHitsBX0", "nSimHitsCSCBX0", "nSimHitsRPCBX0"}};
+  std::vector<TString> vFlt = {{"sim_hit_eta", "sim_hit_theta", "sim_hit_phi", "sim_hit_phi_loc"}};
+  std::vector<TString> vInt = {{"sim_hit_eta_int", "sim_hit_theta_int", "sim_hit_phi_int", "sim_hit_endcap", "sim_hit_sector", "sim_hit_sector_index", 
+				"sim_hit_station", "sim_hit_ring", "sim_hit_CSC_ID", "sim_hit_chamber", "sim_hit_FR", "sim_hit_pattern", "sim_hit_quality", 
+				"sim_hit_alct_quality", "sim_hit_clct_quality", "sim_hit_roll", "sim_hit_subsector", "sim_hit_isCSC", "sim_hit_isRPC", 
+				"sim_hit_valid", "sim_hit_BX", "sim_hit_strip", "sim_hit_strip_hi", "sim_hit_strip_low", "sim_hit_wire", "sim_hit_neighbor",
+                                "sim_hit_match_iHit"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;
@@ -36,7 +37,7 @@ struct EMTFHitInfo {
 ///  Print out for debugging  ///
 /////////////////////////////////
 
-inline void PrintEMTFHit( const l1t::EMTFHit & hit ) {
+inline void PrintEMTFSimHit( const l1t::EMTFHit & hit ) {
   if (hit.Is_CSC()) {
     std::cout << "CSC LCT in BX " << hit.BX() << ", endcap " << hit.Endcap() << ", sector " << hit.Sector()
               << " (" << hit.Sector_idx() << "), subsector " << hit.Subsector() << ", station " << hit.Station()
@@ -53,7 +54,7 @@ inline void PrintEMTFHit( const l1t::EMTFHit & hit ) {
   else std::cout << "EMTF hit is neither CSC nor RPC?!?" << std::endl;
 }
 
-inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const int i) {
+inline void PrintSimHit( const std::map<TString, std::vector<int> > * iHit , const int i) {
 
   if (ACCESS(*iHit, "hit_isCSC").at(i)) {
     std::cout << "* Found in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)

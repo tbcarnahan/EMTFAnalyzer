@@ -8,12 +8,6 @@
 // GEN particles
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-/* // Default values for maps */
-/* int       DINT  = -999; */
-/* float     DFLT  = -999.; */
-/* std::vector<float> DVFLT; */
-/* std::vector<int>   DVINT; */
-
 
 //////////////////////////////
 ///  GEN muon information  ///

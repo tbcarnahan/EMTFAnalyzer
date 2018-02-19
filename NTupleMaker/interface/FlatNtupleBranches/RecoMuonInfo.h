@@ -27,8 +27,9 @@ struct RecoMuonInfo {
   std::vector<TString> ints = {{"nRecoMuons"}};
   std::vector<TString> vFlt = {{"reco_pt", "reco_eta", "reco_eta_St1", "reco_eta_St2", 
 				"reco_theta", "reco_theta_St1", "reco_theta_St2", 
-				"reco_phi", "reco_phi_St1", "reco_phi_St2"}};
-  std::vector<TString> vInt = {{"reco_ID_loose", "reco_ID_medium", "reco_ID_tight", "reco_charge"}};
+				"reco_phi", "reco_phi_St1", "reco_phi_St2",
+                                "reco_dR_match_dEta", "reco_dR_match_dPhi", "reco_dR_match_dR"}};
+  std::vector<TString> vInt = {{"reco_ID_loose", "reco_ID_medium", "reco_ID_tight", "reco_charge", "reco_dR_match_iTrk"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;

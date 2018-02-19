@@ -54,8 +54,6 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "hit_FR",           isFront( emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem() ) );
   INSERT(mVInt, "hit_pattern",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Pattern()) );
   INSERT(mVInt, "hit_quality",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Quality()) );
-  INSERT(mVInt, "hit_alct_quality", ( emtfHit.Is_RPC() ? DINT : emtfHit.ALCT_quality()) );
-  INSERT(mVInt, "hit_clct_quality", ( emtfHit.Is_RPC() ? DINT : emtfHit.CLCT_quality()) );
   INSERT(mVInt, "hit_roll",         (!emtfHit.Is_RPC() ? DINT : emtfHit.Roll()) );
   INSERT(mVInt, "hit_subsector",    emtfHit.Subsector() );
   INSERT(mVInt, "hit_isCSC",        emtfHit.Is_CSC() );
