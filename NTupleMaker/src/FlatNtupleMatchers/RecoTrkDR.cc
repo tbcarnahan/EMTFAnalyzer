@@ -9,7 +9,6 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
   const int nReco = ACCESS(recoMuons.mInts, "nRecoMuons");
   const int nTrk = ACCESS(emtfTrks.mInts, "nTracks");
   
-  std::vector<int> result(nReco, -1);
   std::vector<float> reco_eta_St2(nReco, NOMATCH);
   std::vector<float> reco_phi_St2(nReco, NOMATCH);
   std::vector<float> reco_eta_St1(nReco, NOMATCH);

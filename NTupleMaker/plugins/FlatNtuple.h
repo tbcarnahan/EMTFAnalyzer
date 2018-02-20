@@ -1,4 +1,3 @@
-
 // ROOT includes
 #include "TTree.h"
 #include "TFile.h"
@@ -27,6 +26,7 @@
 
 // Object matchers
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/UnpEmuTrkDR.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/SimUnpHit.h"
 
 // RECO muons
@@ -54,7 +54,8 @@ class FlatNtuple : public edm::EDAnalyzer {
   const float MAX_GEN_ETA  = 2.5;
   const float MIN_RECO_ETA = 1.0;
   const float MAX_RECO_ETA = 2.5;
-  const float MAX_MATCH_DR = 0.5;
+  const float MAX_RECO_TRK_MATCH_DR = 0.5;
+  const float MAX_UNP_EMU_MATCH_DR  = 0.2;
 
   ///////////////////////////////////
   ///  Output branch information  ///
@@ -70,8 +71,9 @@ class FlatNtuple : public edm::EDAnalyzer {
   /////////////////////////
   ///  Object matchers  ///
   /////////////////////////
-  RecoTrkDR        recoTrkDR;
-  SimUnpHit        simUnpHit;
+  RecoTrkDR   recoTrkDR;
+  UnpEmuTrkDR unpEmuTrkDR;
+  SimUnpHit   simUnpHit;
  
   // Output tree
   TTree * out_tree;

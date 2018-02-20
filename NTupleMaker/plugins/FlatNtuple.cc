@@ -170,7 +170,11 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   // std::cout << "About to match EMTF tracks to RECO muons" << std::endl;
   // Match emulated EMTF tracks to RECO muons (and visa-versa)
-  recoTrkDR.Match(recoMuonInfo, emtfTrackInfo, MIN_RECO_ETA, MAX_RECO_ETA, MAX_MATCH_DR);
+  recoTrkDR.Match(recoMuonInfo, emtfTrackInfo, MIN_RECO_ETA, MAX_RECO_ETA, MAX_RECO_TRK_MATCH_DR);
+
+  // std::cout << "About to match EMTF unpacked and emulated tracks" << std::endl;
+  // Match unpacked and emulated EMTF tracks
+  unpEmuTrkDR.Match(emtfUnpTrackInfo, emtfTrackInfo, MAX_UNP_EMU_MATCH_DR);
 
   
   // std::cout << "About to fill output tree" << std::endl;
