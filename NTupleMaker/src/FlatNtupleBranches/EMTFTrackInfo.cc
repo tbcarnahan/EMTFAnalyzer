@@ -21,6 +21,8 @@ void EMTFTrackInfo::Reset() {
 void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hits) {
   // std::cout << "Filling EMTFTrackInfo" << std::endl;
 
+  const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
+
   INSERT(mInts, "nTracks", ACCESS(mInts, "nTracks") + 1 );
   if (emtfTrk.BX() == 0) 
     INSERT(mInts, "nTracksBX0", ACCESS(mInts, "nTracksBX0") + 1 );
@@ -61,7 +63,6 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
     bool foundHit = false;
     bool foundTwoHits = false;
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-      const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
 
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
 	   trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&  
@@ -101,7 +102,6 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
       std::cout << "Found no match (or two matches) in emulator for the following emulator hit:" << std::endl;
       PrintEMTFHit(trk_hit);
       for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-	const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
 	PrintHit(iHit, i);
       }
       std::cout << "\n\n" << std::endl;

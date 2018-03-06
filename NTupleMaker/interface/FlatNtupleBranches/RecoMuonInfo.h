@@ -24,20 +24,24 @@
 ////////////////////////////////
 
 struct RecoMuonInfo {
-  std::vector<TString> ints = {{"nRecoMuons"}};
+  std::vector<TString> ints = {{"nRecoMuons", "nRecoMuonsFwd"}};
   std::vector<TString> vFlt = {{"reco_pt", "reco_eta", "reco_eta_St1", "reco_eta_St2", 
 				"reco_theta", "reco_theta_St1", "reco_theta_St2", 
 				"reco_phi", "reco_phi_St1", "reco_phi_St2",
-                                "reco_dR_match_dEta", "reco_dR_match_dPhi", "reco_dR_match_dR"}};
-  std::vector<TString> vInt = {{"reco_ID_loose", "reco_ID_medium", "reco_ID_tight", "reco_charge",
-				"reco_dR_match_iTrk", "reco_dR_match_numTrk", "reco_dR_match_unique"}};
+                                "reco_dR_match_dEta", "reco_dR_match_dPhi", "reco_dR_match_dR",
+				"reco_iso", "reco_d0_BS", "reco_dZ_BS", "reco_d0_PV", "reco_dZ_PV"}};
+  std::vector<TString> vInt = {{"reco_ID_soft", "reco_ID_loose", "reco_ID_medium", "reco_ID_tight",
+				"reco_ID_PF", "reco_ID_tracker", "reco_ID_stand", "reco_ID_global",
+				"reco_ID_station", "reco_ID_nStations", "reco_charge",
+				"reco_dR_match_iTrk", "reco_dR_match_nTrk", "reco_dR_match_unique"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;
 
   void Initialize();
   void Reset();
-  void Fill(const reco::Muon mu, const reco::Vertex vertex, 
+  void Fill(const reco::Muon mu, const reco::Vertex vertex,
+	    const edm::Handle<reco::BeamSpot>& beamSpotHandle,
 	    PropagateToMuon muProp1st, PropagateToMuon muProp2nd,
 	    const float min_eta, const float max_eta);
 };

@@ -24,6 +24,8 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
 
   bool ReEmulLCTs = true; // Don't expect perfect hit-track matching if using re-emulated LCTs as input
 
+  const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
+
   INSERT(mInts, "nUnpTracks", ACCESS(mInts, "nUnpTracks") + 1 );
   if (emtfTrk.BX() == 0) 
     INSERT(mInts, "nUnpTracksBX0", ACCESS(mInts, "nUnpTracksBX0") + 1 );
@@ -64,7 +66,6 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
     bool foundHit = false;
     bool foundTwoHits = false;
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-      const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
 
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) && 
 	   trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&  
@@ -150,7 +151,6 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
       std::cout << "Found no match (or two matches) in emulator for the following unpacked hit:" << std::endl;
       PrintEMTFHit(trk_hit);
       for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-	const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
 	if (ACCESS(*iHit, "hit_isCSC").at(i)) {
 	  PrintHit(iHit, i);
 	}

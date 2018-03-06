@@ -4,62 +4,77 @@
 void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks, 
 		       const float min_reco_eta, const float max_reco_eta, const float max_match_dR ) {
 
-  const float NOMATCH = -999.;
-	
+  // std::cout << "\nEntering RecoTrkDR.cc" << std::endl;
+
+  const float NOMATCH = 999.;
+
   const int nReco = ACCESS(recoMuons.mInts, "nRecoMuons");
   const int nTrk = ACCESS(emtfTrks.mInts, "nTracks");
-  
-  std::vector<float> reco_eta_St2(nReco, NOMATCH);
-  std::vector<float> reco_phi_St2(nReco, NOMATCH);
-  std::vector<float> reco_eta_St1(nReco, NOMATCH);
-  std::vector<float> reco_phi_St1(nReco, NOMATCH);
-  std::vector<float> reco_eta_nom(nReco, NOMATCH);
-  std::vector<float> reco_phi_nom(nReco, NOMATCH);
-  std::vector<float> recoEta(nReco, NOMATCH);
-  std::vector<float> recoPhi(nReco, NOMATCH);
-  std::vector<float> trkEta(nTrk, NOMATCH);
-  std::vector<float> trkPhi(nTrk, NOMATCH);
-  std::vector<std::vector<float> > dR_matrix(nReco, std::vector<float>(nTrk, NOMATCH));
+
+  std::vector<bool>                valid_St2  (nReco, 0);
+  std::vector<std::vector<float> > dR_matrix  (nReco, std::vector<float>(nTrk, NOMATCH));
   std::vector<std::vector<float> > dEta_matrix(nReco, std::vector<float>(nTrk, NOMATCH));
   std::vector<std::vector<float> > dPhi_matrix(nReco, std::vector<float>(nTrk, NOMATCH));
 
-  const std::map<TString, std::vector<float> > * iReco = &(recoMuons.mVFlt);
-  const std::map<TString, std::vector<float> > * iTrk  = &(emtfTrks.mVFlt);
+  std::map<TString, std::vector<int>   > * iReco = &(recoMuons.mVInt); // Can't be "const" because we modify recoMuons below
+  std::map<TString, std::vector<int>   > * iTrk  = &(emtfTrks.mVInt);  // Can't be "const" because we modify emtfTrks below
+  std::map<TString, std::vector<float> > * fReco = &(recoMuons.mVFlt); // Can't be "const" because we modify recoMuons below
+  std::map<TString, std::vector<float> > * fTrk  = &(emtfTrks.mVFlt);  // Can't be "const" because we modify emtfTrks below
 
   // Find dR, dEta, and dPhi between all RECO-EMTF pairs
   for (int i = 0; i < nReco; i++) {
 
-    reco_eta_St2[i] = ACCESS(*iReco, "reco_eta_St2").at(i);
-    reco_phi_St2[i] = ACCESS(*iReco, "reco_phi_St2").at(i) * M_PI / 180.;
-    reco_eta_St1[i] = ACCESS(*iReco, "reco_eta_St1").at(i);
-    reco_phi_St1[i] = ACCESS(*iReco, "reco_phi_St1").at(i) * M_PI / 180.;
-    reco_eta_nom[i] = ACCESS(*iReco, "reco_eta")    .at(i);
-    reco_phi_nom[i] = ACCESS(*iReco, "reco_phi")    .at(i) * M_PI / 180.;
+    float reco_eta_St2 = ACCESS(*fReco, "reco_eta_St2").at(i);
+    float reco_phi_St2 = ACCESS(*fReco, "reco_phi_St2").at(i) * M_PI / 180.;
+    float reco_eta_St1 = ACCESS(*fReco, "reco_eta_St1").at(i);
+    float reco_phi_St1 = ACCESS(*fReco, "reco_phi_St1").at(i) * M_PI / 180.;
+    float reco_eta_nom = ACCESS(*fReco, "reco_eta")    .at(i);
+    float reco_phi_nom = ACCESS(*fReco, "reco_phi")    .at(i) * M_PI / 180.;
+
+    float recoEta = NOMATCH;
+    float recoPhi = NOMATCH;
 
     // Use RECO muon coordinates extrapolated to 2nd muon station (if available), otherwise 1st
-    if ( reco_eta_St2[i] > -9 ) {
-      recoEta[i] = reco_eta_St2[i];
-      recoPhi[i] = reco_phi_St2[i];
-    } else if ( reco_eta_St1[i] > -9 ) {
-      recoEta[i] = reco_eta_St1[i];
-      recoPhi[i] = reco_phi_St1[i];
+    if ( fabs(reco_eta_St2) < 3.0 ) {
+      recoEta = reco_eta_St2;
+      recoPhi = reco_phi_St2;
+      valid_St2.at(i) = 1;
+    } else if ( fabs(reco_eta_St1) < 3.0 ) {
+      recoEta = reco_eta_St1;
+      recoPhi = reco_phi_St1;
     } else {
-      recoEta[i] = reco_eta_nom[i];
-      recoPhi[i] = reco_phi_nom[i];
+      recoEta = reco_eta_nom;
+      recoPhi = reco_phi_nom;
     }
 
-    if (fabs(recoEta[i]) > max_reco_eta || fabs(recoEta[i]) < min_reco_eta )
+    // For standalone muons, don't use the extrapolation
+    int global  = ACCESS(*iReco, "reco_ID_global").at(i);
+    int tracker = ACCESS(*iReco, "reco_ID_tracker").at(i);
+    if ( global == 0 && tracker == 0 ) {
+      recoEta = reco_eta_nom;
+      recoPhi = reco_phi_nom;
+      valid_St2.at(i) = 1;
+    }
+
+    if ( fabs(recoEta) > max_reco_eta || fabs(recoEta) < min_reco_eta )
       continue;
 
     // Loop over EMTF tracks 
     for (int j = 0; j < nTrk; j++) {
 
-      trkEta[j] = ACCESS(*iTrk, "trk_eta").at(j);
-      trkPhi[j] = ACCESS(*iTrk, "trk_phi").at(j) * M_PI / 180.;
+      // Discard EMTF tracks which have no hits in BX = 0
+      if ( abs(ACCESS(*iTrk, "trk_BX").at(j)) >  1 ) continue;
+      if ( abs(ACCESS(*iTrk, "trk_BX").at(j)) == 1 && ACCESS(*iTrk, "trk_dBX").at(j) == 0 ) continue;
 
-      dEta_matrix[i][j] = trkEta[j] - recoEta[i];
-      dPhi_matrix[i][j] = calc_dPhi(recoPhi[i], trkPhi[j]) * 180. / M_PI;
-      dR_matrix[i][j]   = calc_dR(recoEta[i], recoPhi[i], trkEta[j], trkPhi[j]);
+      // Discard EMTF tracks composed entirely of neighbor hits (should be built in other sector)
+      if ( ACCESS(*iTrk, "trk_mode_neighbor").at(j) == ACCESS(*iTrk, "trk_mode").at(j) ) continue;
+
+      float trkEta = ACCESS(*fTrk, "trk_eta").at(j);
+      float trkPhi = ACCESS(*fTrk, "trk_phi").at(j) * M_PI / 180.;
+
+      dEta_matrix[i][j] = trkEta - recoEta;
+      dPhi_matrix[i][j] = calc_dPhi(recoPhi, trkPhi) * 180. / M_PI;
+      dR_matrix[i][j]   = calc_dR(recoEta, recoPhi, trkEta, trkPhi);
     } // End loop over nTrk (j)
 
   } // End loop over nReco (i)
@@ -71,9 +86,9 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
     int nMatch =  0;
     float min_dR = max_match_dR;
     for (int j = 0; j < nTrk; j++) {
-      if (dR_matrix[i][j] < max_match_dR)
+      if ( fabs( dR_matrix[i][j] ) < max_match_dR )
 	nMatch += 1;
-      if (dR_matrix[i][j] < min_dR) {
+      if ( fabs( dR_matrix[i][j] ) < min_dR ) {
 	jMin = j;
 	min_dR = dR_matrix[i][j];
       }
@@ -90,20 +105,37 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       INSERT(recoMuons.mVFlt, "reco_dR_match_dPhi", DFLT);
       INSERT(recoMuons.mVFlt, "reco_dR_match_dR",   DFLT);
     }
-    INSERT(recoMuons.mVInt, "reco_dR_match_numTrk", nMatch);
+    INSERT(recoMuons.mVInt, "reco_dR_match_nTrk",   nMatch);
     INSERT(recoMuons.mVInt, "reco_dR_match_unique", 0);
-      
+
   } // End loop: for (int i = 0; i < nReco; i++)
 
   // Find closest RECO muon to each EMTF track
   for (int j = 0; j < nTrk; j++) {
-    int iMin   = -1;
-    int nMatch =  0;
+    int iMin       = -1;
+    int nMatch     = 0;
+    int nMatchSoft = 0;
     float min_dR = max_match_dR;
+
+    // At first, only consider RECO muons propagated to station 2
     for (int i = 0; i < nReco; i++) {
-      if (dR_matrix[i][j] < max_match_dR)
-	nMatch += 1;
-      if (dR_matrix[i][j] < min_dR) {
+      if ( fabs( dR_matrix[i][j] ) < max_match_dR ) {
+	if ( valid_St2.at(i) == 0 ) {
+	  nMatchSoft += 1;
+	  continue;
+	} else {
+	  nMatch += 1;
+	}
+      }
+      if ( fabs( dR_matrix[i][j] ) < min_dR ) {
+	iMin = i;
+	min_dR = dR_matrix[i][j];
+      }
+    }
+
+    // If no matches found, consider all RECO muons
+    for (int i = 0; i < nReco; i++) {
+      if ( fabs( dR_matrix[i][j] ) < min_dR ) {
 	iMin = i;
 	min_dR = dR_matrix[i][j];
       }
@@ -120,8 +152,9 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       INSERT(emtfTrks.mVFlt, "trk_dR_match_dPhi",  DFLT);
       INSERT(emtfTrks.mVFlt, "trk_dR_match_dR",    DFLT);
     }
-    INSERT(emtfTrks.mVInt, "trk_dR_match_numReco", nMatch);
-    INSERT(emtfTrks.mVInt, "trk_dR_match_unique",  0);
+    INSERT(emtfTrks.mVInt, "trk_dR_match_nReco",     nMatch);
+    INSERT(emtfTrks.mVInt, "trk_dR_match_nRecoSoft", nMatchSoft);
+    INSERT(emtfTrks.mVInt, "trk_dR_match_unique",    0);
 
   } // End loop: for (int j = 0; j < nTrk; j++)
 
@@ -139,5 +172,6 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
     } // End loop: for (int j = 0; j < nTrk; j++)
   } // End loop: for (int i = 0; i < nReco; i++)
 
-  
+  // std::cout << "Finished with RecoTrkDR.cc\n" << std::endl;
+
 } // End function: void RecoTrkDR::Match()

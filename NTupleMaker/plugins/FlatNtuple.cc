@@ -19,9 +19,10 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   isReco = iConfig.getParameter<bool>("isReco");
   
   // Input collections
-  if (isMC)   GenMuon_token    = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
-  if (isReco) RecoMuon_token   = consumes<reco::MuonCollection>           (iConfig.getParameter<edm::InputTag>("recoMuonTag"));
-  if (isReco) RecoVertex_token = consumes<reco::VertexCollection>         (iConfig.getParameter<edm::InputTag>("recoVertexTag")); 
+  if (isMC)   GenMuon_token      = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
+  if (isReco) RecoMuon_token     = consumes<reco::MuonCollection>           (iConfig.getParameter<edm::InputTag>("recoMuonTag"));
+  if (isReco) RecoVertex_token   = consumes<reco::VertexCollection>         (iConfig.getParameter<edm::InputTag>("recoVertexTag"));
+  if (isReco) RecoBeamSpot_token = consumes<reco::BeamSpot>                 (iConfig.getParameter<edm::InputTag>("recoBeamSpotTag"));
   
   EMTFHit_token      = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfHitTag"));
   EMTFSimHit_token   = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfSimHitTag"));
@@ -44,6 +45,9 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if (isReco) iEvent.getByToken(RecoMuon_token, recoMuons);
   edm::Handle<reco::VertexCollection> recoVertices;
   if (isReco) iEvent.getByToken(RecoVertex_token, recoVertices);
+  edm::Handle<reco::BeamSpot> recoBeamSpot;
+  if (isReco) iEvent.getByToken(RecoBeamSpot_token, recoBeamSpot);
+
   
   edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
   iEvent.getByToken(EMTFHit_token, emtfHits);
@@ -76,7 +80,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     muProp2nd_.init(iSetup);
     // Loop over RECO muons
     for ( reco::MuonCollection::const_iterator mu = recoMuons->begin(); mu != recoMuons->end(); ++mu ) {
-      recoMuonInfo.Fill( *mu, (*recoVertices)[0], muProp1st_, muProp2nd_, MIN_RECO_ETA, MAX_RECO_ETA );
+      recoMuonInfo.Fill( *mu, (*recoVertices)[0], recoBeamSpot, muProp1st_, muProp2nd_, MIN_RECO_ETA, MAX_RECO_ETA );
     }
   }
   else if (isReco) {

@@ -22,7 +22,7 @@ void GenMuonInfo::Fill(const reco::GenParticle & genMuon) {
   float _phi = genMuon.phi() * 180. / M_PI;
   if (_phi > 180) _phi -= 360;
 
-  INSERT(mInts, "nMuons", ACCESS(mVFlt, "mu_pt").size() + 1);
+  INSERT(mInts, "nMuons", ACCESS(mInts, "nMuons") + 1);
 
   INSERT(mVFlt, "mu_pt",     genMuon.pt() );
   INSERT(mVFlt, "mu_eta",    genMuon.eta() );

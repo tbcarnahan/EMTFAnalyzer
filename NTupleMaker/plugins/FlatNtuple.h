@@ -52,8 +52,8 @@ class FlatNtuple : public edm::EDAnalyzer {
   // Default parameters
   const float MIN_GEN_ETA  = 1.0;
   const float MAX_GEN_ETA  = 2.5;
-  const float MIN_RECO_ETA = 1.0;
-  const float MAX_RECO_ETA = 2.5;
+  const float MIN_RECO_ETA = 0.0;
+  const float MAX_RECO_ETA = 3.0;
   const float MAX_RECO_TRK_MATCH_DR = 0.5;
   const float MAX_UNP_EMU_MATCH_DR  = 0.2;
 
@@ -96,6 +96,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<reco::GenParticle>> GenMuon_token;
   edm::EDGetTokenT<reco::MuonCollection>           RecoMuon_token;
   edm::EDGetTokenT<reco::VertexCollection>         RecoVertex_token;
+  edm::EDGetTokenT<reco::BeamSpot>                 RecoBeamSpot_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFSimHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFTrack_token;

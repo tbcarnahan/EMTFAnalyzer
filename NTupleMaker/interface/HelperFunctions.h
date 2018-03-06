@@ -38,7 +38,9 @@ inline bool isFront(int station, int ring, int chamber, int subsystem) {
 
 inline float calc_dPhi(const float phi1, const float phi2) {
 
-  return acos( cos( phi2 - phi1 ) );
+  float dPhi = acos( cos(phi2 - phi1) );
+  if ( sin(phi2 - phi1) < 0 ) dPhi *= -1;
+  return dPhi;
 }
 
 inline float calc_dR(const float eta1, const float phi1, const float eta2, const float phi2) {

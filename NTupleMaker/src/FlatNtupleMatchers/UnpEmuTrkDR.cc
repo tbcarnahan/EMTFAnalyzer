@@ -3,55 +3,50 @@
 
 void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, const float max_match_dR ) {
 
-  const float NOMATCH = -999.;
+  const float NOMATCH = 999.;
 	
   const int nUnp = ACCESS(unpTrks.mInts, "nUnpTracks");
   const int nEmu = ACCESS(emuTrks.mInts, "nTracks");
   
-  std::vector<int>   unpBX (nUnp, NOMATCH);
-  std::vector<float> unpEta(nUnp, NOMATCH);
-  std::vector<float> unpPhi(nUnp, NOMATCH);
-  std::vector<int>   emuBX (nEmu, NOMATCH);
-  std::vector<float> emuEta(nEmu, NOMATCH);
-  std::vector<float> emuPhi(nEmu, NOMATCH);
   std::vector<std::vector<int>   > dBX_matrix (nUnp, std::vector<int>  (nEmu, NOMATCH));
   std::vector<std::vector<float> > dEta_matrix(nUnp, std::vector<float>(nEmu, NOMATCH));
   std::vector<std::vector<float> > dPhi_matrix(nUnp, std::vector<float>(nEmu, NOMATCH));
   std::vector<std::vector<float> > dR_matrix  (nUnp, std::vector<float>(nEmu, NOMATCH));
 
-  const std::map<TString, std::vector<int>   > * iUnp = &(unpTrks.mVInt);
-  const std::map<TString, std::vector<int>   > * iEmu = &(emuTrks.mVInt);
-  const std::map<TString, std::vector<float> > * fUnp = &(unpTrks.mVFlt);
-  const std::map<TString, std::vector<float> > * fEmu = &(emuTrks.mVFlt);
+  std::map<TString, std::vector<int>   > * iUnp = &(unpTrks.mVInt); // Can't be "const" because we modify unpTrks below
+  std::map<TString, std::vector<int>   > * iEmu = &(emuTrks.mVInt); // Can't be "const" because we modify emuTrks below
+  std::map<TString, std::vector<float> > * fUnp = &(unpTrks.mVFlt); // Can't be "const" because we modify unpTrks below
+  std::map<TString, std::vector<float> > * fEmu = &(emuTrks.mVFlt); // Can't be "const" because we modify emuTrks below
 
   // Find dR, dEta, and dPhi between all unpacker-emulator pairs
   for (int i = 0; i < nUnp; i++) {
 
-    unpBX [i] = ACCESS(*iUnp, "unp_trk_BX") .at(i);
-    unpEta[i] = ACCESS(*fUnp, "unp_trk_eta").at(i);
-    unpPhi[i] = ACCESS(*fUnp, "unp_trk_phi").at(i) * M_PI / 180.;
+    int   unpBX  = ACCESS(*iUnp, "unp_trk_BX") .at(i);
+    float unpEta = ACCESS(*fUnp, "unp_trk_eta").at(i);
+    float unpPhi = ACCESS(*fUnp, "unp_trk_phi").at(i) * M_PI / 180.;
 
     for (int j = 0; j < nEmu; j++) {
 
-      emuBX [i] = ACCESS(*iEmu, "trk_BX") .at(j);
-      emuEta[j] = ACCESS(*fEmu, "trk_eta").at(j);
-      emuPhi[j] = ACCESS(*fEmu, "trk_phi").at(j) * M_PI / 180.;
+      int   emuBX  = ACCESS(*iEmu, "trk_BX") .at(j);
+      float emuEta = ACCESS(*fEmu, "trk_eta").at(j);
+      float emuPhi = ACCESS(*fEmu, "trk_phi").at(j) * M_PI / 180.;
 
-      dBX_matrix [i][j] = emuBX[j]  - unpBX[i];
-      dEta_matrix[i][j] = emuEta[j] - unpEta[i];
-      dPhi_matrix[i][j] = calc_dPhi(unpPhi[i], emuPhi[j]) * 180. / M_PI;
-      dR_matrix  [i][j] = calc_dR(unpEta[i], unpPhi[i], emuEta[j], emuPhi[j]);
+      dBX_matrix [i][j] = emuBX  - unpBX;
+      dEta_matrix[i][j] = emuEta - unpEta;
+      dPhi_matrix[i][j] = calc_dPhi(unpPhi, emuPhi) * 180. / M_PI;
+      dR_matrix  [i][j] = calc_dR(unpEta, unpPhi, emuEta, emuPhi);
     } // End loop over nEmu (j)
 
   } // End loop over nUnp (i)
 
 
-  // Find closest EMTF track to each RECO muon
+  // Find closest emulated track to each unpacked muon
   for (int i = 0; i < nUnp; i++) {
-    int jMin   = -1;
+    int   jMin   = -1;
     float min_dR = max_match_dR;
     for (int j = 0; j < nEmu; j++) {
-      if (dR_matrix[i][j] < min_dR && abs(dBX_matrix[i][j]) < 2) {
+      if ( fabs( dR_matrix [i][j] ) < min_dR &&
+	   abs ( dBX_matrix[i][j] ) < 2       ) {
 	jMin = j;
 	min_dR = dR_matrix[i][j];
       }
@@ -62,7 +57,7 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
       INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  dBX_matrix [i][jMin]);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dEta", dEta_matrix[i][jMin]);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dPhi", dPhi_matrix[i][jMin]);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dR",   dR_matrix[i][jMin]);
+      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dR",   dR_matrix  [i][jMin]);
     } else {
       INSERT(unpTrks.mVInt, "unp_trk_emu_match_iEmu", DINT);
       INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  DINT);
@@ -80,7 +75,8 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
     int iMin   = -1;
     float min_dR = max_match_dR;
     for (int i = 0; i < nUnp; i++) {
-      if (dR_matrix[i][j] < min_dR && abs(dBX_matrix[i][j]) < 2) {
+      if ( fabs( dR_matrix [i][j] ) < min_dR &&
+	   abs ( dBX_matrix[i][j] ) < 2      ) {
 	iMin = i;
 	min_dR = dR_matrix[i][j];
       }
@@ -91,7 +87,7 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
       INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  dBX_matrix [iMin][j]);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dEta", dEta_matrix[iMin][j]);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dPhi", dPhi_matrix[iMin][j]);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dR",   dR_matrix[iMin][j]);
+      INSERT(emuTrks.mVFlt, "trk_unp_match_dR",   dR_matrix  [iMin][j]);
     } else {
       INSERT(emuTrks.mVInt, "trk_unp_match_iUnp", DINT);
       INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  DINT);
@@ -131,5 +127,4 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
     } // End loop: for (int j = 0; j < nEmu; j++)
   } // End loop: for (int i = 0; i < nUnp; i++)
 
-  
 } // End function: void UnpEmuTrkDR::Match()

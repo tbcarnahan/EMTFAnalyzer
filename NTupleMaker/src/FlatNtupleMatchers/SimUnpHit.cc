@@ -15,8 +15,8 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
   }
 
   // Pointer to hit and simHit IDs (integers)
-  const std::map<TString, std::vector<int> > * iHit = &(emtfHits.mVInt);
-  const std::map<TString, std::vector<int> > * jHit = &(emtfSimHits.mVInt);
+  std::map<TString, std::vector<int> > * iHit = &(emtfHits.mVInt);    // Can't be "const" because we modify emtfHits below
+  std::map<TString, std::vector<int> > * jHit = &(emtfSimHits.mVInt); // Can't be "const" because we modify emtfSimHits below
 
   
   // Find matches between EMTF hits and simulated hits
@@ -67,5 +67,4 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
     } // End loop:  for (int j = 0; j < nSimHits; j++)
   } // End loop:  for (int i = 0; i < nHits; i++)
 
-  
 } // End function: void SimUnpHit::Match()

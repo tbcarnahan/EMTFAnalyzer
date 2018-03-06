@@ -56,21 +56,21 @@ inline void PrintEMTFSimHit( const l1t::EMTFHit & hit ) {
 
 inline void PrintSimHit( const std::map<TString, std::vector<int> > * iHit , const int i) {
 
-  if (ACCESS(*iHit, "hit_isCSC").at(i)) {
-    std::cout << "* Found in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)
-              << ", sector " << ACCESS(*iHit, "hit_sector").at(i) << " (" << ACCESS(*iHit, "hit_sector_index").at(i)
-              << "), subsector " << ACCESS(*iHit, "hit_subsector").at(i) << ", station " << ACCESS(*iHit, "hit_station").at(i)
-              << ", ring " << ACCESS(*iHit, "hit_ring").at(i) << ", CSC ID " << ACCESS(*iHit, "hit_CSC_ID").at(i)
-              << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i) << ", pattern " << ACCESS(*iHit, "hit_pattern").at(i)
-              << ", quality " << ACCESS(*iHit, "hit_quality").at(i) << ", strip " << ACCESS(*iHit, "hit_strip").at(i)
-              << ", wire " << ACCESS(*iHit, "hit_wire").at(i) << std::endl;
+  if (ACCESS(*iHit, "sim_hit_isCSC").at(i)) {
+    std::cout << "* Found in BX " << ACCESS(*iHit, "sim_hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "sim_hit_endcap").at(i)
+              << ", sector " << ACCESS(*iHit, "sim_hit_sector").at(i) << " (" << ACCESS(*iHit, "sim_hit_sector_index").at(i)
+              << "), subsector " << ACCESS(*iHit, "sim_hit_subsector").at(i) << ", station " << ACCESS(*iHit, "sim_hit_station").at(i)
+              << ", ring " << ACCESS(*iHit, "sim_hit_ring").at(i) << ", CSC ID " << ACCESS(*iHit, "sim_hit_CSC_ID").at(i)
+              << ", chamber " << ACCESS(*iHit, "sim_hit_chamber").at(i) << ", pattern " << ACCESS(*iHit, "sim_hit_pattern").at(i)
+              << ", quality " << ACCESS(*iHit, "sim_hit_quality").at(i) << ", strip " << ACCESS(*iHit, "sim_hit_strip").at(i)
+              << ", wire " << ACCESS(*iHit, "sim_hit_wire").at(i) << std::endl;
   }
-  else if (ACCESS(*iHit, "hit_isRPC").at(i)) {
-    std::cout << "* Found in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)
-	      << ", sector " << ACCESS(*iHit, "hit_sector").at(i) << " (" << ACCESS(*iHit, "hit_sector_index").at(i)
-	      << "), subsector " << ACCESS(*iHit, "hit_subsector").at(i) << ", station " << ACCESS(*iHit, "hit_station").at(i)
-	      << ", ring " << ACCESS(*iHit, "hit_ring").at(i) << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i)
-	      << ", theta " << ACCESS(*iHit, "hit_theta_int").at(i) << ", phi " << ACCESS(*iHit, "hit_phi_int").at(i) << std::endl;
+  else if (ACCESS(*iHit, "sim_hit_isRPC").at(i)) {
+    std::cout << "* Found in BX " << ACCESS(*iHit, "sim_hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "sim_hit_endcap").at(i)
+	      << ", sector " << ACCESS(*iHit, "sim_hit_sector").at(i) << " (" << ACCESS(*iHit, "sim_hit_sector_index").at(i)
+	      << "), subsector " << ACCESS(*iHit, "sim_hit_subsector").at(i) << ", station " << ACCESS(*iHit, "sim_hit_station").at(i)
+	      << ", ring " << ACCESS(*iHit, "sim_hit_ring").at(i) << ", chamber " << ACCESS(*iHit, "sim_hit_chamber").at(i)
+	      << ", theta " << ACCESS(*iHit, "sim_hit_theta_int").at(i) << ", phi " << ACCESS(*iHit, "sim_hit_phi_int").at(i) << std::endl;
   }
   else std::cout << "iHit with index " << i << " is neither CSC nor RPC?!?" << std::endl;
 }
