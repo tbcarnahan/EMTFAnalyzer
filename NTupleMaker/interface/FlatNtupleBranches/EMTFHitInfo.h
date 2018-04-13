@@ -41,13 +41,13 @@ inline void PrintEMTFHit( const l1t::EMTFHit & hit ) {
     std::cout << "CSC LCT in BX " << hit.BX() << ", endcap " << hit.Endcap() << ", sector " << hit.Sector()
               << " (" << hit.Sector_idx() << "), subsector " << hit.Subsector() << ", station " << hit.Station()
               << ", ring " << hit.Ring() << ", CSC ID " << hit.CSC_ID() << ", chamber " << hit.Chamber()
-              << ", pattern " << hit.Pattern() << ", quality " << hit.Quality()
+              << ", neighbor " << hit.Neighbor() << ", pattern " << hit.Pattern() << ", quality " << hit.Quality()
               << ", strip " << hit.Strip() << ", wire " << hit.Wire() << std::endl;
   } 
   else if (hit.Is_RPC()) {
     std::cout << "RPC hit in BX " << hit.BX() << ", endcap " << hit.Endcap() << ", sector " << hit.Sector()
 	      << " (" << hit.Sector_idx() << "), subsector " << hit.Subsector() << ", station " << hit.Station()
-	      << ", ring " << hit.Ring() << ", chamber " << hit.Chamber()
+	      << ", ring " << hit.Ring() << ", chamber " << hit.Chamber() << ", neighbor " << hit.Neighbor()
 	      << ", theta " << hit.Theta_fp() << ", phi " << hit.Phi_fp() << std::endl;
   }
   else std::cout << "EMTF hit is neither CSC nor RPC?!?" << std::endl;
@@ -60,8 +60,9 @@ inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const 
               << ", sector " << ACCESS(*iHit, "hit_sector").at(i) << " (" << ACCESS(*iHit, "hit_sector_index").at(i)
               << "), subsector " << ACCESS(*iHit, "hit_subsector").at(i) << ", station " << ACCESS(*iHit, "hit_station").at(i)
               << ", ring " << ACCESS(*iHit, "hit_ring").at(i) << ", CSC ID " << ACCESS(*iHit, "hit_CSC_ID").at(i)
-              << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i) << ", pattern " << ACCESS(*iHit, "hit_pattern").at(i)
-              << ", quality " << ACCESS(*iHit, "hit_quality").at(i) << ", strip " << ACCESS(*iHit, "hit_strip").at(i)
+              << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i) << ", neighbor " << ACCESS(*iHit, "hit_neighbor").at(i)
+	      << ", pattern " << ACCESS(*iHit, "hit_pattern").at(i) << ", quality " << ACCESS(*iHit, "hit_quality").at(i)
+	      << ", strip " << ACCESS(*iHit, "hit_strip").at(i)
               << ", wire " << ACCESS(*iHit, "hit_wire").at(i) << std::endl;
   }
   else if (ACCESS(*iHit, "hit_isRPC").at(i)) {
@@ -69,6 +70,7 @@ inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const 
 	      << ", sector " << ACCESS(*iHit, "hit_sector").at(i) << " (" << ACCESS(*iHit, "hit_sector_index").at(i)
 	      << "), subsector " << ACCESS(*iHit, "hit_subsector").at(i) << ", station " << ACCESS(*iHit, "hit_station").at(i)
 	      << ", ring " << ACCESS(*iHit, "hit_ring").at(i) << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i)
+	      << ", neighbor " << ACCESS(*iHit, "hit_neighbor").at(i)
 	      << ", theta " << ACCESS(*iHit, "hit_theta_int").at(i) << ", phi " << ACCESS(*iHit, "hit_phi_int").at(i) << std::endl;
   }
   else std::cout << "iHit with index " << i << " is neither CSC nor RPC?!?" << std::endl;
