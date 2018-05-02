@@ -1,4 +1,4 @@
-## 11.02.16: Copied from https://raw.githubusercontent.com/dcurry09/EMTF8/master/L1Trigger/L1TMuonEndCap/test/runMuonEndCap.py
+# 11.02.16: Copied from https://raw.githubusercontent.com/dcurry09/EMTF8/master/L1Trigger/L1TMuonEndCap/test/runMuonEndCap.py
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -42,8 +42,8 @@ import FWCore.PythonUtilities.LumiList as LumiList
 # process.source.lumisToProcess = LumiList.LumiList(filename = 'goodList.json').getVLuminosityBlockRange()
 
 ## Message Logger and Event range
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(10)
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.options = cms.untracked.PSet(
@@ -54,14 +54,17 @@ process.options = cms.untracked.PSet(
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 
-## Default parameters for firmware version, pT LUT XMLs, and coordinate conversion LUTs
-process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff') 
-# process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2017_data_cff') 
-# process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2016_data_cff') 
+# ## Default parameters for firmware version, pT LUT XMLs, and coordinate conversion LUTs
+# process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff') 
+# # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2017_data_cff') 
+# # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2016_data_cff') 
 
-# ## Un-comment out this line to choose the GlobalTag settings rather than fakeEmtfParams settings
-# ## Comment out this line to use default FW version rather than true FW version in data
+## Un-comment out this line to choose the GlobalTag settings rather than fakeEmtfParams settings
+## Comment out this line to use default FW version rather than true FW version in data
+## Update: seems to have no effect one way or the other in re-emulating 2017 data - AWB 26.04.18
 process.es_prefer_GlobalTag = cms.ESPrefer("PoolDBESSource","GlobalTag")
+
+## What is this supposed to do?  Causes segfault when re-emulating 2017 data - AWB 26.04.18
 # process.es_prefer_GlobalTag = cms.ESPrefer("PoolDBESSource","emtfParamsSource")
 
 
@@ -81,6 +84,7 @@ eos_cmd = '/afs/cern.ch/project/eos/installation/ams/bin/eos.select'
 # in_dir_name = '/eos/cms/tier0/store/data/Commissioning2017/MinimumBias/RAW/v1/000/293/765/00000/'
 # in_dir_name = '/eos/cms/tier0/store/data/Run2017E/DoubleMuon/RAW/v1/000/303/832/00000/'
 in_dir_name = '/store/data/Run2017F/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/306/091/00000/'
+# in_dir_name = '/store/data/Run2018A/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/315/322/00000/'
 
 # ## 2017 Cosmics, with RPC!
 # in_dir_name = '/store/express/Commissioning2017/ExpressCosmics/FEVT/Express-v1/000/291/622/ 00000/'
@@ -142,7 +146,7 @@ for in_file_name in subprocess.check_output([eos_cmd, 'ls', in_dir_name]).splitl
     if not ('.root' in in_file_name): continue
     iFile += 1
     if iFile < 10: continue  ## Skip earliest files in run
-    if iFile > 11: break
+    if iFile > 20: break
     print in_file_name
     readFiles.extend( cms.untracked.vstring(in_dir_name+in_file_name) )
     # in_dir_name_T0 = in_dir_name.replace('/eos/cms/tier0/', 'root://cms-xrd-tzero.cern.ch//')
@@ -162,6 +166,7 @@ process.content = cms.EDAnalyzer("EventContentAnalyzer")
 process.dumpED = cms.EDAnalyzer("EventContentAnalyzer")
 process.dumpES = cms.EDAnalyzer("PrintEventSetupContent")
 
+
 ## Re-emulate CSC LCTs to get full ALCT+CLCT info
 process.load('L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi')
 process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = cms.InputTag('muonCSCDigis', 'MuonCSCComparatorDigi')
@@ -180,15 +185,33 @@ process.cscTriggerPrimitiveDigis.commonParam = cms.PSet(
 process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
-process.simEmtfDigis.CSCInput  = cms.InputTag('emtfStage2Digis')
-process.simEmtfDigis.RPCInput  = cms.InputTag('muonRPCDigis')
+process.simEmtfDigisData.verbosity = cms.untracked.int32(0)
+
+# ## Planned 2018 settings
+# process.simEmtfDigisData.FWConfig = cms.bool(False)
+# process.simEmtfDigisData.BXWindow = cms.int32(2)
+# process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
+# process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
+# process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
+# process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
+
+# ## Early 2018 actual settings (through end of April at least)
+# process.simEmtfDigisData.FWConfig = cms.bool(False)
+# process.simEmtfDigisData.BXWindow = cms.int32(2)
+# process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(8)
+# process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
+# process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(False)
+# process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(1)
+
+# process.simEmtfDigisData.CSCInput  = cms.InputTag('emtfStage2Digis')
+# process.simEmtfDigisData.RPCInput  = cms.InputTag('muonRPCDigis')
 
 
 ## EMTF Emulator with re-emulated CSC LCTs as input
-process.simEmtfDigisSimLct = process.simEmtfDigis.clone()
+process.simEmtfDigisDataSimLct = process.simEmtfDigisData.clone()
 
-process.simEmtfDigisSimLct.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
-process.simEmtfDigisSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+process.simEmtfDigisDataSimLct.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
+process.simEmtfDigisDataSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
 
 
 
@@ -197,6 +220,7 @@ process.simEmtfDigisSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulat
 ###################
 
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
+process.FlatNtupleData.skimTrig = cms.bool(True)
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
@@ -204,8 +228,8 @@ RawToDigi_AWB = cms.Sequence(
     process.cscTriggerPrimitiveDigis + ## To get re-emulated CSC LCTs
     # process.csctfDigis               + ## Necessary for legacy studies, or if you use csctfDigis as input
     process.emtfStage2Digis          + 
-    process.simEmtfDigis             + 
-    process.simEmtfDigisSimLct       +
+    process.simEmtfDigisData         + 
+    process.simEmtfDigisDataSimLct   +
     process.FlatNtupleData
     )
 
@@ -214,50 +238,63 @@ process.raw2digi_step = cms.Path(RawToDigi_AWB)
 ## Defined in Configuration/StandardSequences/python/EndOfProcess_cff.py
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
-
 # out_dir_name = '/afs/cern.ch/work/a/abrinke1/public/EMTF/Analyzer/ntuples/'
 out_dir_name = './'
 
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_simLCT_test.root')
+    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_2017_emul_1k.root')
+    # fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_315322_FW_emul_central_CPPF_print.root')
     )
 
 
 # outCommands = cms.untracked.vstring('keep *')
+
 outCommands = cms.untracked.vstring(
-
-    'keep recoMuons_muons__*',
-    'keep *Gen*_*_*_*',
-    'keep *_*Gen*_*_*',
-    'keep *gen*_*_*_*',
-    'keep *_*gen*_*_*',
-    'keep CSCDetIdCSCCorrelatedLCTDigiMuonDigiCollection_*_*_*', ## muonCSCDigis
-    'keep RPCDetIdRPCDigiMuonDigiCollection_*_*_*', ## muonRPCDigis
-    #'keep CSCCorrelatedLCTDigiCollection_muonCSCDigis_*_*',
-    #'keep *_*_*muonCSCDigis*_*',
-    #'keep *_*_*_*muonCSCDigis*',
-    'keep *_csctfDigis_*_*',
-    'keep *_emtfStage2Digis_*_*',
-    'keep *_simEmtfDigis_*_*',
-    'keep *_simEmtfDigisMC_*_*',
-    'keep *_gmtStage2Digis_*_*',
-    'keep *_simGmtStage2Digis_*_*',
-
+    
+    'keep *rig*_*_*_*',
+    'keep *_*rig*_*_*',
+    'keep *_*_*rig*_*',
+    'keep *_*_*_*rig*',
+    
     )
 
-# process.treeOut = cms.OutputModule("PoolOutputModule", 
-#                                    # fileName = cms.untracked.string("EMTF_MC_Tree_RelValNuGun_UP15_1k.root"),
-#                                    # fileName = cms.untracked.string("EMTF_MC_Tree_tau_to_3_mu_RPC_debug.root"),
-#                                    fileName = cms.untracked.string(out_dir_name+'EMTF_MC_Tree_SingleMu_noRPC_300k.root'),
-#                                    outputCommands = outCommands
-#                                    )
+# outCommands = cms.untracked.vstring(
 
-# process.treeOut_step = cms.EndPath(process.treeOut) ## Keep output tree - AWB 08.07.16
+#     'keep recoMuons_muons__*',
+#     'keep *Gen*_*_*_*',
+#     'keep *_*Gen*_*_*',
+#     'keep *gen*_*_*_*',
+#     'keep *_*gen*_*_*',
+#     'keep CSCDetIdCSCCorrelatedLCTDigiMuonDigiCollection_*_*_*', ## muonCSCDigis
+#     'keep RPCDetIdRPCDigiMuonDigiCollection_*_*_*', ## muonRPCDigis
+#     #'keep CSCCorrelatedLCTDigiCollection_muonCSCDigis_*_*',
+#     #'keep *_*_*muonCSCDigis*_*',
+#     #'keep *_*_*_*muonCSCDigis*',
+#     'keep *_csctfDigis_*_*',
+#     'keep *_emtfStage2Digis_*_*',
+#     'keep *_simEmtfDigis_*_*',
+#     'keep *_simEmtfDigisMC_*_*',
+#     'keep *_simEmtfDigisData_*_*',
+#     'keep *_gmtStage2Digis_*_*',
+#     'keep *_simGmtStage2Digis_*_*',
+
+#     )
+
+process.treeOut = cms.OutputModule("PoolOutputModule", 
+                                   # fileName = cms.untracked.string("EMTF_MC_Tree_RelValNuGun_UP15_1k.root"),
+                                   # fileName = cms.untracked.string("EMTF_MC_Tree_tau_to_3_mu_RPC_debug.root"),
+                                   fileName = cms.untracked.string(out_dir_name+'EMTF_ZMu_Tree_306091_simLCT_test.root'),
+                                   outputCommands = outCommands
+                                   )
+
+
+process.treeOut_step = cms.EndPath(process.treeOut) ## Keep output tree - AWB 08.07.16
 
 # Schedule definition
-process.schedule = cms.Schedule(process.raw2digi_step,process.endjob_step)
+process.schedule = cms.Schedule(process.raw2digi_step,process.endjob_step) #,process.treeOut_step)
+
 # process.schedule = cms.Schedule(process.L1RePack_step,process.raw2digi_step,process.endjob_step,process.treeOut_step)
 
 # process.output_step = cms.EndPath(process.treeOut)

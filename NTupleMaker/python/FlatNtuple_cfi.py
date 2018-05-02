@@ -12,13 +12,18 @@ FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
 FlatNtupleData = cms.EDAnalyzer('FlatNtuple',
                                 isMC             = cms.bool(False),
                                 isReco           = cms.bool(True),
+                                skimTrig         = cms.bool(False), # Discard events with too few triggering muons
+                                skimEmtf         = cms.bool(False), # Discard events with no EMTF tracks in BX 0
+
                                 genMuonTag       = cms.InputTag(""),
                                 recoMuonTag      = cms.InputTag("muons"),
                                 recoVertexTag    = cms.InputTag("offlinePrimaryVertices"),
                                 recoBeamSpotTag  = cms.InputTag("offlineBeamSpot"),
-                                emtfHitTag       = cms.InputTag("simEmtfDigis"),
-                                emtfSimHitTag    = cms.InputTag("simEmtfDigisSimLct"),
-                                emtfTrackTag     = cms.InputTag("simEmtfDigis"),
+                                trigEvent        = cms.InputTag("hltTriggerSummaryAOD","","HLT"),
+                                muonTriggers     = cms.vstring("HLT_IsoMu27", "HLT_IsoTkMu27", "HLT_Mu50"),
+                                emtfHitTag       = cms.InputTag("simEmtfDigisData"),
+                                emtfSimHitTag    = cms.InputTag("simEmtfDigisDataSimLct"),
+                                emtfTrackTag     = cms.InputTag("simEmtfDigisData"),
                                 emtfUnpTrackTag  = cms.InputTag("emtfStage2Digis"),
 
                                 # RECO muon extrapolation to 1st station

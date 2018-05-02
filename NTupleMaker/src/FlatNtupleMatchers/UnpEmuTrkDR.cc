@@ -21,26 +21,30 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
   // Find dR, dEta, and dPhi between all unpacker-emulator pairs
   for (int i = 0; i < nUnp; i++) {
 
-    int   unpBX  = ACCESS(*iUnp, "unp_trk_BX") .at(i);
-    float unpEta = ACCESS(*fUnp, "unp_trk_eta").at(i);
-    float unpPhi = ACCESS(*fUnp, "unp_trk_phi").at(i) * M_PI / 180.;
+    int   unpSect = ACCESS(*iUnp, "unp_trk_sector_index").at(i);
+    int   unpBX   = ACCESS(*iUnp, "unp_trk_BX") .at(i);
+    float unpEta  = ACCESS(*fUnp, "unp_trk_eta").at(i);
+    float unpPhi  = ACCESS(*fUnp, "unp_trk_phi").at(i) * M_PI / 180.;
 
     for (int j = 0; j < nEmu; j++) {
 
-      int   emuBX  = ACCESS(*iEmu, "trk_BX") .at(j);
-      float emuEta = ACCESS(*fEmu, "trk_eta").at(j);
-      float emuPhi = ACCESS(*fEmu, "trk_phi").at(j) * M_PI / 180.;
+      int   emuSect = ACCESS(*iEmu, "trk_sector_index").at(j);
+      int   emuBX   = ACCESS(*iEmu, "trk_BX") .at(j);
+      float emuEta  = ACCESS(*fEmu, "trk_eta").at(j);
+      float emuPhi  = ACCESS(*fEmu, "trk_phi").at(j) * M_PI / 180.;
 
-      dBX_matrix [i][j] = emuBX  - unpBX;
-      dEta_matrix[i][j] = emuEta - unpEta;
-      dPhi_matrix[i][j] = calc_dPhi(unpPhi, emuPhi) * 180. / M_PI;
-      dR_matrix  [i][j] = calc_dR(unpEta, unpPhi, emuEta, emuPhi);
+      if (emuSect == unpSect) {
+	dBX_matrix [i][j] = emuBX  - unpBX;
+	dEta_matrix[i][j] = emuEta - unpEta;
+	dPhi_matrix[i][j] = calc_dPhi(unpPhi, emuPhi) * 180. / M_PI;
+	dR_matrix  [i][j] = calc_dR(unpEta, unpPhi, emuEta, emuPhi);
+      }
     } // End loop over nEmu (j)
 
   } // End loop over nUnp (i)
 
 
-  // Find closest emulated track to each unpacked muon
+  // Find closest emulated track to each unpacked track
   for (int i = 0; i < nUnp; i++) {
     int   jMin   = -1;
     float min_dR = max_match_dR;
@@ -70,7 +74,7 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
       
   } // End loop: for (int i = 0; i < nUnp; i++)
 
-  // Find closest RECO muon to each EMTF track
+  // Find closest unpacked track to each emulated track
   for (int j = 0; j < nEmu; j++) {
     int iMin   = -1;
     float min_dR = max_match_dR;

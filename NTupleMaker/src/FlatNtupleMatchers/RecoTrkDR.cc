@@ -12,6 +12,8 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
   const int nTrk = ACCESS(emtfTrks.mInts, "nTracks");
 
   std::vector<bool>                valid_St2  (nReco, 0);
+  std::vector<bool>                standalone (nReco, 0);
+  std::vector<float>               reco_pt_vec(nReco, 0);
   std::vector<std::vector<float> > dR_matrix  (nReco, std::vector<float>(nTrk, NOMATCH));
   std::vector<std::vector<float> > dEta_matrix(nReco, std::vector<float>(nTrk, NOMATCH));
   std::vector<std::vector<float> > dPhi_matrix(nReco, std::vector<float>(nTrk, NOMATCH));
@@ -24,6 +26,7 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
   // Find dR, dEta, and dPhi between all RECO-EMTF pairs
   for (int i = 0; i < nReco; i++) {
 
+    float reco_pt      = ACCESS(*fReco, "reco_pt")     .at(i);
     float reco_eta_St2 = ACCESS(*fReco, "reco_eta_St2").at(i);
     float reco_phi_St2 = ACCESS(*fReco, "reco_phi_St2").at(i) * M_PI / 180.;
     float reco_eta_St1 = ACCESS(*fReco, "reco_eta_St1").at(i);
@@ -46,6 +49,7 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       recoEta = reco_eta_nom;
       recoPhi = reco_phi_nom;
     }
+    reco_pt_vec.at(i) = reco_pt;
 
     // For standalone muons, don't use the extrapolation
     int global  = ACCESS(*iReco, "reco_ID_global").at(i);
@@ -53,7 +57,8 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
     if ( global == 0 && tracker == 0 ) {
       recoEta = reco_eta_nom;
       recoPhi = reco_phi_nom;
-      valid_St2.at(i) = 1;
+      valid_St2 .at(i) = 1;
+      standalone.at(i) = 1;
     }
 
     if ( fabs(recoEta) > max_reco_eta || fabs(recoEta) < min_reco_eta )
@@ -84,9 +89,12 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
   for (int i = 0; i < nReco; i++) {
     int jMin   = -1;
     int nMatch =  0;
-    float min_dR = max_match_dR;
+    float max_match_dR_pt = max_match_dR;
+    if (standalone.at(i) == 0) // Require tighter dR cuts for higher pT muons from collisions, ~99.9% efficient
+      max_match_dR_pt = std::max(0.15, std::min(double(max_match_dR), (0.5 - 0.08*log2(reco_pt_vec.at(i))) ) );
+    float min_dR = max_match_dR_pt;
     for (int j = 0; j < nTrk; j++) {
-      if ( fabs( dR_matrix[i][j] ) < max_match_dR )
+      if ( fabs( dR_matrix[i][j] ) < max_match_dR_pt )
 	nMatch += 1;
       if ( fabs( dR_matrix[i][j] ) < min_dR ) {
 	jMin = j;
@@ -119,7 +127,13 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
 
     // At first, only consider RECO muons propagated to station 2
     for (int i = 0; i < nReco; i++) {
-      if ( fabs( dR_matrix[i][j] ) < max_match_dR ) {
+
+      float max_match_dR_pt = max_match_dR;
+      if (standalone.at(i) == 0) // Require tighter dR cuts for higher pT muons from collisions, ~99.9% efficient
+	max_match_dR_pt = std::max(0.15, std::min(double(max_match_dR), (0.5 - 0.08*log2(reco_pt_vec.at(i))) ) );
+      if (i == 0) min_dR = max_match_dR_pt;
+
+      if ( fabs( dR_matrix[i][j] ) < max_match_dR_pt ) {
 	if ( valid_St2.at(i) == 0 ) {
 	  nMatchSoft += 1;
 	  continue;

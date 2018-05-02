@@ -31,8 +31,6 @@
 
 // RECO muons
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
-/* #include <DataFormats/PatCandidates/interface/Muon.h> */
-/* #include "L1Trigger/L1TNtuples/interface/MuonID.h" */
 
 // RECO vertices
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -40,6 +38,10 @@
 // RECO muon track extrapolation
 #include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+
+// HLT configuration
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
 
 class FlatNtuple : public edm::EDAnalyzer {
 
@@ -55,7 +57,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   const float MIN_RECO_ETA = 0.0;
   const float MAX_RECO_ETA = 3.0;
   const float MAX_RECO_TRK_MATCH_DR = 0.5;
-  const float MAX_UNP_EMU_MATCH_DR  = 0.2;
+  const float MAX_UNP_EMU_MATCH_DR  = 0.15;
 
   ///////////////////////////////////
   ///  Output branch information  ///
@@ -77,33 +79,49 @@ class FlatNtuple : public edm::EDAnalyzer {
  
   // Output tree
   TTree * out_tree;
+  TTree * out_tree_meta;
  
  private:
   
   // Inherited from EDAnalyzer
+
   virtual void beginJob();
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  virtual void endJob();
+  virtual void beginRun(const edm::Run&,   const edm::EventSetup&);
+  virtual void analyze (const edm::Event&, const edm::EventSetup&);
+  virtual void endRun  (const edm::Run&,   const edm::EventSetup&);
+  virtual void endJob  ();
   
   // File in/out
   edm::Service<TFileService> fs;
   
   // Config parameters
-  bool isMC;
-  bool isReco;
+  bool isMC, isReco, skimTrig, skimEmtf;
+
+  // User defined settings
+  std::vector<std::string> muonTriggers_;  // List of unprescale SingleMuon triggers
+
+  // HLT trigger matching
+  std::vector<std::string> trigNames_;      // HLT triggers matching the desired names
+  std::vector<std::string> trigModLabels_;  // HLT 3rd-to-last module label for each trigger
   
   // EDM Tokens
-  edm::EDGetTokenT<std::vector<reco::GenParticle>> GenMuon_token;
-  edm::EDGetTokenT<reco::MuonCollection>           RecoMuon_token;
-  edm::EDGetTokenT<reco::VertexCollection>         RecoVertex_token;
-  edm::EDGetTokenT<reco::BeamSpot>                 RecoBeamSpot_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFHit_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFHit>>      EMTFSimHit_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFTrack_token;
-  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>    EMTFUnpTrack_token;
+  edm::EDGetTokenT<std::vector<reco::GenParticle>>         GenMuon_token;
+  edm::EDGetTokenT<reco::MuonCollection>                   RecoMuon_token;
+  edm::EDGetTokenT<reco::VertexCollection>                 RecoVertex_token;
+  edm::EDGetTokenT<reco::BeamSpot>                         RecoBeamSpot_token;
+  edm::EDGetTokenT<trigger::TriggerEvent>                  TrigEvent_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFHit_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFSimHit_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;
+  edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFUnpTrack_token;
  
+  // Event counters for metadata
+  int nEventsProc_, nEventsSel_;
+
   PropagateToMuon muProp1st_;
   PropagateToMuon muProp2nd_;
+
+  HLTConfigProvider hltConfig_;
 }; // End class FlatNtuple public edm::EDAnalyzer
 
 // Define as a plugin

@@ -5,6 +5,9 @@
 // Most helper functions already defined in EMTF emulator
 #include "L1Trigger/L1TMuonEndCap/interface/TrackTools.h"
 
+// "Assert" statements to catch code or format errors
+#include <assert.h>
+
 inline bool calc_FR_bit(int station, int ring, int chamber) {
   bool result = false;
   bool isOverlapping = !(station == 1 && ring == 3);

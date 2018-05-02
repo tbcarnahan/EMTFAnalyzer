@@ -1,7 +1,10 @@
 
 <use name="L1Trigger/L1TMuonEndCap"/>
 <use name="MuonAnalysis/MuonAssociators"/>  <!-- For the RECO muon extrapolation -->
+<use name="HLTrigger/HLTcore"/>  <!-- For HLT muon matching -->
 <use name="root"/>
+<use name="boost"/>
+<use name="boost_regex"/>  <!-- For trigger name matching -->
 
 <export>
   <lib name="1"/>

@@ -26,7 +26,7 @@ struct EMTFTrackInfo {
 				"trk_unp_match_dEta", "trk_unp_match_dPhi", "trk_unp_match_dR"}};
   std::vector<TString> vInt = {{"trk_pt_int", "trk_eta_int", "trk_theta_int", "trk_phi_int", "trk_BX", "trk_endcap", 
 				"trk_sector", "trk_sector_index", "trk_mode", "trk_mode_CSC", "trk_mode_RPC", "trk_mode_neighbor",
-				"trk_charge", "trk_nHits", "trk_nRPC", "trk_nNeighbor", "trk_dBX", "trk_dPhi_int", "trk_dTheta_int",
+				"trk_qual", "trk_charge", "trk_nHits", "trk_nRPC", "trk_nNeighbor", "trk_dBX", "trk_dPhi_int", "trk_dTheta_int",
                                 "trk_dR_match_iReco", "trk_dR_match_nReco", "trk_dR_match_nRecoSoft", "trk_dR_match_unique",
                                 "trk_unp_match_iUnp", "trk_unp_match_dBX", "trk_unp_match_unique", "trk_unp_match_exact"}};
   std::vector<TString> vvInt = {{"trk_iHit"}};

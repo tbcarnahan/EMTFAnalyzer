@@ -54,8 +54,10 @@ void EMTFSimHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "sim_hit_FR",           isFront( emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem() ) );
   INSERT(mVInt, "sim_hit_pattern",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Pattern()) );
   INSERT(mVInt, "sim_hit_quality",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Quality()) );
-  INSERT(mVInt, "sim_hit_alct_quality", ( emtfHit.Is_RPC() ? DINT : emtfHit.ALCT_quality()) );
-  INSERT(mVInt, "sim_hit_clct_quality", ( emtfHit.Is_RPC() ? DINT : emtfHit.CLCT_quality()) );
+  // INSERT(mVInt, "sim_hit_alct_quality", ( emtfHit.Is_RPC() ? DINT : emtfHit.ALCT_quality()) );
+  // INSERT(mVInt, "sim_hit_clct_quality", ( emtfHit.Is_RPC() ? DINT : emtfHit.CLCT_quality()) );
+  INSERT(mVInt, "sim_hit_alct_quality", DINT );
+  INSERT(mVInt, "sim_hit_clct_quality", DINT );
   INSERT(mVInt, "sim_hit_roll",         (!emtfHit.Is_RPC() ? DINT : emtfHit.Roll()) );
   INSERT(mVInt, "sim_hit_subsector",    emtfHit.Subsector() );
   INSERT(mVInt, "sim_hit_isCSC",        emtfHit.Is_CSC() );

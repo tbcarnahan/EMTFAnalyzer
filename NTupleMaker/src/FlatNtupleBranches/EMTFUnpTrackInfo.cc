@@ -37,7 +37,7 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   INSERT(mVFlt, "unp_trk_phi_loc",       emtfTrk.Phi_loc() );
   INSERT(mVInt, "unp_trk_pt_int",        emtfTrk.GMT_pt() );
   INSERT(mVInt, "unp_trk_eta_int",       emtfTrk.GMT_eta() );
-  INSERT(mVInt, "unp_trk_theta_int",     emtf::calc_theta_int( emtf::calc_theta_deg( emtfTrk.Eta() ), emtfTrk.Endcap(), 7 ) );
+  INSERT(mVInt, "unp_trk_theta_int",     emtf::calc_theta_int( emtf::calc_theta_deg( emtfTrk.Eta() ), emtfTrk.Endcap() ) );
   INSERT(mVInt, "unp_trk_phi_int",       emtfTrk.Phi_fp() );
   INSERT(mVInt, "unp_trk_BX",            emtfTrk.BX() );
   INSERT(mVInt, "unp_trk_endcap",        emtfTrk.Endcap() );
@@ -47,6 +47,7 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   INSERT(mVInt, "unp_trk_mode_CSC",      emtfTrk.Mode_CSC() );
   INSERT(mVInt, "unp_trk_mode_RPC",      emtfTrk.Mode_RPC() );
   INSERT(mVInt, "unp_trk_mode_neighbor", emtfTrk.Mode_neighbor() );
+  INSERT(mVInt, "unp_trk_qual",          emtfTrk.GMT_quality() );
   INSERT(mVInt, "unp_trk_charge",        emtfTrk.Charge() );
 
   INSERT(mVVInt, "unp_trk_iHit", DVINT ); 

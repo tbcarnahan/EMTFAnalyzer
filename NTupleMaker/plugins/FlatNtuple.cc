@@ -7,22 +7,30 @@
 
 // Constructor
 FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
+  nEventsProc_(0), nEventsSel_(0),
   muProp1st_(iConfig.getParameter<edm::ParameterSet>("muProp1st")), // Propagate RECO muon coordinates to 1st muon station
   muProp2nd_(iConfig.getParameter<edm::ParameterSet>("muProp2nd"))  // Propagate RECO muon coordinates to 2nd muon station
 {
   // Output file
   edm::Service<TFileService> fs;
-  out_tree = fs->make<TTree>("tree","FlatNtupleTree");
+  out_tree      = fs->make<TTree>("tree",    "FlatNtupleTree");
+  out_tree_meta = fs->make<TTree>("metadata","FlatNtupleMeta");
   
   // Config parameters  
-  isMC   = iConfig.getParameter<bool>("isMC");
-  isReco = iConfig.getParameter<bool>("isReco");
+  isMC     = iConfig.getParameter<bool>("isMC");
+  isReco   = iConfig.getParameter<bool>("isReco");
+  skimTrig = iConfig.getParameter<bool>("skimTrig");
+  skimEmtf = iConfig.getParameter<bool>("skimEmtf");
   
   // Input collections
   if (isMC)   GenMuon_token      = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
   if (isReco) RecoMuon_token     = consumes<reco::MuonCollection>           (iConfig.getParameter<edm::InputTag>("recoMuonTag"));
   if (isReco) RecoVertex_token   = consumes<reco::VertexCollection>         (iConfig.getParameter<edm::InputTag>("recoVertexTag"));
   if (isReco) RecoBeamSpot_token = consumes<reco::BeamSpot>                 (iConfig.getParameter<edm::InputTag>("recoBeamSpotTag"));
+  if (isReco) TrigEvent_token    = consumes<trigger::TriggerEvent>          (iConfig.getParameter<edm::InputTag>("trigEvent"));
+
+  // User defined settings
+  if (isReco) muonTriggers_ = iConfig.getParameter< std::vector<std::string> > ("muonTriggers");
   
   EMTFHit_token      = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfHitTag"));
   EMTFSimHit_token   = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfSimHitTag"));
@@ -34,9 +42,58 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
 // Destructor
 FlatNtuple::~FlatNtuple() {}
 
+// Called once per run
+void FlatNtuple::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
+  std::cout << "\nInside FlatNtuple::beginRun()" << std::endl;
+
+  if (not isReco) return;
+  
+  bool changed = true;
+  if (not hltConfig_.init(iRun, iSetup, "HLT", changed)) {
+    std::cout << "\n\nTrying to set up HLT, could not!!!" << std::endl;
+    std::cout << "Quitting.\n\n" << std::endl;
+    assert(false);
+  }
+  
+  const boost::regex rgx("_v[0-9]+");
+
+  for (unsigned i = 0; i < hltConfig_.size(); i++) {
+    std::string trigName = hltConfig_.triggerName(i);
+    std::string trigNameStripped = boost::regex_replace(trigName, rgx, "", boost::match_default | boost::format_sed);
+
+    for (unsigned j = 0; j < muonTriggers_.size(); j++) {
+      if (trigNameStripped == muonTriggers_.at(j)) {
+	std::cout << "\nTrigger #" << i << ": " << trigName << "(" << trigNameStripped << ") matches " << muonTriggers_.at(j) << std::endl;
+	trigNames_    .push_back(trigName);
+	trigModLabels_.push_back(hltConfig_.moduleLabels(i).at(hltConfig_.size(i) - 2));
+	std::cout << "  * Module index " << hltConfig_.size(i) - 2 << " returns label " << trigModLabels_.back() << std::endl;
+      }
+    }
+  }
+  
+  if (trigNames_.size() == 0 || trigNames_.size() > muonTriggers_.size()) {
+    std::cout << "\nFound " << trigNames_.size() << " triggers matching: ";
+    for (unsigned i = 0; i < muonTriggers_.size(); i++) {
+      std::cout << muonTriggers_.at(i) << " or ";
+    } std::cout << "\n" << std::endl;
+    for (unsigned i = 0; i < trigNames_.size(); i++) {
+      std::cout << "  * Trigger #" << i << ": " << trigNames_.at(i) << std::endl;
+    }
+    assert(false);
+  }
+  
+} // End FlatNtuple::beginRun()
+
+
+// Called once per run
+void FlatNtuple::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
+  std::cout << "\nInside FlatNtuple::endRun()\n" << std::endl;
+}  
+
 
 // Called once per event
 void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  nEventsProc_ += 1;
 
   // std::cout << "\nCalling analyze" << std::endl;
   edm::Handle<std::vector<reco::GenParticle>> genMuons;
@@ -47,6 +104,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if (isReco) iEvent.getByToken(RecoVertex_token, recoVertices);
   edm::Handle<reco::BeamSpot> recoBeamSpot;
   if (isReco) iEvent.getByToken(RecoBeamSpot_token, recoBeamSpot);
+  edm::Handle<trigger::TriggerEvent> trigEvent;
+  if (isReco) iEvent.getByToken(TrigEvent_token, trigEvent);
 
   
   edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
@@ -74,21 +133,26 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   // std::cout << "About to fill RECO muon info" << std::endl;	
   // Fill RECO muon info
-  if ( isReco && recoMuons.isValid() && recoVertices.isValid() ) {
+  if ( isReco && recoMuons.isValid() && recoVertices.isValid() && trigEvent.isValid() ) {
     // Set up muon propagator for this event
     muProp1st_.init(iSetup);
     muProp2nd_.init(iSetup);
     // Loop over RECO muons
     for ( reco::MuonCollection::const_iterator mu = recoMuons->begin(); mu != recoMuons->end(); ++mu ) {
-      recoMuonInfo.Fill( *mu, (*recoVertices)[0], recoBeamSpot, muProp1st_, muProp2nd_, MIN_RECO_ETA, MAX_RECO_ETA );
+      recoMuonInfo.Fill( *mu, (*recoVertices)[0], recoBeamSpot, trigEvent, trigModLabels_, 
+			 muProp1st_, muProp2nd_, MIN_RECO_ETA, MAX_RECO_ETA );
     }
   }
   else if (isReco) {
-    std::cout << "ERROR: could not get recoMuons or recoVertices from event!!!" << std::endl;
+    std::cout << "ERROR: could not get recoMuons, recoVertices, or trigEvent from event!!!" << std::endl;
+    std::cout << "recoMuons = " << recoMuons.isValid() << ", recoVertices = " << recoVertices.isValid() 
+	      << ", trigEvent = " << trigEvent.isValid() << std::endl;
     return;
   }
-  
-  
+  if (skimTrig && ACCESS(recoMuonInfo.mInts, "nRecoMuonsTrig")    < 2 
+               && ACCESS(recoMuonInfo.mInts, "nRecoMuonsTrigCen") < 1) return;
+
+
   // std::cout << "About to fill GEN muon info" << std::endl;	
   // Fill RECO muon info
   if ( isMC && genMuons.isValid() ) {
@@ -129,20 +193,17 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       emtfSimHitInfo.Fill(emtfSimHit);
     } // End for (l1t::EMTFHit emtfSimHit: *emtfSimHits)
   }
-  else {
-    std::cout << "ERROR: could not get emtfSimHits from event!!!" << std::endl;
-    return;
-  }
+  // else {
+  //   std::cout << "ERROR: could not get emtfSimHits from event!!!" << std::endl;
+  //   return;
+  // }
 
   
   // std::cout << "About to fill EMTF track branches" << std::endl;
-  bool passesSingleMu16 = false;
   // Fill EMTF track branches
   if ( emtfTracks.isValid() ) {
     for (l1t::EMTFTrack emtfTrk: *emtfTracks) {
       emtfTrackInfo.Fill(emtfTrk, emtfHitInfo);
-      if ( (emtfTrk.Mode() == 7 || emtfTrk.Mode() == 11 || emtfTrk.Mode() > 12) &&
-	   emtfTrk.Pt() >= 16 ) passesSingleMu16 = true;
     }
   } // End for (l1t::EMTFTrack emtfTrk: *emtfTracks)
   else {
@@ -157,8 +218,6 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if ( emtfUnpTracks.isValid() ) {
       for (l1t::EMTFTrack emtfTrk: *emtfUnpTracks) {
 	emtfUnpTrackInfo.Fill(emtfTrk, emtfHitInfo);
-	if ( (emtfTrk.Mode() == 7 || emtfTrk.Mode() == 11 || emtfTrk.Mode() > 12) &&
-	     emtfTrk.Pt() >= 16 ) passesSingleMu16 = true;
       } // End for (l1t::EMTFTrack emtfTrk: *emtfUnpTracks)
     }  
     else {
@@ -166,6 +225,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       return;
     }
   }
+  if (skimEmtf && ACCESS(emtfTrackInfo.mInts,    "nTracksBX0")    == 0 
+               && ACCESS(emtfUnpTrackInfo.mInts, "nUnpTracksBX0") == 0) return;
 
 
   // std::cout << "About to match EMTF hits to simulated hits" << std::endl;
@@ -182,9 +243,9 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   
   // std::cout << "About to fill output tree" << std::endl;
-  if (passesSingleMu16 || true) { // No filter for now
-    out_tree->Fill();
-  }
+  nEventsSel_ += 1;
+  out_tree->Fill();
+
   // std::cout << "All done with this event!\n" << std::endl;
   return;
       
@@ -248,5 +309,9 @@ void FlatNtuple::beginJob() {
 } // End FlatNtuple::beginJob
 
 // Called once per job after ending event loop
-void FlatNtuple::endJob() {}
+void FlatNtuple::endJob() {
+  out_tree_meta->Branch("nEventsProc", &nEventsProc_, "nEventsProc/I");
+  out_tree_meta->Branch("nEventsSel",  &nEventsSel_,  "nEventsSel/I");
 
+  out_tree_meta->Fill();
+}

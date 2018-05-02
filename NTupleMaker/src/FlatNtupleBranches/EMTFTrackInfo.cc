@@ -44,6 +44,7 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
   INSERT(mVInt, "trk_mode_CSC",      emtfTrk.Mode_CSC() );
   INSERT(mVInt, "trk_mode_RPC",      emtfTrk.Mode_RPC() );
   INSERT(mVInt, "trk_mode_neighbor", emtfTrk.Mode_neighbor() );
+  INSERT(mVInt, "trk_qual",          emtfTrk.GMT_quality() );
   INSERT(mVInt, "trk_charge",        emtfTrk.Charge() );
 
   INSERT(mVVInt, "trk_iHit", DVINT ); 

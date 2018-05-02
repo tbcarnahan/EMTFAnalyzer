@@ -11,12 +11,17 @@ void RecoMuonInfo::Reset(){
   for (auto & it : mInts)  it.second = DINT;
   for (auto & it : mVFlt)  it.second.clear();
   for (auto & it : mVInt)  it.second.clear();
-  INSERT(mInts, "nRecoMuons"   , 0);
-  INSERT(mInts, "nRecoMuonsFwd", 0);
+  INSERT(mInts, "nRecoMuons",        0);
+  INSERT(mInts, "nRecoMuonsFwd",     0);
+  INSERT(mInts, "nRecoMuonsTrig",    0);
+  INSERT(mInts, "nRecoMuonsTrigCen", 0);
 }
 
+
 void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
-			const edm::Handle<reco::BeamSpot>& beamSpotHandle,
+			const edm::Handle<reco::BeamSpot>& beamSpot,
+			const edm::Handle<trigger::TriggerEvent>& trigEvent,
+			std::vector<std::string> trigModLabels,
 			PropagateToMuon muProp1st, PropagateToMuon muProp2nd,
 			const float min_eta, const float max_eta) {
 
@@ -101,9 +106,57 @@ void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
   INSERT(mVFlt, "reco_phi_St2",    phi_St2 );
 
   INSERT(mVFlt, "reco_iso",   relIso );
-  INSERT(mVFlt, "reco_d0_BS", track.dxy( beamSpotHandle->position() ) );
-  INSERT(mVFlt, "reco_dZ_BS", track.dz ( beamSpotHandle->position() ) );
+  INSERT(mVFlt, "reco_d0_BS", track.dxy( beamSpot->position() ) );
+  INSERT(mVFlt, "reco_dZ_BS", track.dz ( beamSpot->position() ) );
   INSERT(mVFlt, "reco_d0_PV", track.dxy( vertex.position() ) );
   INSERT(mVFlt, "reco_dZ_PV", track.dz ( vertex.position() ) );
 
+  HltMatch( mu, trigEvent, trigModLabels, 0.01, 25 );
+
 }
+
+
+// Code taken from L1Trigger/L1TNtuples/plugins/L1Muon2RecoTreeProducer.cc
+// Find the distance from the muon to one firing the HLT path
+void RecoMuonInfo::HltMatch( const reco::Muon muon,
+			     const edm::Handle<trigger::TriggerEvent>& trigEvent,
+			     std::vector<std::string> trigModLabels,
+			     const double _muon_trig_dR, const double _muon_trig_pt ) {
+  
+  // std::cout << "Inside RecoMuonInfo::HltMatch, muon has charge = " << muon.charge() << ", pT = " << muon.pt()
+  // 	    << ", eta = " << muon.eta() << ", phi() = " << muon.phi() << ", isolation = " << ACCESS(mVFlt, "reco_iso").back() << std::endl;
+
+  double matchDR = 999.;  // deltaR between HLT muon and RECO muon
+  int    matchID = DINT;  // bitmask of which HLT muons are matched to the RECO muon
+  
+  const trigger::TriggerObjectCollection trigObjs = trigEvent->getObjects();
+
+  for (unsigned i = 0; i < trigModLabels.size(); i++) {
+    const unsigned iFilter = trigEvent->filterIndex( edm::InputTag ( trigModLabels.at(i), "", "HLT" ) );
+
+    if (iFilter < trigEvent->sizeFilters()) {
+      const trigger::Keys triggerKeys(trigEvent->filterKeys(iFilter));
+      const trigger::Vids triggerVids(trigEvent->filterIds(iFilter));
+	
+      for (unsigned iVid = 0; iVid < triggerVids.size(); iVid++) {
+	const trigger::TriggerObject trigObject = trigObjs.at(triggerKeys.at(iVid));
+	if (deltaR(muon, trigObject) < _muon_trig_dR && muon.pt() > _muon_trig_pt) {
+	  matchDR  = std::min(matchDR, deltaR(muon, trigObject));
+	  matchID  = std::max(matchID, 0);
+	  matchID |= int(pow(2, i));
+	  // std::cout << "  * Trigger " << i << ": matched with dR = " << matchDR << " to module:" << trigModLabels.at(i) 
+	  // 	    << ", key:" << triggerKeys.at(iVid) << ", object ID = " << trigObject.id()
+	  // 	    << ", pT = " << trigObject.pt() << ", eta = " << trigObject.eta() << ", phi = " << trigObject.phi() << std::endl;
+	}
+      }
+    }
+  }
+  
+  INSERT(mVFlt, "reco_trig_dR", matchDR);
+  INSERT(mVInt, "reco_trig_ID", matchID);
+  if (matchID > 0) {
+    INSERT(mInts, "nRecoMuonsTrig", ACCESS(mInts, "nRecoMuonsTrig") + 1);
+    if (abs(muon.eta()) < 1.2) INSERT(mInts, "nRecoMuonsTrigCen", ACCESS(mInts, "nRecoMuonsTrigCen") + 1);
+  }
+  
+} // End function: RecoMuonInfo::HltMatch()
