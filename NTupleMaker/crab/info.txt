@@ -1,0 +1,8 @@
+
+## Before running
+source /cvmfs/cms.cern.ch/crab3/crab.csh
+voms-proxy-init --voms cms --valid 168:00
+
+## Run the scripts
+crab submit -c crab_config.py
+crab status -d logs/crab_EMTF_JPsi_2017_07_17/
