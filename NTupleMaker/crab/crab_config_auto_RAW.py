@@ -14,7 +14,7 @@ config.General.requestName = MYARGS.outputDatasetTag
 config.General.workArea = 'logs'
 config.General.transferOutputs = True  ## Do output root files
 config.General.transferLogs = True
-config.General.instance = 'preprod'  ## Fix for CMSSW_10_1_0 - AWB 26.04.18
+# config.General.instance = 'preprod'  ## Fix for CMSSW_10_1_0, obsolete as of Apr. 30 - AWB 05.04.18
 
 config.section_('JobType')
 config.JobType.psetName = 'RunTrackFinder_data_NTuple.py'
@@ -35,7 +35,7 @@ config.Data.runRange = '306091'
 
 config.Data.useParent = True
 config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob =   2 ## ~1k events per LS, ~1k events / minute
+config.Data.unitsPerJob =   1 ## ~1k events per LS, ~1k events / minute
 config.Data.totalUnits =  999
 config.Data.lumiMask = 'data/Run_306091_tracker_on.txt'
 # config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'

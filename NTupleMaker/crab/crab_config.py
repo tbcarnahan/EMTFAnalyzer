@@ -14,7 +14,7 @@ config.General.requestName = 'EMTF_JPsi_2017_09_04'
 config.General.workArea = 'logs'
 config.General.transferOutputs = True  ## Do output root files
 config.General.transferLogs = True
-config.General.instance = 'preprod'  ## Fix for CMSSW_10_1_0 - AWB 26.04.18
+# config.General.instance = 'preprod'  ## Fix for CMSSW_10_1_0, obsolete as of Apr. 30 - AWB 05.04.18
 
 config.section_('JobType')
 config.JobType.psetName = 'RunTrackFinder_MC_NTuple.py'

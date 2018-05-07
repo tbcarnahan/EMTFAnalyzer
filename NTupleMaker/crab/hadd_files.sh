@@ -8,18 +8,13 @@ eos_cmd="/afs/cern.ch/project/eos/installation/scripts/bin/eos.select"
 hadd_cmd="/cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_0_0/external/slc6_amd64_gcc630/bin/hadd -O -f"
 
 eos_pre="root://eoscms.cern.ch/"
-eos_dir="/store/user/abrinke1/EMTF/Emulator/ntuples/"
-tmp_dir="/afs/cern.ch/work/a/abrinke1/tmp2"
+eos_dir="/eos/cms/store/user/abrinke1/EMTF/Emulator/ntuples/"
+tmp_dir="/afs/cern.ch/work/a/abrinke1/tmp4"
 max_add=40
 
 # ## Clean up tmp directory
 `rm $tmp_dir/NTuple_*.root`
 `rm $tmp_dir/tuple_*.root`
-
-## Remove existing hadd of all files matching data_tag
-echo "Removing existing ${eos_dir}HADD/NTuple_${data_tag}_${job_tag}.root"
-`$eos_cmd rm ${eos_dir}HADD/NTuple_${data_tag}_${job_tag}.root`
-echo ""
 
 ## hadd command for all files matching data_tag
 hadd_all_str="$hadd_cmd $tmp_dir/NTuple_${data_tag}_${job_tag}.root"
@@ -46,14 +41,6 @@ for dir1 in `$eos_cmd ls ${eos_dir}`; do
     	    ## Only look at single crab job tag
     	    if test "${dir2#${job_tag}}" == "$dir2"; then
     	    	continue
-    	    fi
-
-    	    ## Remove existing hadded files
-    	    if test "${dir3#*root}" != "$dir3"; then
-    		echo "Removing existing ${eos_dir}$dir1/$dir2/$dir3"
-    		`$eos_cmd rm ${eos_dir}$dir1/$dir2/$dir3`
-		echo ""
-    		continue
     	    fi
 
     	    ## Find most recent crab subission
@@ -112,6 +99,10 @@ for dir1 in `$eos_cmd ls ${eos_dir}`; do
     		    `$hadd_str`
     		    echo ""
     		    echo "  * Wrote out $tmp_dir/NTuple_$nOut.root"
+    	            ## Remove existing hadded files
+    		    echo "Removing existing ${eos_dir}$dir1/$dir2/NTuple_$nOut.root"
+    		    `$eos_cmd rm ${eos_dir}$dir1/$dir2/NTuple_$nOut.root`
+		    echo ""
     		    `xrdcp $tmp_dir/NTuple_$nOut.root ${eos_pre}${eos_dir}$dir1/$dir2`
     		    `rm $tmp_dir/tuple_*.root`
     		    `mv $tmp_dir/NTuple_$nOut.root $tmp_dir/NTuple_${dir1}_${nOut}.root`
@@ -131,5 +122,11 @@ echo "${hadd_all_str}"
 echo ""
 echo "  * Wrote out $tmp_dir/NTuple_${data_tag}_${job_tag}.root"
 echo ""
+
+## Remove existing hadd of all files matching data_tag
+echo "Removing existing ${eos_dir}HADD/NTuple_${data_tag}_${job_tag}.root"
+`$eos_cmd rm ${eos_dir}HADD/NTuple_${data_tag}_${job_tag}.root`
+echo ""
+
 `xrdcp $tmp_dir/NTuple_${data_tag}_${job_tag}.root ${eos_pre}${eos_dir}HADD/`
 `rm $tmp_dir/NTuple_*.root`
