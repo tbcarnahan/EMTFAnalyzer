@@ -21,6 +21,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   isReco   = iConfig.getParameter<bool>("isReco");
   skimTrig = iConfig.getParameter<bool>("skimTrig");
   skimEmtf = iConfig.getParameter<bool>("skimEmtf");
+  skimPair = iConfig.getParameter<bool>("skimPair");
   
   // Input collections
   if (isMC)   GenMuon_token      = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
@@ -125,7 +126,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   emtfTrackInfo.Reset();
   emtfUnpTrackInfo.Reset();
   recoMuonInfo.Reset();
-  
+  recoPairInfo.Reset();
+
   // std::cout << "About to fill event info" << std::endl;	
   // Fill event info
   eventInfo.Fill(iEvent);
@@ -152,6 +154,11 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if (skimTrig && ACCESS(recoMuonInfo.mInts, "nRecoMuonsTrig")    < 2 
                && ACCESS(recoMuonInfo.mInts, "nRecoMuonsTrigCen") < 1) return;
 
+
+  // std::cout << "About to fill RECO muon pair info" << std::endl;
+  // Fill RECO muon pair info
+  recoPairInfo.Fill(recoMuonInfo);
+  if (skimPair && ACCESS(recoPairInfo.mInts, "nRecoPairsFwd") < 1) return;
 
   // std::cout << "About to fill GEN muon info" << std::endl;	
   // Fill RECO muon info
@@ -262,6 +269,7 @@ void FlatNtuple::beginJob() {
   emtfTrackInfo.Initialize();
   emtfUnpTrackInfo.Initialize();
   recoMuonInfo.Initialize();
+  recoPairInfo.Initialize();
 	
   ////////////////////////////////////////////////
   ////   WARNING!!! CONSTRUCTION OF STRUCTS   ////
@@ -298,6 +306,10 @@ void FlatNtuple::beginJob() {
   for (auto & it : recoMuonInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
   for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
   for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+
+  for (auto & it : recoPairInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
+  for (auto & it : recoPairInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+  for (auto & it : recoPairInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
 
   if (not isMC) {
     for (auto & it : emtfUnpTrackInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);

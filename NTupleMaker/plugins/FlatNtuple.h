@@ -23,6 +23,7 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoPairInfo.h"
 
 // Object matchers
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoTrkDR.h"
@@ -65,6 +66,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   EventInfo        eventInfo;
   GenMuonInfo      genMuonInfo;
   RecoMuonInfo     recoMuonInfo;
+  RecoPairInfo     recoPairInfo;
   EMTFHitInfo      emtfHitInfo;
   EMTFSimHitInfo   emtfSimHitInfo;
   EMTFTrackInfo    emtfTrackInfo;
@@ -95,7 +97,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::Service<TFileService> fs;
   
   // Config parameters
-  bool isMC, isReco, skimTrig, skimEmtf;
+  bool isMC, isReco, skimTrig, skimEmtf, skimPair;
 
   // User defined settings
   std::vector<std::string> muonTriggers_;  // List of unprescale SingleMuon triggers

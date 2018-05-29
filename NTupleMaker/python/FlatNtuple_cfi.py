@@ -14,6 +14,7 @@ FlatNtupleData = cms.EDAnalyzer('FlatNtuple',
                                 isReco           = cms.bool(True),
                                 skimTrig         = cms.bool(False), # Discard events with too few triggering muons
                                 skimEmtf         = cms.bool(False), # Discard events with no EMTF tracks in BX 0
+                                skimPair         = cms.bool(False), # Discard events with no RECO muon pairs
 
                                 genMuonTag       = cms.InputTag(""),
                                 recoMuonTag      = cms.InputTag("muons"),
