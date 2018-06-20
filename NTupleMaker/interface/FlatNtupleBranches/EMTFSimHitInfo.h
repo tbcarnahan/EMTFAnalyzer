@@ -29,6 +29,7 @@ struct EMTFSimHitInfo {
 
   void Initialize();
   void Reset();
+  inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); }
   void Fill(const l1t::EMTFHit & emtfHit);
 };
 

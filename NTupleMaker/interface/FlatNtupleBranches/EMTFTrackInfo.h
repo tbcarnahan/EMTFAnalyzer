@@ -28,7 +28,7 @@ struct EMTFTrackInfo {
 				"trk_sector", "trk_sector_index", "trk_mode", "trk_mode_CSC", "trk_mode_RPC", "trk_mode_neighbor",
 				"trk_qual", "trk_charge", "trk_nHits", "trk_nRPC", "trk_nNeighbor", "trk_dBX", "trk_dPhi_int", "trk_dTheta_int",
                                 "trk_dR_match_iReco", "trk_dR_match_nReco", "trk_dR_match_nRecoSoft", "trk_dR_match_unique",
-                                "trk_unp_match_iUnp", "trk_unp_match_dBX", "trk_unp_match_unique", "trk_unp_match_exact"}};
+                                "trk_unp_match_iTrk", "trk_unp_match_dBX", "trk_unp_match_unique", "trk_unp_match_exact"}};
   std::vector<TString> vvInt = {{"trk_iHit"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
@@ -37,6 +37,7 @@ struct EMTFTrackInfo {
 
   void Initialize();
   void Reset();
+  inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); CHECKSIZE(mVVInt); }
   void Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hits);
 };
 

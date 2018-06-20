@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
 FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
-                              isMC          = cms.bool(True),
-                              isReco        = cms.bool(False),
-                              genMuonTag    = cms.InputTag("genParticles"),
-                              emtfHitTag    = cms.InputTag("simEmtfDigis"),
-                              emtfTrackTag  = cms.InputTag("simEmtfDigis"),
+                              isMC             = cms.bool(True),
+                              isReco           = cms.bool(False),
+                              genMuonTag       = cms.InputTag("genParticles"),
+                              emtfHitTag       = cms.InputTag("simEmtfDigis"),
+                              emtfTrackTag     = cms.InputTag("simEmtfDigis"),
                               emtfUnpTrackTag  = cms.InputTag(""),
                               )
 
@@ -17,11 +17,14 @@ FlatNtupleData = cms.EDAnalyzer('FlatNtuple',
                                 skimPair         = cms.bool(False), # Discard events with no RECO muon pairs
 
                                 genMuonTag       = cms.InputTag(""),
+                                cscSegmentTag    = cms.InputTag("cscSegments"),
                                 recoMuonTag      = cms.InputTag("muons"),
                                 recoVertexTag    = cms.InputTag("offlinePrimaryVertices"),
                                 recoBeamSpotTag  = cms.InputTag("offlineBeamSpot"),
                                 trigEvent        = cms.InputTag("hltTriggerSummaryAOD","","HLT"),
                                 muonTriggers     = cms.vstring("HLT_IsoMu27", "HLT_IsoTkMu27", "HLT_Mu50"),
+                                cppfDigiTag      = cms.InputTag("simEmtfDigisData"),
+                                cppfUnpDigiTag   = cms.InputTag("emtfStage2Digis"),
                                 emtfHitTag       = cms.InputTag("simEmtfDigisData"),
                                 emtfSimHitTag    = cms.InputTag("simEmtfDigisDataSimLct"),
                                 emtfTrackTag     = cms.InputTag("simEmtfDigisData"),

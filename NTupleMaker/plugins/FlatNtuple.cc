@@ -25,6 +25,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   
   // Input collections
   if (isMC)   GenMuon_token      = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
+  if (isReco) CSCSeg_token       = consumes<CSCSegmentCollection>           (iConfig.getParameter<edm::InputTag>("cscSegmentTag"));
   if (isReco) RecoMuon_token     = consumes<reco::MuonCollection>           (iConfig.getParameter<edm::InputTag>("recoMuonTag"));
   if (isReco) RecoVertex_token   = consumes<reco::VertexCollection>         (iConfig.getParameter<edm::InputTag>("recoVertexTag"));
   if (isReco) RecoBeamSpot_token = consumes<reco::BeamSpot>                 (iConfig.getParameter<edm::InputTag>("recoBeamSpotTag"));
@@ -32,12 +33,13 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
 
   // User defined settings
   if (isReco) muonTriggers_ = iConfig.getParameter< std::vector<std::string> > ("muonTriggers");
-  
+
+  CPPFDigi_token     = consumes<l1t::CPPFDigiCollection>     (iConfig.getParameter<edm::InputTag>("cppfDigiTag"));
+  CPPFUnpDigi_token  = consumes<l1t::CPPFDigiCollection>     (iConfig.getParameter<edm::InputTag>("cppfUnpDigiTag"));
   EMTFHit_token      = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfHitTag"));
   EMTFSimHit_token   = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfSimHitTag"));
   EMTFTrack_token    = consumes<std::vector<l1t::EMTFTrack>> (iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
   EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>> (iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
-  
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
@@ -99,6 +101,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // std::cout << "\nCalling analyze" << std::endl;
   edm::Handle<std::vector<reco::GenParticle>> genMuons;
   if (isMC)   iEvent.getByToken(GenMuon_token, genMuons);
+  edm::Handle<CSCSegmentCollection> cscSegs;
+  if (isReco) iEvent.getByToken(CSCSeg_token, cscSegs);
   edm::Handle<reco::MuonCollection> recoMuons;
   if (isReco) iEvent.getByToken(RecoMuon_token, recoMuons);
   edm::Handle<reco::VertexCollection> recoVertices;
@@ -109,6 +113,10 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if (isReco) iEvent.getByToken(TrigEvent_token, trigEvent);
 
   
+  edm::Handle<l1t::CPPFDigiCollection> cppfDigis;
+  iEvent.getByToken(CPPFDigi_token, cppfDigis);
+  edm::Handle<l1t::CPPFDigiCollection> cppfUnpDigis;
+  iEvent.getByToken(CPPFUnpDigi_token, cppfUnpDigis);
   edm::Handle<std::vector<l1t::EMTFHit>> emtfHits;
   iEvent.getByToken(EMTFHit_token, emtfHits);
   edm::Handle<std::vector<l1t::EMTFHit>> emtfSimHits;
@@ -117,7 +125,10 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(EMTFTrack_token, emtfTracks);
   edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
   iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
-  
+
+  edm::ESHandle<CSCGeometry> cscGeom;
+  iSetup.get<MuonGeometryRecord>().get(cscGeom);
+
   // Reset branch values
   eventInfo.Reset();
   genMuonInfo.Reset();
@@ -125,13 +136,26 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   emtfSimHitInfo.Reset();
   emtfTrackInfo.Reset();
   emtfUnpTrackInfo.Reset();
+  cscSegInfo.Reset();
   recoMuonInfo.Reset();
   recoPairInfo.Reset();
 
   // std::cout << "About to fill event info" << std::endl;	
   // Fill event info
   eventInfo.Fill(iEvent);
-  
+
+
+  // std::cout << "About to fill CSC segment info" << std::endl;
+  // Fill CSC segment info
+  if ( isReco && cscSegs.isValid() ) {
+    for (CSCSegmentCollection::const_iterator iter = cscSegs->begin(); iter != cscSegs->end(); iter++) {
+      cscSegInfo.Fill(*iter, cscGeom);
+    }
+  }
+  else if (isReco) {
+    std::cout << "ERROR: could not get cscSegs from event!!!" << std::endl;
+    return;
+  }
 
   // std::cout << "About to fill RECO muon info" << std::endl;	
   // Fill RECO muon info
@@ -240,14 +264,32 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Match EMTF hits to simulated hits (and visa-versa)
   simUnpHit.Match(emtfHitInfo, emtfSimHitInfo);
 
-  // std::cout << "About to match EMTF tracks to RECO muons" << std::endl;
+
+  // std::cout << "About to match CSC RECO segments to CSC LCTs" << std::endl;
+  // Match CSC RECO segments to CSC LCTs (and visa-versa)
+  lctSeg.Match(cscSegInfo, emtfHitInfo);
+
+  // std::cout << "About to match emulated EMTF tracks to RECO muons" << std::endl;
   // Match emulated EMTF tracks to RECO muons (and visa-versa)
   recoTrkDR.Match(recoMuonInfo, emtfTrackInfo, MIN_RECO_ETA, MAX_RECO_ETA, MAX_RECO_TRK_MATCH_DR);
+
+  // std::cout << "About to match unpacked EMTF tracks to RECO muons" << std::endl;
+  // Match unpacked EMTF tracks to RECO muons (and visa-versa)
+  recoUnpTrkDR.Match(recoMuonInfo, emtfUnpTrackInfo, MIN_RECO_ETA, MAX_RECO_ETA, MAX_RECO_TRK_MATCH_DR);
 
   // std::cout << "About to match EMTF unpacked and emulated tracks" << std::endl;
   // Match unpacked and emulated EMTF tracks
   unpEmuTrkDR.Match(emtfUnpTrackInfo, emtfTrackInfo, MAX_UNP_EMU_MATCH_DR);
 
+  // Check that size of all vectors is consistent
+  genMuonInfo.CheckSize();
+  emtfHitInfo.CheckSize();
+  emtfSimHitInfo.CheckSize();
+  emtfTrackInfo.CheckSize();
+  emtfUnpTrackInfo.CheckSize();
+  cscSegInfo.CheckSize();
+  recoMuonInfo.CheckSize();
+  recoPairInfo.CheckSize();
   
   // std::cout << "About to fill output tree" << std::endl;
   nEventsSel_ += 1;
@@ -268,9 +310,10 @@ void FlatNtuple::beginJob() {
   emtfSimHitInfo.Initialize();
   emtfTrackInfo.Initialize();
   emtfUnpTrackInfo.Initialize();
+  cscSegInfo.Initialize();
   recoMuonInfo.Initialize();
   recoPairInfo.Initialize();
-	
+
   ////////////////////////////////////////////////
   ////   WARNING!!! CONSTRUCTION OF STRUCTS   ////
   ////////////////////////////////////////////////
@@ -302,7 +345,11 @@ void FlatNtuple::beginJob() {
   for (auto & it : emtfTrackInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
   for (auto & it : emtfTrackInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
   for (auto & it : emtfTrackInfo.mVVInt) out_tree->Branch(it.first, (std::vector<std::vector<int> >*) &it.second);
-  
+
+  for (auto & it : cscSegInfo.mInts) out_tree->Branch(it.first, (int*) &it.second);
+  for (auto & it : cscSegInfo.mVFlt) out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+  for (auto & it : cscSegInfo.mVInt) out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+
   for (auto & it : recoMuonInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
   for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
   for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);

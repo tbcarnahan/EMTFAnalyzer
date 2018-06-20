@@ -47,6 +47,14 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
   INSERT(mVInt, "trk_qual",          emtfTrk.GMT_quality() );
   INSERT(mVInt, "trk_charge",        emtfTrk.Charge() );
 
+  INSERT(mVInt, "trk_dR_match_nReco",     0);
+  INSERT(mVInt, "trk_dR_match_nRecoSoft", 0);
+  INSERT(mVInt, "trk_dR_match_unique",    0);
+  INSERT(mVInt, "trk_dR_match_iReco",     DINT);
+  INSERT(mVFlt, "trk_dR_match_dEta",      DFLT);
+  INSERT(mVFlt, "trk_dR_match_dPhi",      DFLT);
+  INSERT(mVFlt, "trk_dR_match_dR",        DFLT);
+
   INSERT(mVVInt, "trk_iHit", DVINT ); 
 
   int _nTrkHits = 0, _nTrkRPC = 0, _nTrkNeighbor = 0;
@@ -84,7 +92,9 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
 	     ( trk_hit.Is_RPC() &&
 	       trk_hit.Roll()      == ACCESS(*iHit, "hit_roll").at(i) &&
 	       trk_hit.Strip_hi()  == ACCESS(*iHit, "hit_strip_hi").at(i) &&
-	       trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) ) ) ) {
+	       trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) &&
+	       trk_hit.Phi_fp()    == ACCESS(*iHit, "hit_phi_int").at(i) &&
+	       trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) ) ) ) {
 
 	INSERT(mVVInt, "trk_iHit", i );
 	if (foundHit) foundTwoHits = true;

@@ -34,6 +34,7 @@ struct RecoPairInfo {
 
   void Initialize();
   void Reset();
+  inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); }
   void Fill(const RecoMuonInfo & recoMuons);
 
 };

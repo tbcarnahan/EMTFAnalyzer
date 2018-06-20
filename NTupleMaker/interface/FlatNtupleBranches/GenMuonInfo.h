@@ -22,6 +22,7 @@ struct GenMuonInfo {
 
   void Initialize();
   void Reset();
+  inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); }
   void Fill(const reco::GenParticle & genMuon);
 };
 

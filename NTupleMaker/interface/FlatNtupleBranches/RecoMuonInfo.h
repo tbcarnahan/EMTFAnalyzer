@@ -37,13 +37,15 @@ struct RecoMuonInfo {
   std::vector<TString> vFlt = {{"reco_pt", "reco_eta", "reco_eta_St1", "reco_eta_St2", 
 				"reco_theta", "reco_theta_St1", "reco_theta_St2", 
 				"reco_phi", "reco_phi_St1", "reco_phi_St2",
-                                "reco_dR_match_dEta", "reco_dR_match_dPhi", "reco_dR_match_dR",
+				"reco_dR_match_emu_dEta", "reco_dR_match_emu_dPhi", "reco_dR_match_emu_dR",
+				"reco_dR_match_unp_dEta", "reco_dR_match_unp_dPhi", "reco_dR_match_unp_dR",
 				"reco_iso", "reco_d0_BS", "reco_dZ_BS", "reco_d0_PV", "reco_dZ_PV",
 				"reco_trig_dR"}};
   std::vector<TString> vInt = {{"reco_ID_soft", "reco_ID_loose", "reco_ID_medium", "reco_ID_tight",
 				"reco_ID_PF", "reco_ID_tracker", "reco_ID_stand", "reco_ID_global",
 				"reco_ID_station", "reco_ID_nStations", "reco_charge",
-				"reco_dR_match_iTrk", "reco_dR_match_nTrk", "reco_dR_match_unique",
+				"reco_dR_match_emu_iTrk", "reco_dR_match_emu_nTrk", "reco_dR_match_emu_unique",
+				"reco_dR_match_unp_iTrk", "reco_dR_match_unp_nTrk", "reco_dR_match_unp_unique",
 				"reco_trig_ID"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
@@ -51,6 +53,7 @@ struct RecoMuonInfo {
 
   void Initialize();
   void Reset();
+  inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); }
   void Fill(const reco::Muon mu, const reco::Vertex vertex,
 	    const edm::Handle<reco::BeamSpot>& beamSpotHandle,
 	    const edm::Handle<trigger::TriggerEvent>& trigEvent,

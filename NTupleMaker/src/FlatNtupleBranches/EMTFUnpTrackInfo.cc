@@ -50,6 +50,14 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   INSERT(mVInt, "unp_trk_qual",          emtfTrk.GMT_quality() );
   INSERT(mVInt, "unp_trk_charge",        emtfTrk.Charge() );
 
+  INSERT(mVInt, "unp_trk_dR_match_nReco",     0);
+  INSERT(mVInt, "unp_trk_dR_match_nRecoSoft", 0);
+  INSERT(mVInt, "unp_trk_dR_match_unique",    0);
+  INSERT(mVInt, "unp_trk_dR_match_iReco",     DINT);
+  INSERT(mVFlt, "unp_trk_dR_match_dEta",      DFLT);
+  INSERT(mVFlt, "unp_trk_dR_match_dPhi",      DFLT);
+  INSERT(mVFlt, "unp_trk_dR_match_dR",        DFLT);
+
   INSERT(mVVInt, "unp_trk_iHit", DVINT ); 
 
   int _nTrkHits = 0, _nTrkRPC = 0, _nTrkNeighbor = 0, _TrkHitMode = 0;

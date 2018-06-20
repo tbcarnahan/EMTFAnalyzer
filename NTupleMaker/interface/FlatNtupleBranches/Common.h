@@ -5,7 +5,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <assert.h>
 #include "TString.h"
+#include "TMath.h"
 
 // Default values for maps
 const int       DINT  = -999;
@@ -92,5 +94,67 @@ inline std::vector<std::vector<int> > ACCESS(const std::map<TString, std::vector
   catch (const std::exception& e) { std::cout << "\n\nACCESS: No matching 'std::vector<std::vector<int>>' element found for string: '" << iStr << "' - code will break\n\n" << std::endl;
     return iMap.at(iStr); }
 };
+
+
+////////////////////////////////////////////////////////////
+///  Delete all elements of std::map from a given index  ///
+////////////////////////////////////////////////////////////
+
+inline void DELETE(std::map<TString, std::vector<float> > & Map, const int idx) {
+  for (auto iMap : Map) {
+    try { iMap.second.erase(iMap.second.begin() + idx); }
+    catch (const std::exception& e) {
+      std::cout << "\n\nDELETE: No matching 'float' element found for string: '" << iMap.first << "' at index " << idx << " - code will break\n\n" << std::endl;
+      iMap.second.erase(iMap.second.begin() + idx); }
+  }
+};
+inline void DELETE(std::map<TString, std::vector<int> > & Map, const int idx) {
+  for (auto iMap : Map) {
+    try { iMap.second.erase(iMap.second.begin() + idx); }
+    catch (const std::exception& e) { std::cout << "\n\nDELETE: No matching 'int' element found for string: '" << iMap.first << "' at index " << idx << " - code will break\n\n" << std::endl;
+      iMap.second.erase(iMap.second.begin() + idx); }
+  }
+};
+inline void DELETE(std::map<TString, std::vector<std::vector<int> > > & Map, const int idx) {
+  for (auto iMap : Map) {
+    try { iMap.second.erase(iMap.second.begin() + idx); }
+    catch (const std::exception& e) { std::cout << "\n\nDELETE: No matching 'std::vector<int>' element found for string: '" << iMap.first << "' at index " << idx << " - code will break\n\n" << std::endl;
+    iMap.second.erase(iMap.second.begin() + idx); }
+  }
+};
+
+
+/////////////////////////////////////////////////////////////////////////
+///  Check that all elements of a std::map have the same vector size  ///
+/////////////////////////////////////////////////////////////////////////
+
+inline void CHECKSIZE(const std::map<TString, std::vector<float> > & Map) {
+  uint size = Map.begin()->second.size();
+  for (const auto iMap : Map) {
+    if (iMap.second.size() != size) {
+      std::cout << "\n\nCHECKSIZE: 'float' element found for string: '" << iMap.first << "' has size " << iMap.second.size() << " instead of " << size << "!!!\n\n" << std::endl;
+      assert(iMap.second.size() == size);
+    }
+  }
+};
+inline void CHECKSIZE(const std::map<TString, std::vector<int> > & Map) {
+  uint size = Map.begin()->second.size();
+  for (const auto iMap : Map) {
+    if (iMap.second.size() != size) {
+      std::cout << "\n\nCHECKSIZE: 'int' element found for string: '" << iMap.first << "' has size " << iMap.second.size() << " instead of " << size << "!!!\n\n" << std::endl;
+      assert(iMap.second.size() == size);
+    }
+  }
+};
+inline void CHECKSIZE(const std::map<TString, std::vector<std::vector<int> > > & Map) {
+  uint size = Map.begin()->second.size();
+  for (const auto iMap : Map) {
+    if (iMap.second.size() != size) {
+      std::cout << "\n\nCHECKSIZE: 'std::vector<int>' element found for string: '" << iMap.first << "' has size " << iMap.second.size() << " instead of " << size << "!!!\n\n" << std::endl;
+      assert(iMap.second.size() == size);
+    }
+  }
+};
+
 
 #endif  // #ifndef FlatNtupleBranchesCommon_h

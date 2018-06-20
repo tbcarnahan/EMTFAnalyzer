@@ -21,13 +21,14 @@ struct EMTFHitInfo {
   std::vector<TString> vInt = {{"hit_eta_int", "hit_theta_int", "hit_phi_int", "hit_endcap", "hit_sector", "hit_sector_index", "hit_station", 
 				"hit_ring", "hit_CSC_ID", "hit_chamber", "hit_FR", "hit_pattern", "hit_quality", "hit_roll", "hit_subsector", 
 				"hit_isCSC", "hit_isRPC", "hit_valid", "hit_BX", "hit_strip", "hit_strip_hi", "hit_strip_low", "hit_wire", "hit_neighbor",
-                                "hit_match_iSimHit"}};
+                                "hit_match_iSimHit", "hit_match_iSeg", "hit_match_nSegs", "hit_match_seg_unique"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;
 
   void Initialize();
   void Reset();
+  inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); }
   void Fill(const l1t::EMTFHit & emtfHit);
 };
 
@@ -56,7 +57,7 @@ inline void PrintEMTFHit( const l1t::EMTFHit & hit ) {
 inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const int i) {
 
   if (ACCESS(*iHit, "hit_isCSC").at(i)) {
-    std::cout << "* Found in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)
+    std::cout << "* CSC LCT in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)
               << ", sector " << ACCESS(*iHit, "hit_sector").at(i) << " (" << ACCESS(*iHit, "hit_sector_index").at(i)
               << "), subsector " << ACCESS(*iHit, "hit_subsector").at(i) << ", station " << ACCESS(*iHit, "hit_station").at(i)
               << ", ring " << ACCESS(*iHit, "hit_ring").at(i) << ", CSC ID " << ACCESS(*iHit, "hit_CSC_ID").at(i)
@@ -66,7 +67,7 @@ inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const 
               << ", wire " << ACCESS(*iHit, "hit_wire").at(i) << std::endl;
   }
   else if (ACCESS(*iHit, "hit_isRPC").at(i)) {
-    std::cout << "* Found in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)
+    std::cout << "* RPC hit in BX " << ACCESS(*iHit, "hit_BX").at(i) << ", endcap " << ACCESS(*iHit, "hit_endcap").at(i)
 	      << ", sector " << ACCESS(*iHit, "hit_sector").at(i) << " (" << ACCESS(*iHit, "hit_sector_index").at(i)
 	      << "), subsector " << ACCESS(*iHit, "hit_subsector").at(i) << ", station " << ACCESS(*iHit, "hit_station").at(i)
 	      << ", ring " << ACCESS(*iHit, "hit_ring").at(i) << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i)

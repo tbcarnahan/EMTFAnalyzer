@@ -17,7 +17,9 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2016Reco_cff') ## Is this appropriate for 2015 data/MC? - AWB 18.04.16
+## Geometry : see http://cmslxr.fnal.gov/source/Configuration/Geometry/python/
+# process.load('Configuration.Geometry.GeometryExtended2016Reco_cff') ## Is this appropriate for 2015 data/MC? - AWB 18.04.16
+process.load('Configuration.Geometry.GeometryExtended2018Reco_cff')   ## Is this appropriate for 2018 data?    - AWB 19.06.18
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff') ## Will this work on 0T data? - AWB 18.04.16
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff') ## Will this work for MC? - AWB 18.04.16
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -29,9 +31,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #                                         monitorPssAndPrivate = cms.untracked.bool(True))
 # process.Tracer = cms.Service("Tracer")
 
-## CSCTF digis, phi / pT LUTs?
-process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff")
-process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerPtScaleConfig_cff")
+# ## CSCTF digis, phi / pT LUTs?
+# process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff")
+# process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerPtScaleConfig_cff")
 
 ## Import RECO muon configurations
 process.load("RecoMuon.TrackingTools.MuonServiceProxy_cff")
@@ -42,7 +44,7 @@ import FWCore.PythonUtilities.LumiList as LumiList
 # process.source.lumisToProcess = LumiList.LumiList(filename = 'goodList.json').getVLuminosityBlockRange()
 
 ## Message Logger and Event range
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(10)
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
@@ -83,8 +85,8 @@ eos_cmd = '/afs/cern.ch/project/eos/installation/ams/bin/eos.select'
 # in_dir_name = '/eos/cms/tier0/store/data/Commissioning2017/L1Accept/RAW/v1/000/293/765/00000/'
 # in_dir_name = '/eos/cms/tier0/store/data/Commissioning2017/MinimumBias/RAW/v1/000/293/765/00000/'
 # in_dir_name = '/eos/cms/tier0/store/data/Run2017E/DoubleMuon/RAW/v1/000/303/832/00000/'
-in_dir_name = '/store/data/Run2017F/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/306/091/00000/'
-# in_dir_name = '/store/data/Run2018A/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/315/322/00000/'
+# in_dir_name = '/store/data/Run2017F/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/306/091/00000/'
+in_dir_name = '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/317/320/00000/'
 
 # ## 2017 Cosmics, with RPC!
 # in_dir_name = '/store/express/Commissioning2017/ExpressCosmics/FEVT/Express-v1/000/291/622/ 00000/'
@@ -167,27 +169,28 @@ process.dumpED = cms.EDAnalyzer("EventContentAnalyzer")
 process.dumpES = cms.EDAnalyzer("PrintEventSetupContent")
 
 
-## Re-emulate CSC LCTs to get full ALCT+CLCT info
-process.load('L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi')
-process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = cms.InputTag('muonCSCDigis', 'MuonCSCComparatorDigi')
-process.cscTriggerPrimitiveDigis.CSCWireDigiProducer       = cms.InputTag('muonCSCDigis', 'MuonCSCWireDigi')
-process.cscTriggerPrimitiveDigis.commonParam = cms.PSet(
-    isTMB07 = cms.bool(True), ## Default
-    isMTCC = cms.bool(False), ## Default
-    isSLHC = cms.bool(False), ## Default
-    smartME1aME1b = cms.bool(False), ## Default
-    gangedME1a = cms.bool(False), ## Changed - why is this not default?
-    disableME1a = cms.bool(False), ## Default
-    disableME42 = cms.bool(False), ## Default
-)
+# ## Re-emulate CSC LCTs to get full ALCT+CLCT info
+# process.load('L1Trigger.CSCTriggerPrimitives.cscTriggerPrimitiveDigis_cfi')
+# process.cscTriggerPrimitiveDigis.CSCComparatorDigiProducer = cms.InputTag('muonCSCDigis', 'MuonCSCComparatorDigi')
+# process.cscTriggerPrimitiveDigis.CSCWireDigiProducer       = cms.InputTag('muonCSCDigis', 'MuonCSCWireDigi')
+# process.cscTriggerPrimitiveDigis.commonParam = cms.PSet(
+#     isTMB07 = cms.bool(True), ## Default
+#     isMTCC = cms.bool(False), ## Default
+#     isSLHC = cms.bool(False), ## Default
+#     smartME1aME1b = cms.bool(False), ## Default
+#     gangedME1a = cms.bool(False), ## Changed - why is this not default?
+#     disableME1a = cms.bool(False), ## Default
+#     disableME42 = cms.bool(False), ## Default
+# )
 
 ## EMTF Emulator
 process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
-process.simEmtfDigisData.verbosity = cms.untracked.int32(0)
+process.simEmtfDigisData.verbosity  = cms.untracked.int32(0)
+process.simEmtfDigisData.CPPFEnable = cms.bool(True)
 
-# ## Planned 2018 settings
+## Planned 2018 settings
 # process.simEmtfDigisData.FWConfig = cms.bool(False)
 # process.simEmtfDigisData.BXWindow = cms.int32(2)
 # process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
@@ -195,23 +198,23 @@ process.simEmtfDigisData.verbosity = cms.untracked.int32(0)
 # process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
 # process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
 
-# ## Early 2018 actual settings (through end of April at least)
-# process.simEmtfDigisData.FWConfig = cms.bool(False)
-# process.simEmtfDigisData.BXWindow = cms.int32(2)
-# process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(8)
-# process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
-# process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(False)
-# process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(1)
+## Early 2018 actual settings (through end of April at least)
+process.simEmtfDigisData.FWConfig = cms.bool(False)
+process.simEmtfDigisData.BXWindow = cms.int32(2)
+process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(8)
+process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
+process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(False)
+process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(1)
 
 # process.simEmtfDigisData.CSCInput  = cms.InputTag('emtfStage2Digis')
 # process.simEmtfDigisData.RPCInput  = cms.InputTag('muonRPCDigis')
 
 
-## EMTF Emulator with re-emulated CSC LCTs as input
-process.simEmtfDigisDataSimLct = process.simEmtfDigisData.clone()
+# ## EMTF Emulator with re-emulated CSC LCTs as input
+# process.simEmtfDigisDataSimLct = process.simEmtfDigisData.clone()
 
-process.simEmtfDigisDataSimLct.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
-process.simEmtfDigisDataSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+# process.simEmtfDigisDataSimLct.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
+# process.simEmtfDigisDataSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
 
 
 
@@ -225,11 +228,11 @@ process.FlatNtupleData.skimTrig = cms.bool(True)
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
     process.muonCSCDigis             + ## Unpacked CSC LCTs (and raw strip and wire?) from TMB
-    process.cscTriggerPrimitiveDigis + ## To get re-emulated CSC LCTs
+    # process.cscTriggerPrimitiveDigis + ## To get re-emulated CSC LCTs
     # process.csctfDigis               + ## Necessary for legacy studies, or if you use csctfDigis as input
     process.emtfStage2Digis          + 
     process.simEmtfDigisData         + 
-    process.simEmtfDigisDataSimLct   +
+    # process.simEmtfDigisDataSimLct   +
     process.FlatNtupleData
     )
 
@@ -244,7 +247,7 @@ out_dir_name = './'
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_306091_2017_emul_1k.root')
+    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_317320_2018_emul_CPPF_unp_2018_geom_test.root')
     # fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_315322_FW_emul_central_CPPF_print.root')
     )
 

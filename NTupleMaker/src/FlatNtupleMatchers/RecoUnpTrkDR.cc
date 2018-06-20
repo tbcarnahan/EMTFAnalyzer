@@ -1,15 +1,15 @@
 
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoUnpTrkDR.h"
 
-void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks, 
-		       const float min_reco_eta, const float max_reco_eta, const float max_match_dR ) {
+void RecoUnpTrkDR::Match( RecoMuonInfo & recoMuons, EMTFUnpTrackInfo & emtfTrks, 
+			  const float min_reco_eta, const float max_reco_eta, const float max_match_dR ) {
 
-  // std::cout << "\nEntering RecoTrkDR.cc" << std::endl;
+  // std::cout << "\nEntering RecoUnpTrkDR.cc" << std::endl;
 
   const float NOMATCH = 999.;
 
   const int nReco = ACCESS(recoMuons.mInts, "nRecoMuons");
-  const int nTrk  = ACCESS(emtfTrks.mInts,  "nTracks");
+  const int nTrk  = ACCESS(emtfTrks.mInts,  "nUnpTracks");
 
   std::vector<bool>                valid_St2  (nReco, 0);
   std::vector<bool>                standalone (nReco, 0);
@@ -68,14 +68,14 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
     for (int j = 0; j < nTrk; j++) {
 
       // Discard EMTF tracks which have no hits in BX = 0
-      if ( abs(ACCESS(*iTrk, "trk_BX").at(j)) >  1 ) continue;
-      if ( abs(ACCESS(*iTrk, "trk_BX").at(j)) == 1 && ACCESS(*iTrk, "trk_dBX").at(j) == 0 ) continue;
+      if ( abs(ACCESS(*iTrk, "unp_trk_BX").at(j)) >  1 ) continue;
+      if ( abs(ACCESS(*iTrk, "unp_trk_BX").at(j)) == 1 && ACCESS(*iTrk, "unp_trk_dBX").at(j) == 0 ) continue;
 
       // Discard EMTF tracks composed entirely of neighbor hits (should be built in other sector)
-      if ( ACCESS(*iTrk, "trk_mode_neighbor").at(j) == ACCESS(*iTrk, "trk_mode").at(j) ) continue;
+      if ( ACCESS(*iTrk, "unp_trk_mode_neighbor").at(j) == ACCESS(*iTrk, "unp_trk_mode").at(j) ) continue;
 
-      float trkEta = ACCESS(*fTrk, "trk_eta").at(j);
-      float trkPhi = ACCESS(*fTrk, "trk_phi").at(j) * M_PI / 180.;
+      float trkEta = ACCESS(*fTrk, "unp_trk_eta").at(j);
+      float trkPhi = ACCESS(*fTrk, "unp_trk_phi").at(j) * M_PI / 180.;
 
       dEta_matrix[i][j] = trkEta - recoEta;
       dPhi_matrix[i][j] = calc_dPhi(recoPhi, trkPhi) * 180. / M_PI;
@@ -103,13 +103,13 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
     }
 
     if (jMin >= 0) {
-      INSERT(recoMuons.mVInt, "reco_dR_match_emu_iTrk", i, jMin);
-      INSERT(recoMuons.mVFlt, "reco_dR_match_emu_dEta", i, dEta_matrix[i][jMin]);
-      INSERT(recoMuons.mVFlt, "reco_dR_match_emu_dPhi", i, dPhi_matrix[i][jMin]);
-      INSERT(recoMuons.mVFlt, "reco_dR_match_emu_dR",   i, dR_matrix[i][jMin]);
+      INSERT(recoMuons.mVInt, "reco_dR_match_unp_iTrk", i, jMin);
+      INSERT(recoMuons.mVFlt, "reco_dR_match_unp_dEta", i, dEta_matrix[i][jMin]);
+      INSERT(recoMuons.mVFlt, "reco_dR_match_unp_dPhi", i, dPhi_matrix[i][jMin]);
+      INSERT(recoMuons.mVFlt, "reco_dR_match_unp_dR",   i, dR_matrix[i][jMin]);
     }
-    INSERT(recoMuons.mVInt, "reco_dR_match_emu_nTrk",   i, nMatch);
-    INSERT(recoMuons.mVInt, "reco_dR_match_emu_unique", i, 0);
+    INSERT(recoMuons.mVInt, "reco_dR_match_unp_nTrk",   i, nMatch);
+    INSERT(recoMuons.mVInt, "reco_dR_match_unp_unique", i, 0);
 
   } // End loop: for (int i = 0; i < nReco; i++)
 
@@ -151,14 +151,14 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
     }
 
     if (iMin >= 0) {
-      INSERT(emtfTrks.mVInt, "trk_dR_match_iReco", j, iMin);
-      INSERT(emtfTrks.mVFlt, "trk_dR_match_dEta" , j, dEta_matrix[iMin][j]);
-      INSERT(emtfTrks.mVFlt, "trk_dR_match_dPhi",  j, dPhi_matrix[iMin][j]);
-      INSERT(emtfTrks.mVFlt, "trk_dR_match_dR",    j, dR_matrix[iMin][j]);
+      INSERT(emtfTrks.mVInt, "unp_trk_dR_match_iReco", j, iMin);
+      INSERT(emtfTrks.mVFlt, "unp_trk_dR_match_dEta" , j, dEta_matrix[iMin][j]);
+      INSERT(emtfTrks.mVFlt, "unp_trk_dR_match_dPhi",  j, dPhi_matrix[iMin][j]);
+      INSERT(emtfTrks.mVFlt, "unp_trk_dR_match_dR",    j, dR_matrix[iMin][j]);
     }
-    INSERT(emtfTrks.mVInt, "trk_dR_match_nReco",     j, nMatch);
-    INSERT(emtfTrks.mVInt, "trk_dR_match_nRecoSoft", j, nMatchSoft);
-    INSERT(emtfTrks.mVInt, "trk_dR_match_unique",    j, 0);
+    INSERT(emtfTrks.mVInt, "unp_trk_dR_match_nReco",     j, nMatch);
+    INSERT(emtfTrks.mVInt, "unp_trk_dR_match_nRecoSoft", j, nMatchSoft);
+    INSERT(emtfTrks.mVInt, "unp_trk_dR_match_unique",    j, 0);
 
   } // End loop: for (int j = 0; j < nTrk; j++)
 
@@ -167,15 +167,15 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
   for (int i = 0; i < nReco; i++) {
     for (int j = 0; j < nTrk; j++) {
 
-      if ( ACCESS(recoMuons.mVInt, "reco_dR_match_emu_iTrk").at(i) == j &&
-	   ACCESS(emtfTrks.mVInt,  "trk_dR_match_iReco").at(j) == i ) {
-	INSERT(recoMuons.mVInt, "reco_dR_match_emu_unique", i, 1);
-	INSERT(emtfTrks.mVInt,  "trk_dR_match_unique",  j, 1);
+      if ( ACCESS(recoMuons.mVInt, "reco_dR_match_unp_iTrk").at(i) == j &&
+	   ACCESS(emtfTrks.mVInt,  "unp_trk_dR_match_iReco").at(j) == i ) {
+	INSERT(recoMuons.mVInt, "reco_dR_match_unp_unique", i, 1);
+	INSERT(emtfTrks.mVInt,  "unp_trk_dR_match_unique",  j, 1);
       }
 
     } // End loop: for (int j = 0; j < nTrk; j++)
   } // End loop: for (int i = 0; i < nReco; i++)
 
-  // std::cout << "Finished with RecoTrkDR.cc\n" << std::endl;
+  // std::cout << "Finished with RecoUnpTrkDR.cc\n" << std::endl;
 
-} // End function: void RecoTrkDR::Match()
+} // End function: void RecoUnpTrkDR::Match()

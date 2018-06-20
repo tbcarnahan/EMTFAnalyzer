@@ -22,13 +22,19 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFSimHitInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/CSCSegInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoPairInfo.h"
 
 // Object matchers
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoUnpTrkDR.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/UnpEmuTrkDR.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/SimUnpHit.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/LCTSeg.h"
+
+// CSC segment geometry
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
 
 // RECO muons
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
@@ -67,6 +73,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   GenMuonInfo      genMuonInfo;
   RecoMuonInfo     recoMuonInfo;
   RecoPairInfo     recoPairInfo;
+  CSCSegInfo       cscSegInfo;
   EMTFHitInfo      emtfHitInfo;
   EMTFSimHitInfo   emtfSimHitInfo;
   EMTFTrackInfo    emtfTrackInfo;
@@ -75,9 +82,11 @@ class FlatNtuple : public edm::EDAnalyzer {
   /////////////////////////
   ///  Object matchers  ///
   /////////////////////////
-  RecoTrkDR   recoTrkDR;
-  UnpEmuTrkDR unpEmuTrkDR;
-  SimUnpHit   simUnpHit;
+  RecoTrkDR    recoTrkDR;
+  RecoUnpTrkDR recoUnpTrkDR;
+  UnpEmuTrkDR  unpEmuTrkDR;
+  SimUnpHit    simUnpHit;
+  LCTSeg       lctSeg;
  
   // Output tree
   TTree * out_tree;
@@ -108,10 +117,13 @@ class FlatNtuple : public edm::EDAnalyzer {
   
   // EDM Tokens
   edm::EDGetTokenT<std::vector<reco::GenParticle>>         GenMuon_token;
+  edm::EDGetTokenT<CSCSegmentCollection>                   CSCSeg_token;
   edm::EDGetTokenT<reco::MuonCollection>                   RecoMuon_token;
   edm::EDGetTokenT<reco::VertexCollection>                 RecoVertex_token;
   edm::EDGetTokenT<reco::BeamSpot>                         RecoBeamSpot_token;
   edm::EDGetTokenT<trigger::TriggerEvent>                  TrigEvent_token;
+  edm::EDGetTokenT<std::vector<l1t::CPPFDigi>>             CPPFDigi_token;
+  edm::EDGetTokenT<std::vector<l1t::CPPFDigi>>             CPPFUnpDigi_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFSimHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;

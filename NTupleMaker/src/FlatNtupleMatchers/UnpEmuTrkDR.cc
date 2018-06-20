@@ -57,13 +57,13 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
     }
 
     if (jMin >= 0) {
-      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iEmu", jMin);
+      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iTrk", jMin);
       INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  dBX_matrix [i][jMin]);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dEta", dEta_matrix[i][jMin]);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dPhi", dPhi_matrix[i][jMin]);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dR",   dR_matrix  [i][jMin]);
     } else {
-      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iEmu", DINT);
+      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iTrk", DINT);
       INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  DINT);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dEta", DFLT);
       INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dPhi", DFLT);
@@ -87,13 +87,13 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
     }
 
     if (iMin >= 0) {
-      INSERT(emuTrks.mVInt, "trk_unp_match_iUnp", iMin);
+      INSERT(emuTrks.mVInt, "trk_unp_match_iTrk", iMin);
       INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  dBX_matrix [iMin][j]);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dEta", dEta_matrix[iMin][j]);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dPhi", dPhi_matrix[iMin][j]);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dR",   dR_matrix  [iMin][j]);
     } else {
-      INSERT(emuTrks.mVInt, "trk_unp_match_iUnp", DINT);
+      INSERT(emuTrks.mVInt, "trk_unp_match_iTrk", DINT);
       INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  DINT);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dEta", DFLT);
       INSERT(emuTrks.mVFlt, "trk_unp_match_dPhi", DFLT);
@@ -109,8 +109,8 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
   for (int i = 0; i < nUnp; i++) {
     for (int j = 0; j < nEmu; j++) {
 
-      if ( ACCESS(unpTrks.mVInt, "unp_trk_emu_match_iEmu").at(i) == j &&
-	   ACCESS(emuTrks.mVInt, "trk_unp_match_iUnp")    .at(j) == i ) {
+      if ( ACCESS(unpTrks.mVInt, "unp_trk_emu_match_iTrk").at(i) == j &&
+	   ACCESS(emuTrks.mVInt, "trk_unp_match_iTrk")    .at(j) == i ) {
 	INSERT(unpTrks.mVInt, "unp_trk_emu_match_unique", i, 1);
 	INSERT(emuTrks.mVInt, "trk_unp_match_unique",     j, 1);
       }
