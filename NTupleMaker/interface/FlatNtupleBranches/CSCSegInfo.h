@@ -21,11 +21,11 @@
 /////////////////////////////////
 struct CSCSegInfo {
   std::vector<TString> ints = {{"nSegs", "nSegsBX0"}};
-  std::vector<TString> vFlt = {{"seg_chi2", "seg_time", "seg_eta", "seg_phi", "seg_globX", "seg_globY", "seg_globZ",
+  std::vector<TString> vFlt = {{"seg_chi2", "seg_time", "seg_eta", "seg_theta", "seg_phi", "seg_globX", "seg_globY", "seg_globZ",
 				"seg_locX", "seg_locY", "seg_dirX", "seg_dirY", "seg_dirZ", "seg_bend_theta", "seg_bend_phi"}};
   std::vector<TString> vInt = {{"seg_endcap", "seg_ring", "seg_station", "seg_chamber", "seg_sector", "seg_CSC_ID",
 				"seg_nRecHits", "seg_wire_max", "seg_wire_min", "seg_strip_max", "seg_strip_min",
-				"seg_match_iHit", "seg_match_nHits", "seg_match_hit_unique"}};
+				"seg_match_iHit", "seg_match_iHit2", "seg_match_nHits", "seg_hit_match_unique"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;

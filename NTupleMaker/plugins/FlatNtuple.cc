@@ -224,10 +224,10 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       emtfSimHitInfo.Fill(emtfSimHit);
     } // End for (l1t::EMTFHit emtfSimHit: *emtfSimHits)
   }
-  // else {
-  //   std::cout << "ERROR: could not get emtfSimHits from event!!!" << std::endl;
-  //   return;
-  // }
+  else {
+    std::cout << "ERROR: could not get emtfSimHits from event!!!" << std::endl;
+    return;
+  }
 
   
   // std::cout << "About to fill EMTF track branches" << std::endl;
@@ -346,17 +346,23 @@ void FlatNtuple::beginJob() {
   for (auto & it : emtfTrackInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
   for (auto & it : emtfTrackInfo.mVVInt) out_tree->Branch(it.first, (std::vector<std::vector<int> >*) &it.second);
 
-  for (auto & it : cscSegInfo.mInts) out_tree->Branch(it.first, (int*) &it.second);
-  for (auto & it : cscSegInfo.mVFlt) out_tree->Branch(it.first, (std::vector<float>*) &it.second);
-  for (auto & it : cscSegInfo.mVInt) out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+  if (isReco) {
+    for (auto & it : cscSegInfo.mInts) out_tree->Branch(it.first, (int*) &it.second);
+    for (auto & it : cscSegInfo.mVFlt) out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+    for (auto & it : cscSegInfo.mVInt) out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+  }
 
-  for (auto & it : recoMuonInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
-  for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
-  for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+  if (isReco) {
+    for (auto & it : recoMuonInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
+    for (auto & it : recoMuonInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+    for (auto & it : recoMuonInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+  }
 
-  for (auto & it : recoPairInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
-  for (auto & it : recoPairInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
-  for (auto & it : recoPairInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+  if (isReco) {
+    for (auto & it : recoPairInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);
+    for (auto & it : recoPairInfo.mVFlt)  out_tree->Branch(it.first, (std::vector<float>*) &it.second);
+    for (auto & it : recoPairInfo.mVInt)  out_tree->Branch(it.first, (std::vector<int>*)   &it.second);
+  }
 
   if (not isMC) {
     for (auto & it : emtfUnpTrackInfo.mInts)  out_tree->Branch(it.first, (int*) &it.second);

@@ -17,24 +17,12 @@ void LCTSeg::Match(CSCSegInfo & cscSegs, EMTFHitInfo & emtfHits) {
   
   // std::cout << "nsegs: " << n1 << ", nLCTs: " << n2 << std::endl;
 
-  for (int j = 0; j < n2; j++) { // Loop over LCTs
-    if (ACCESS(emtfHits.mVInt, "hit_isCSC").at(j) == 1) {
-      INSERT(emtfHits.mVInt, "hit_match_iSeg", DINT);
-      INSERT(emtfHits.mVInt, "hit_match_nSegs", 0);
-      INSERT(emtfHits.mVInt, "hit_match_seg_unique", 0);
-    }
-    else {
-      INSERT(emtfHits.mVInt, "hit_match_iSeg", DINT); // Pushes back default integer value
-      INSERT(emtfHits.mVInt, "hit_match_nSegs", DINT);
-      INSERT(emtfHits.mVInt, "hit_match_seg_unique", DINT);
-    }
-  }
-
   for (int i = 0; i < n1; i++) { // Loop over segments
     for (int j = 0; j < n2; j++) { // Loop over LCTs
 
       if (ACCESS(emtfHits.mVInt, "hit_isCSC").at(j) != 1) continue; // Skip RPC hits
       if (ACCESS(cscSegs.mVInt, "seg_strip_max").at(i) - ACCESS(cscSegs.mVInt, "seg_strip_min").at(i) > 24) continue; // Skip anomalous huge segments
+      if ( fabs( ACCESS(cscSegs.mVFlt, "seg_time").at(i) - ACCESS(emtfHits.mVInt, "hit_BX").at(j) * 25. ) > 37.5 ) continue; // Require matching within 1 BX
 
       // Check to see if the segment and LCT are in the same endcap (EMTFHit: endcap --> +/-1, CSCDetId: endcap --> +/-1)
       int seg_endcap = ACCESS(cscSegs.mVInt,  "seg_endcap").at(i);
@@ -80,40 +68,50 @@ void LCTSeg::Match(CSCSegInfo & cscSegs, EMTFHitInfo & emtfHits) {
       if (LCT_wire  < Seg_wire_min  - 1 || LCT_wire  > Seg_wire_max  + 1) continue;
 
       // std::cout << "We have a full match, segment index " << i << " to LCT index " << j << "!" << std::endl;
+
+      if ( ACCESS(emtfHits.mVInt, "hit_neighbor").at(j) == 1 ) { // Only set LCT to match segment, not segment to match LCT
+	INSERT(emtfHits.mVInt, "hit_match_iSeg",  j, i);
+	INSERT(emtfHits.mVInt, "hit_match_nSegs", j, ACCESS(emtfHits.mVInt, "hit_match_nSegs").at(j) + 1);
+	continue;
+      }
+
+      assert( (ACCESS(cscSegs.mVInt,  "seg_match_nHits").at(i) >= 1) == (ACCESS(cscSegs.mVInt,  "seg_match_iHit").at(i) >= 0) );
+      assert( (ACCESS(emtfHits.mVInt, "hit_match_nSegs").at(j) >= 1) == (ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j) >= 0) );
       
       INSERT(cscSegs.mVInt,  "seg_match_nHits", i, ACCESS(cscSegs.mVInt,  "seg_match_nHits").at(i) + 1);
       INSERT(emtfHits.mVInt, "hit_match_nSegs", j, ACCESS(emtfHits.mVInt, "hit_match_nSegs").at(j) + 1);
-  
-      // Check for segments matched to two LCTs (need to check for neighbor LCTs)
-      if (ACCESS(cscSegs.mVInt, "seg_match_iHit").at(i) >= 0) {
+
+      int l = ACCESS(cscSegs.mVInt,  "seg_match_iHit").at(i); // Old matched hit index
+      int k = ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j); // Old matched segment index
+
+      assert(l != j);
+      assert(k != i);
+
+
+      // If no double matching then we save the indices
+      if (l < 0) INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j); // Sets i^th value in vector to j
+      if (k < 0) INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i); // Sets j^th value in vector to i
+
+      // Check for segments matched to two LCTs
+      if (l >= 0) {
 	// std::cout << "But segment already had a match with index " << ACCESS(cscSegs.mVInt, "seg_match_iHit").at(i) << "!!!" << std::endl;
-	int l           = ACCESS(cscSegs.mVInt,  "seg_match_iHit").at(i);  // Old index
 	int LCT_strip_l = ACCESS(emtfHits.mVInt, "hit_strip").at(l) + 2; // Old strip
 	int LCT_wire_l  = ACCESS(emtfHits.mVInt, "hit_wire").at(l)  + 1; // Old wire
 
-	// Match both LCTs to the segment index but the segment index only to the non-neighbor index
-	if ( ACCESS(emtfHits.mVInt, "hit_neighbor").at(l) == 1 &&
-	     ACCESS(emtfHits.mVInt, "hit_neighbor").at(j) == 0 ) { // Only the old match is a neighbor hit
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j);          // Sets the index to new LCT index
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i);
-	}
-	else if ( ACCESS(emtfHits.mVInt, "hit_neighbor").at(l) == 0 &&
-		  ACCESS(emtfHits.mVInt, "hit_neighbor").at(j) == 1 ) { // Only the new match is a neighbor hit
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i);               // Only set LCT to match segment, not segment to match LCT              
-	}
-	else if ( abs(LCT_strip - Seg_strip_avg) < abs(LCT_strip_l - Seg_strip_avg) ) {
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j); // Sets the index to new LCT index
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i);
+	// Match both LCTs to the segment index but the segment index only to the closer LCT
+	if ( abs(LCT_strip - Seg_strip_avg) < abs(LCT_strip_l - Seg_strip_avg) ) {
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit",  i, j); // Sets the index to new LCT index
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit2", i, l); // Sets the second index to old LCT index
 	}
 	else if ( abs(LCT_strip - Seg_strip_avg) > abs(LCT_strip_l - Seg_strip_avg) ) {
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i); // Only set LCT to match segment, not segment to match LCT
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit2", i, j); // Sets the second index to new LCT index
 	}
 	else if ( abs(LCT_wire - Seg_wire_avg) < abs(LCT_wire_l - Seg_wire_avg) ) {
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j); // Sets the index to new LCT index
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i);
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit",  i, j); // Sets the index to new LCT index
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit2", i, l); // Sets the second index to old LCT index
 	}
 	else if ( abs(LCT_wire - Seg_wire_avg) > abs(LCT_wire_l - Seg_wire_avg) ) {
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i); // Only set LCT to match segment, not segment to match LCT
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit2", i, j); // Sets the second index to new LCT index
 	}
 	else {
 	  // std::cout << "\nBizzare case in CSC segment matching: two distinct LCTs, same distance from the segment!" << std::endl;
@@ -124,29 +122,29 @@ void LCTSeg::Match(CSCSegInfo & cscSegs, EMTFHitInfo & emtfHits) {
 	  // 	    << ", dStrip = "  << LCT_strip   << " - " <<  Seg_strip_avg << " = " << (LCT_strip - Seg_strip_avg)
 	  // 	    << ", dWire_l = " << LCT_wire_l  << " - " <<  Seg_wire_avg  << " = " << (LCT_wire_l - Seg_wire_avg)
 	  // 	    << ", dWire = "   << LCT_wire    << " - " <<  Seg_wire_avg  << " = " << (LCT_wire - Seg_wire_avg) << std::endl;
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i); // Only set LCT to match segment, not segment to match LCT              
+	  INSERT(cscSegs.mVInt,  "seg_match_iHit2", i, j); // Sets the second index to new LCT index
 	}
       }
 
+
       // Check for LCTs matched to two segments
-      else if (ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j) >= 0) {
+      if ( k >= 0 ) {
 	// std::cout << "But LCT already had a match with index " << ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j) << "!!!" << std::endl;
-	int k = ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j);
         
 	// Check which segment has the most rechits and keep that one
 	if (ACCESS(cscSegs.mVInt, "seg_nRecHits").at(i) > (ACCESS(cscSegs.mVInt, "seg_nRecHits").at(k))) {
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j);  // Sets i^th value in vector to j
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i);  // Sets j^th value in vector to i
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg",  j, i);  // Sets j^th value in vector to i
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg2", j, k);  // Sets j^th value in vector to k
 	}
 	else if (ACCESS(cscSegs.mVInt, "seg_nRecHits").at(i) < (ACCESS(cscSegs.mVInt, "seg_nRecHits").at(k))) {
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j);  // Sets i^th value in vector to j
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg2", j, i);  // Sets j^th value in vector to i
 	}
 	else if (ACCESS(cscSegs.mVFlt, "seg_chi2").at(i) < (ACCESS(cscSegs.mVFlt, "seg_chi2").at(k))) {
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j);  // Sets i^th value in vector to j
-	  INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i);  // Sets j^th value in vector to i
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg",  j, i);  // Sets j^th value in vector to i
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg2", j, k);  // Sets j^th value in vector to k
 	}
 	else if (ACCESS(cscSegs.mVFlt, "seg_chi2").at(i) > (ACCESS(cscSegs.mVFlt, "seg_chi2").at(k))) {
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j);  // Sets i^th value in vector to j
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg2", j, i);  // Sets j^th value in vector to i
 	}
 	else {
 	  std::cout << "\nBizzare case in LCT matching: two distinct segements with the same nRecHits and Chi2!" << std::endl;
@@ -154,15 +152,18 @@ void LCTSeg::Match(CSCSegInfo & cscSegs, EMTFHitInfo & emtfHits) {
 	  PrintHit(&(emtfHits.mVInt), j);
 	  PrintSeg(&(cscSegs.mVInt), &(cscSegs.mVFlt), k);
 	  PrintSeg(&(cscSegs.mVInt), &(cscSegs.mVFlt), i);
-	  INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j); // Only set segment to match LCT, not LCT to match segment
+	  INSERT(emtfHits.mVInt, "hit_match_iSeg2", j, i); // Sets the second index to new segment index
 	}
       }
       
-      // If no double matching then we save the indices
-      else {
-	INSERT(cscSegs.mVInt,  "seg_match_iHit", i, j); // Sets i^th value in vector to j
-	INSERT(emtfHits.mVInt, "hit_match_iSeg", j, i); // Sets j^th value in vector to i
-      }
+
+      assert( (ACCESS(cscSegs.mVInt,  "seg_match_nHits").at(i) >= 2) == (ACCESS(cscSegs.mVInt,  "seg_match_iHit2").at(i) >= 0) );
+      assert( (ACCESS(emtfHits.mVInt, "hit_match_nSegs").at(j) >= 2) == (ACCESS(emtfHits.mVInt, "hit_match_iSeg2").at(j) >= 0) );
+
+      assert( (ACCESS(cscSegs.mVInt,  "seg_match_nHits").at(i) == 0) ||
+	      (ACCESS(cscSegs.mVInt,  "seg_match_iHit2").at(i) != ACCESS(cscSegs.mVInt, "seg_match_iHit").at(i)) );
+      assert( (ACCESS(emtfHits.mVInt, "hit_match_nSegs").at(j) == 0) ||
+	      (ACCESS(emtfHits.mVInt, "hit_match_iSeg2").at(j) != ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j)) );
 
     } // End j loop (over LCTs)
   } // End i loop (over segments)
@@ -170,17 +171,16 @@ void LCTSeg::Match(CSCSegInfo & cscSegs, EMTFHitInfo & emtfHits) {
   for (int i = 0; i < n1; i++) { // Loop over segments
     int j = ACCESS(cscSegs.mVInt, "seg_match_iHit").at(i);
     if (j > 0 && ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j) == i) {
-      INSERT(cscSegs.mVInt, "seg_match_hit_unique", i, 1);
+      INSERT(cscSegs.mVInt, "seg_hit_match_unique", i, 1);
     }
   }
 
   for (int j = 0; j < n2; j++) { // Loop over LCTs
     int i = ACCESS(emtfHits.mVInt, "hit_match_iSeg").at(j);
     if (i > 0 && ACCESS(cscSegs.mVInt, "seg_match_iHit").at(i) == j) {
-      INSERT(emtfHits.mVInt, "hit_match_seg_unique", j, 1);
+      INSERT(emtfHits.mVInt, "hit_seg_match_unique", j, 1);
     }
   }
-
 
   
 } // End Fill

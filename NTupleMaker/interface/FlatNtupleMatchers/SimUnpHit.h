@@ -8,6 +8,9 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFHitInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFSimHitInfo.h"
 
+// Helpful tools
+#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/HelperFunctions.h"
+
 ////////////////////////////////
 ///  Matching variables      ///
 ////////////////////////////////

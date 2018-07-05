@@ -54,6 +54,7 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   INSERT(mVInt, "unp_trk_dR_match_nRecoSoft", 0);
   INSERT(mVInt, "unp_trk_dR_match_unique",    0);
   INSERT(mVInt, "unp_trk_dR_match_iReco",     DINT);
+  INSERT(mVInt, "unp_trk_dR_match_iReco2",    DINT);
   INSERT(mVFlt, "unp_trk_dR_match_dEta",      DFLT);
   INSERT(mVFlt, "unp_trk_dR_match_dPhi",      DFLT);
   INSERT(mVFlt, "unp_trk_dR_match_dR",        DFLT);
@@ -180,6 +181,15 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   INSERT(mVInt, "unp_trk_dBX",        _maxBX - _minBX );
   INSERT(mVInt, "unp_trk_dPhi_int",   _maxPh - _minPh );
   INSERT(mVInt, "unp_trk_dTheta_int", _maxTh - _minTh );
+
+  INSERT(mVInt, "unp_trk_emu_match_iTrk",  DINT);
+  INSERT(mVInt, "unp_trk_emu_match_iTrk2", DINT);
+  INSERT(mVInt, "unp_trk_emu_match_dBX",   DINT);
+  INSERT(mVFlt, "unp_trk_emu_match_dEta",  DFLT);
+  INSERT(mVFlt, "unp_trk_emu_match_dPhi",  DFLT);
+  INSERT(mVFlt, "unp_trk_emu_match_dR",    DFLT);
+  INSERT(mVInt, "unp_trk_emu_match_unique",   0);
+  INSERT(mVInt, "unp_trk_emu_match_exact",    0);
 
   // std::cout << "Filled EMTFUnpTrackInfo" << std::endl;
 } // End function: EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hits)

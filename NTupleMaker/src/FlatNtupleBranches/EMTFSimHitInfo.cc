@@ -69,5 +69,9 @@ void EMTFSimHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "sim_hit_strip_low",    (!emtfHit.Is_RPC() ? DINT : emtfHit.Strip_low()) );
   INSERT(mVInt, "sim_hit_wire",         ( emtfHit.Is_RPC() ? DINT : emtfHit.Wire()) );
   INSERT(mVInt, "sim_hit_neighbor",     emtfHit.Neighbor() );
+
+  INSERT(mVInt, "sim_hit_match_iHit", DINT);
+  INSERT(mVInt, "sim_hit_match_exact",   0);
+
   // std::cout << "Filled EMTFSimHitInfo" << std::endl;
 } // End function: EMTFSimHitInfo::Fill(const l1t::EMTFHit & emtfHit)

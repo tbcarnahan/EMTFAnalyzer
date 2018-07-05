@@ -44,8 +44,8 @@ struct RecoMuonInfo {
   std::vector<TString> vInt = {{"reco_ID_soft", "reco_ID_loose", "reco_ID_medium", "reco_ID_tight",
 				"reco_ID_PF", "reco_ID_tracker", "reco_ID_stand", "reco_ID_global",
 				"reco_ID_station", "reco_ID_nStations", "reco_charge",
-				"reco_dR_match_emu_iTrk", "reco_dR_match_emu_nTrk", "reco_dR_match_emu_unique",
-				"reco_dR_match_unp_iTrk", "reco_dR_match_unp_nTrk", "reco_dR_match_unp_unique",
+				"reco_dR_match_emu_iTrk", "reco_dR_match_emu_iTrk2", "reco_dR_match_emu_nTrk", "reco_dR_match_emu_unique",
+				"reco_dR_match_unp_iTrk", "reco_dR_match_unp_iTrk2", "reco_dR_match_unp_nTrk", "reco_dR_match_unp_unique",
 				"reco_trig_ID"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;

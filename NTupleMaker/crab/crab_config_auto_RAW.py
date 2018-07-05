@@ -28,17 +28,14 @@ config.Data.inputDBS = 'global'
 
 config.Data.inputDataset = MYARGS.inputDataset
 
-config.Data.runRange = '306091'
-# config.Data.runRange = '306092'
-# config.Data.runRange = '306135'
-# config.Data.runRange = '306154'
+# config.Data.runRange = '317591'
 
 config.Data.useParent = True
-config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob =   1 ## ~1k events per LS, ~1k events / minute
-config.Data.totalUnits =  999
-config.Data.lumiMask = 'data/Run_306091_tracker_on.txt'
-# config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
+config.Data.splitting = 'FileBased'
+config.Data.unitsPerJob =    3 ## ~1k events per LS, ~1k events / minute
+config.Data.totalUnits =  9999
+# config.Data.lumiMask = 'data/Run_306091_tracker_on.txt'
+config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions18/13TeV/PromptReco/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON.txt'
 
 config.Data.outLFNDirBase = '/store/user/abrinke1/EMTF/Emulator/ntuples/'
 config.Data.publication = False

@@ -65,5 +65,19 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "hit_strip_low",    (!emtfHit.Is_RPC() ? DINT : emtfHit.Strip_low()) );
   INSERT(mVInt, "hit_wire",         ( emtfHit.Is_RPC() ? DINT : emtfHit.Wire()) );
   INSERT(mVInt, "hit_neighbor",     emtfHit.Neighbor() );
+
+  INSERT(mVInt, "hit_match_iSimHit", DINT);
+  INSERT(mVInt, "hit_sim_match_exact",  0);
+
+  INSERT(mVInt,   "hit_match_iSeg",       DINT);
+  INSERT(mVInt,   "hit_match_iSeg2",      DINT);
+  if (emtfHit.Is_CSC()) {
+    INSERT(mVInt, "hit_match_nSegs",      0);
+    INSERT(mVInt, "hit_seg_match_unique", 0);
+  } else {
+    INSERT(mVInt, "hit_match_nSegs",      DINT);
+    INSERT(mVInt, "hit_seg_match_unique", DINT);
+  }
+
   // std::cout << "Filled EMTFHitInfo" << std::endl;
 } // End function: EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit)

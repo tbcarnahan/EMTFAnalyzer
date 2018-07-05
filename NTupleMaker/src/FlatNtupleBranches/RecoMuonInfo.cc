@@ -114,6 +114,7 @@ void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
   INSERT(mVInt, "reco_dR_match_emu_nTrk",   0);
   INSERT(mVInt, "reco_dR_match_emu_unique", 0);
   INSERT(mVInt, "reco_dR_match_emu_iTrk",   DINT);
+  INSERT(mVInt, "reco_dR_match_emu_iTrk2",  DINT);
   INSERT(mVFlt, "reco_dR_match_emu_dEta",   DFLT);
   INSERT(mVFlt, "reco_dR_match_emu_dPhi",   DFLT);
   INSERT(mVFlt, "reco_dR_match_emu_dR",     DFLT);
@@ -121,6 +122,7 @@ void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
   INSERT(mVInt, "reco_dR_match_unp_nTrk",   0);
   INSERT(mVInt, "reco_dR_match_unp_unique", 0);
   INSERT(mVInt, "reco_dR_match_unp_iTrk",   DINT);
+  INSERT(mVInt, "reco_dR_match_unp_iTrk2",  DINT);
   INSERT(mVFlt, "reco_dR_match_unp_dEta",   DFLT);
   INSERT(mVFlt, "reco_dR_match_unp_dPhi",   DFLT);
   INSERT(mVFlt, "reco_dR_match_unp_dR",     DFLT);

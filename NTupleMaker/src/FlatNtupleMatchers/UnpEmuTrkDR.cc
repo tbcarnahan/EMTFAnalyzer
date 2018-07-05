@@ -46,61 +46,67 @@ void UnpEmuTrkDR::Match( EMTFUnpTrackInfo & unpTrks, EMTFTrackInfo & emuTrks, co
 
   // Find closest emulated track to each unpacked track
   for (int i = 0; i < nUnp; i++) {
-    int   jMin   = -1;
-    float min_dR = max_match_dR;
+    int   jMin    = -1;
+    int   jMin2   = -1;
+    float min_dR  = max_match_dR;
+    float min_dR2 = max_match_dR;
     for (int j = 0; j < nEmu; j++) {
-      if ( fabs( dR_matrix [i][j] ) < min_dR &&
-	   abs ( dBX_matrix[i][j] ) < 2       ) {
-	jMin = j;
-	min_dR = dR_matrix[i][j];
+      if ( abs ( dBX_matrix[i][j] ) >= 2 ) continue;
+      if ( fabs( dR_matrix [i][j] ) < min_dR ) {
+	jMin2   = jMin;
+	jMin    = j;
+	min_dR2 = min_dR;
+	min_dR  = dR_matrix[i][j];
+      }
+      else if ( fabs( dR_matrix [i][j] ) < min_dR2 ) {
+	jMin2   = j;
+	min_dR2 = dR_matrix[i][j];
       }
     }
 
     if (jMin >= 0) {
-      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iTrk", jMin);
-      INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  dBX_matrix [i][jMin]);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dEta", dEta_matrix[i][jMin]);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dPhi", dPhi_matrix[i][jMin]);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dR",   dR_matrix  [i][jMin]);
-    } else {
-      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iTrk", DINT);
-      INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  DINT);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dEta", DFLT);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dPhi", DFLT);
-      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dR",   DFLT);
+      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iTrk", i, jMin);
+      INSERT(unpTrks.mVInt, "unp_trk_emu_match_dBX",  i, dBX_matrix [i][jMin]);
+      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dEta", i, dEta_matrix[i][jMin]);
+      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dPhi", i, dPhi_matrix[i][jMin]);
+      INSERT(unpTrks.mVFlt, "unp_trk_emu_match_dR",   i, dR_matrix  [i][jMin]);
     }
-    INSERT(unpTrks.mVInt, "unp_trk_emu_match_unique", 0);
-    INSERT(unpTrks.mVInt, "unp_trk_emu_match_exact",  0);
+    if (jMin2 >= 0) {
+      INSERT(unpTrks.mVInt, "unp_trk_emu_match_iTrk2", i, jMin2);
+    }
       
   } // End loop: for (int i = 0; i < nUnp; i++)
 
   // Find closest unpacked track to each emulated track
   for (int j = 0; j < nEmu; j++) {
-    int iMin   = -1;
-    float min_dR = max_match_dR;
+    int iMin      = -1;
+    int iMin2     = -1;
+    float min_dR  = max_match_dR;
+    float min_dR2 = max_match_dR;
     for (int i = 0; i < nUnp; i++) {
-      if ( fabs( dR_matrix [i][j] ) < min_dR &&
-	   abs ( dBX_matrix[i][j] ) < 2      ) {
-	iMin = i;
-	min_dR = dR_matrix[i][j];
+      if ( abs ( dBX_matrix[i][j] ) >= 2 ) continue;
+      if ( fabs( dR_matrix [i][j] ) < min_dR ) {
+	iMin2   = iMin;
+	iMin    = i;
+	min_dR2 = min_dR;
+	min_dR  = dR_matrix[i][j];
+      }
+      else if ( fabs( dR_matrix [i][j] ) < min_dR2 ) {
+	iMin2   = i;
+	min_dR2 = dR_matrix[i][j];
       }
     }
 
     if (iMin >= 0) {
-      INSERT(emuTrks.mVInt, "trk_unp_match_iTrk", iMin);
-      INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  dBX_matrix [iMin][j]);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dEta", dEta_matrix[iMin][j]);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dPhi", dPhi_matrix[iMin][j]);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dR",   dR_matrix  [iMin][j]);
-    } else {
-      INSERT(emuTrks.mVInt, "trk_unp_match_iTrk", DINT);
-      INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  DINT);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dEta", DFLT);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dPhi", DFLT);
-      INSERT(emuTrks.mVFlt, "trk_unp_match_dR",   DFLT);
+      INSERT(emuTrks.mVInt, "trk_unp_match_iTrk", j, iMin);
+      INSERT(emuTrks.mVInt, "trk_unp_match_dBX",  j, dBX_matrix [iMin][j]);
+      INSERT(emuTrks.mVFlt, "trk_unp_match_dEta", j, dEta_matrix[iMin][j]);
+      INSERT(emuTrks.mVFlt, "trk_unp_match_dPhi", j, dPhi_matrix[iMin][j]);
+      INSERT(emuTrks.mVFlt, "trk_unp_match_dR",   j, dR_matrix  [iMin][j]);
     }
-    INSERT(emuTrks.mVInt, "trk_unp_match_unique", 0);
-    INSERT(emuTrks.mVInt, "trk_unp_match_exact",  0);
+    if (iMin2 >= 0) {
+      INSERT(emuTrks.mVInt, "trk_unp_match_iTrk2", j, iMin2);
+    }
 
   } // End loop: for (int j = 0; j < nEmu; j++)
 

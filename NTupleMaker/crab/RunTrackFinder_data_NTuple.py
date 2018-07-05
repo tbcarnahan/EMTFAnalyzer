@@ -1,4 +1,4 @@
-## 11.02.16: Copied from https://raw.githubusercontent.com/dcurry09/EMTF8/master/L1Trigger/L1TMuonEndCap/test/runMuonEndCap.py
+# 11.02.16: Copied from https://raw.githubusercontent.com/dcurry09/EMTF8/master/L1Trigger/L1TMuonEndCap/test/runMuonEndCap.py
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -17,7 +17,9 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2016Reco_cff') ## Is this appropriate for 2015 data/MC? - AWB 18.04.16
+## Geometry : see http://cmslxr.fnal.gov/source/Configuration/Geometry/python/
+# process.load('Configuration.Geometry.GeometryExtended2016Reco_cff') ## Is this appropriate for 2015 data/MC? - AWB 18.04.16
+process.load('Configuration.Geometry.GeometryExtended2018Reco_cff')   ## Is this appropriate for 2018 data?    - AWB 19.06.18
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff') ## Will this work on 0T data? - AWB 18.04.16
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff') ## Will this work for MC? - AWB 18.04.16
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -29,9 +31,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #                                         monitorPssAndPrivate = cms.untracked.bool(True))
 # process.Tracer = cms.Service("Tracer")
 
-## CSCTF digis, phi / pT LUTs?
-process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff")
-process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerPtScaleConfig_cff")
+# ## CSCTF digis, phi / pT LUTs?
+# process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff")
+# process.load("L1TriggerConfig.L1ScalesProducers.L1MuTriggerPtScaleConfig_cff")
 
 ## Import RECO muon configurations
 process.load("RecoMuon.TrackingTools.MuonServiceProxy_cff")
@@ -50,9 +52,20 @@ process.options = cms.untracked.PSet(
     # SkipEvent = cms.untracked.vstring('ProductNotFound')
 )
 
+# ## Global Tags
+# from Configuration.AlCa.GlobalTag import GlobalTag
+# # process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+# process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v3', '')
+
 ## Global Tags
-from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
+process.GlobalTag.globaltag = '101X_dataRun2_HLT_v7'
+
+# from Configuration.AlCa.GlobalTag import GlobalTag as gtCustomise
+# process.GlobalTag.globaltag = gtCustomise(process.GlobalTag, 'auto:run2_data', '')
+
+# from Configuration.AlCa.autoCond_condDBv2 import autoCond
+# process.GlobalTag.globaltag = cms.string( autoCond['run2_data'] )
+
 
 # ## Default parameters for firmware version, pT LUT XMLs, and coordinate conversion LUTs
 # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff') 
@@ -74,7 +87,7 @@ process.source = cms.Source(
     'PoolSource',
     fileNames = readFiles,
     secondaryFileNames= secFiles
-    #, eventsToProcess = cms.untracked.VEventRange('201196:265380261')
+    # eventsToProcess = cms.untracked.VEventRange('317626:30320773')
     )
 
 
@@ -95,21 +108,25 @@ process.cscTriggerPrimitiveDigis.commonParam = cms.PSet(
     gangedME1a = cms.bool(False), ## Changed - why is this not default?
     disableME1a = cms.bool(False), ## Default
     disableME42 = cms.bool(False), ## Default
+    alctClctOffset = cms.uint32(1), ## Default
 )
 
 ## EMTF Emulator
 process.load('EventFilter.L1TRawToDigi.emtfStage2Digis_cfi')
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
-process.simEmtfDigisData.verbosity = cms.untracked.int32(0)
+process.simEmtfDigisData.verbosity  = cms.untracked.int32(0)
+process.simEmtfDigisData.CPPFEnable = cms.bool(True)
 
-# ## Planned 2018 settings
-# process.simEmtfDigisData.FWConfig = cms.bool(False)
-# process.simEmtfDigisData.BXWindow = cms.int32(2)
-# process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(8)
-# process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
-# process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
-# process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
+# process.simEmtfDigisData.FWConfig = cms.bool(True)
+
+## Planned 2018 settings
+process.simEmtfDigisData.FWConfig = cms.bool(False)
+process.simEmtfDigisData.BXWindow = cms.int32(2)
+process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
+process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
+process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
+process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
 
 # ## Early 2018 actual settings (through end of April at least)
 # process.simEmtfDigisData.FWConfig = cms.bool(False)
@@ -120,11 +137,12 @@ process.simEmtfDigisData.verbosity = cms.untracked.int32(0)
 # process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(1)
 
 
-# ## EMTF Emulator with re-emulated CSC LCTs as input
-# process.simEmtfDigisDataSimLct = process.simEmtfDigisData.clone()
+## EMTF Emulator with re-emulated CSC LCTs and clustered RPC hits as input
+process.simEmtfDigisDataSimHit = process.simEmtfDigisData.clone()
 
-# process.simEmtfDigisDataSimLct.CSCInput  = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
-# process.simEmtfDigisDataSimLct.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+process.simEmtfDigisDataSimHit.CSCInput = cms.InputTag('cscTriggerPrimitiveDigis','MPCSORTED') ## Re-emulated CSC LCTs
+process.simEmtfDigisDataSimHit.CSCInputBXShift = cms.int32(-8) ## Only for re-emulated CSC LCTs (vs. -6 default)
+process.simEmtfDigisDataSimHit.CPPFEnable = cms.bool(False)
 
 
 
@@ -134,7 +152,8 @@ process.simEmtfDigisData.verbosity = cms.untracked.int32(0)
 
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
 process.FlatNtupleData.skimTrig = cms.bool(False)
-process.FlatNtupleData.skimEmtf = cms.bool(True)
+process.FlatNtupleData.skimEmtf = cms.bool(False)
+process.FlatNtupleData.isReco   = cms.bool(True)
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
@@ -143,7 +162,7 @@ RawToDigi_AWB = cms.Sequence(
     # process.csctfDigis               + ## Necessary for legacy studies, or if you use csctfDigis as input
     process.emtfStage2Digis          + 
     process.simEmtfDigisData         + 
-    # process.simEmtfDigisDataSimLct   +
+    process.simEmtfDigisDataSimHit   +
     process.FlatNtupleData
     )
 

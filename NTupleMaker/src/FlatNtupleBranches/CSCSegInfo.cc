@@ -34,6 +34,8 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   float chi2 =       (cscSeg).chi2();
   float time =       (cscSeg).time();
   float eta =        globPos.eta();
+  float theta =      globPos.theta() * 180. / M_PI;
+  if (theta > 90) theta = 180 - theta;
   float phi =        globPos.phi() * 180. / M_PI;
   float globX =      globPos.x();
   float globY =      globPos.y();
@@ -70,13 +72,15 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
       if (strip_min > recHit.channels(i)) strip_min = recHit.channels(i);
     }
   }
-  
+
   int nDuplicates = 0;
   for (int i = 0; i < ACCESS(mInts, "nSegs"); i++) {
+
     if ( endcap  == ACCESS(mVInt, "seg_endcap").at(i)  &&
 	 ring    == ACCESS(mVInt, "seg_ring").at(i)    &&
 	 station == ACCESS(mVInt, "seg_station").at(i) &&
 	 chamber == ACCESS(mVInt, "seg_chamber").at(i) &&
+	 // Total overlap in strip and wire range (one contained inside the other, in both strip and wire)
 	 ( ( (strip_min  >= ACCESS(mVInt, "seg_strip_min").at(i) &&
 	      strip_max  <= ACCESS(mVInt, "seg_strip_max").at(i)) ||
 	     (strip_min  <= ACCESS(mVInt, "seg_strip_min").at(i) &&
@@ -85,14 +89,14 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
 	      wire_max   <= ACCESS(mVInt, "seg_wire_max").at(i)) ||
 	     (wire_min   <= ACCESS(mVInt, "seg_wire_min").at(i) &&
 	      wire_max   >= ACCESS(mVInt, "seg_wire_max").at(i)) ) ) ) {
-      // std::cout << "Segment " << ACCESS(mInts, "nSegs") + 1 << " identical to segment " << i + 1 << " - skipping" << std::endl;
-      if ( nRecHits >= ACCESS(mVInt, "seg_nRecHits").at(i) &&
-	   chi2     <= ACCESS(mVFlt, "seg_chi2").at(i) ) {
+      // std::cout << "\nSegment with index " << ACCESS(mInts, "nSegs") << " identical to segment with index " << i << " - skipping one" << std::endl;
+      // PrintSeg(&(mVInt), &(mVFlt), i);
+      // std::cout << "* CSCSeg time " << time << ", endcap " << endcap << ", sector " << sector << ", station " << station << ", ring " << ring
+      // 		<< ", CSC ID " << CSC_ID << ", chamber " << chamber << ", nRecHits " << nRecHits << ", chi2 " << chi2 << ", strips " << strip_min
+      // 		<< " - " << strip_max << ", wires " << wire_min << " - " << wire_max << ", eta " << eta << ", phi " << phi << "\n" << std::endl;
+      if ( ( nRecHits  > ACCESS(mVInt, "seg_nRecHits").at(i) ) ||
+	   ( nRecHits == ACCESS(mVInt, "seg_nRecHits").at(i) && chi2 < ACCESS(mVFlt, "seg_chi2").at(i) + 0.001 ) ) {
 	// std::cout << "LATER DUPLICATE SEGMENT APPEARS TO BE BETTER QUALITY!!!" << std::endl;
-	// PrintSeg(&(mVInt), &(mVFlt), i);
-	// std::cout << "* CSCSeg time " << time << ", endcap " << endcap << ", sector " << sector << ", station " << station << ", ring " << ring
-	// 	  << ", CSC ID " << CSC_ID << ", chamber " << chamber << ", nRecHits " << nRecHits << ", chi2 " << chi2 << ", strips " << strip_min
-	// 	  << " - " << strip_max << ", wires " << wire_min << " - " << wire_max << ", eta " << eta << ", phi " << phi << std::endl;
 	DELETE(mVInt, i);
 	DELETE(mVFlt, i);
 	INSERT(mInts, "nSegs", ACCESS(mInts, "nSegs") - 1);
@@ -115,6 +119,7 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   INSERT(mVFlt, "seg_chi2",       chi2 );
   INSERT(mVFlt, "seg_time",       time );
   INSERT(mVFlt, "seg_eta",        eta );
+  INSERT(mVFlt, "seg_theta",      theta );
   INSERT(mVFlt, "seg_phi",        phi );
   INSERT(mVFlt, "seg_globX",      globX );
   INSERT(mVFlt, "seg_globY",      globY );
@@ -140,8 +145,9 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   INSERT(mVInt, "seg_strip_max", strip_max );
   INSERT(mVInt, "seg_strip_min", strip_min );
 
-  INSERT(mVInt, "seg_match_iHit", DINT );
-  INSERT(mVInt, "seg_match_nHits", 0 );
-  INSERT(mVInt, "seg_match_hit_unique", 0 );
+  INSERT(mVInt, "seg_match_iHit",       DINT );
+  INSERT(mVInt, "seg_match_iHit2",      DINT );
+  INSERT(mVInt, "seg_match_nHits",      0 );
+  INSERT(mVInt, "seg_hit_match_unique", 0 );
 
 } // End function: CSCSegInfo::Fill(const l1t::CSCSeg & cscSeg)

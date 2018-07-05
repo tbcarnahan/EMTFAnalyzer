@@ -88,17 +88,26 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
   // Find closest EMTF track to each RECO muon
   for (int i = 0; i < nReco; i++) {
     int jMin   = -1;
+    int jMin2  = -1;
     int nMatch =  0;
     float max_match_dR_pt = max_match_dR;
     if (standalone.at(i) == 0) // Require tighter dR cuts for higher pT muons from collisions, ~99.9% efficient
       max_match_dR_pt = std::max(0.15, std::min(double(max_match_dR), (0.5 - 0.08*log2(reco_pt_vec.at(i))) ) );
-    float min_dR = max_match_dR_pt;
+    float min_dR  = max_match_dR_pt;
+    float min_dR2 = max_match_dR_pt;
     for (int j = 0; j < nTrk; j++) {
       if ( fabs( dR_matrix[i][j] ) < max_match_dR_pt )
 	nMatch += 1;
+
       if ( fabs( dR_matrix[i][j] ) < min_dR ) {
-	jMin = j;
-	min_dR = dR_matrix[i][j];
+	jMin2   = jMin;
+	jMin    = j;
+	min_dR2 = min_dR;
+	min_dR  = dR_matrix[i][j];
+      }
+      else if ( fabs( dR_matrix[i][j] ) < min_dR2 ) {
+	jMin2   = j;
+	min_dR2 = dR_matrix[i][j];
       }
     }
 
@@ -108,17 +117,25 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       INSERT(recoMuons.mVFlt, "reco_dR_match_emu_dPhi", i, dPhi_matrix[i][jMin]);
       INSERT(recoMuons.mVFlt, "reco_dR_match_emu_dR",   i, dR_matrix[i][jMin]);
     }
+    if (jMin2 >= 0) {
+      INSERT(recoMuons.mVInt, "reco_dR_match_emu_iTrk2", i, jMin2);
+    }
     INSERT(recoMuons.mVInt, "reco_dR_match_emu_nTrk",   i, nMatch);
     INSERT(recoMuons.mVInt, "reco_dR_match_emu_unique", i, 0);
+
+    assert( (ACCESS(recoMuons.mVInt, "reco_dR_match_emu_nTrk").at(i) >= 1) <= (ACCESS(recoMuons.mVInt, "reco_dR_match_emu_iTrk") .at(i) >= 0) );
+    assert( (ACCESS(recoMuons.mVInt, "reco_dR_match_emu_nTrk").at(i) >= 2) <= (ACCESS(recoMuons.mVInt, "reco_dR_match_emu_iTrk2").at(i) >= 0) );
 
   } // End loop: for (int i = 0; i < nReco; i++)
 
   // Find closest RECO muon to each EMTF track
   for (int j = 0; j < nTrk; j++) {
     int iMin       = -1;
+    int iMin2      = -1;
     int nMatch     = 0;
     int nMatchSoft = 0;
-    float min_dR = max_match_dR;
+    float min_dR  = max_match_dR;
+    float min_dR2 = max_match_dR;
 
     // At first, only consider RECO muons propagated to station 2
     for (int i = 0; i < nReco; i++) {
@@ -126,7 +143,8 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       float max_match_dR_pt = max_match_dR;
       if (standalone.at(i) == 0) // Require tighter dR cuts for higher pT muons from collisions, ~99.9% efficient
 	max_match_dR_pt = std::max(0.15, std::min(double(max_match_dR), (0.5 - 0.08*log2(reco_pt_vec.at(i))) ) );
-      if (i == 0) min_dR = max_match_dR_pt;
+      min_dR  = std::min(min_dR,  max_match_dR_pt);
+      min_dR2 = std::min(min_dR2, max_match_dR_pt);
 
       if ( fabs( dR_matrix[i][j] ) < max_match_dR_pt ) {
 	if ( valid_St2.at(i) == 0 ) {
@@ -136,17 +154,43 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
 	  nMatch += 1;
 	}
       }
-      if ( fabs( dR_matrix[i][j] ) < min_dR ) {
-	iMin = i;
-	min_dR = dR_matrix[i][j];
+
+      if ( (fabs( dR_matrix[i][j] ) < min_dR) ||
+	   (fabs( dR_matrix[i][j] ) < max_match_dR_pt && iMin < 0) ) {
+	iMin2   = iMin;
+	iMin    = i;
+	min_dR2 = min_dR;
+	min_dR  = dR_matrix[i][j];
+      }
+      else if ( (fabs( dR_matrix[i][j] ) < min_dR2) ||
+		(fabs( dR_matrix[i][j] ) < max_match_dR_pt && iMin2 < 0) ) {
+	iMin2   = i;
+	min_dR2 = dR_matrix[i][j];
       }
     }
 
     // If no matches found, consider all RECO muons
-    for (int i = 0; i < nReco; i++) {
-      if ( fabs( dR_matrix[i][j] ) < min_dR ) {
-	iMin = i;
-	min_dR = dR_matrix[i][j];
+    if (iMin < 0) {
+      for (int i = 0; i < nReco; i++) {
+
+	float max_match_dR_pt = max_match_dR;
+	if (standalone.at(i) == 0) // Require tighter dR cuts for higher pT muons from collisions, ~99.9% efficient
+	  max_match_dR_pt = std::max(0.15, std::min(double(max_match_dR), (0.5 - 0.08*log2(reco_pt_vec.at(i))) ) );
+	min_dR  = std::min(min_dR,  max_match_dR_pt);
+	min_dR2 = std::min(min_dR2, max_match_dR_pt);
+
+	if ( (fabs( dR_matrix[i][j] ) < min_dR) ||
+	     (fabs( dR_matrix[i][j] ) < max_match_dR_pt && iMin < 0) ) {
+	  iMin2   = iMin;
+	  iMin    = i;
+	  min_dR2 = min_dR;
+	  min_dR  = dR_matrix[i][j];
+	}
+	else if ( (fabs( dR_matrix[i][j] ) < min_dR2) ||
+		  (fabs( dR_matrix[i][j] ) < max_match_dR_pt && iMin2 < 0) ) {
+	  iMin2   = i;
+	  min_dR2 = dR_matrix[i][j];
+	}
       }
     }
 
@@ -156,9 +200,15 @@ void RecoTrkDR::Match( RecoMuonInfo & recoMuons, EMTFTrackInfo & emtfTrks,
       INSERT(emtfTrks.mVFlt, "trk_dR_match_dPhi",  j, dPhi_matrix[iMin][j]);
       INSERT(emtfTrks.mVFlt, "trk_dR_match_dR",    j, dR_matrix[iMin][j]);
     }
+    if (iMin2 >= 0) {
+      INSERT(emtfTrks.mVInt, "trk_dR_match_iReco2", j, iMin2);
+    }
     INSERT(emtfTrks.mVInt, "trk_dR_match_nReco",     j, nMatch);
     INSERT(emtfTrks.mVInt, "trk_dR_match_nRecoSoft", j, nMatchSoft);
     INSERT(emtfTrks.mVInt, "trk_dR_match_unique",    j, 0);
+
+    assert( (ACCESS(emtfTrks.mVInt, "trk_dR_match_nReco").at(j) >= 1) <= (ACCESS(emtfTrks.mVInt, "trk_dR_match_iReco") .at(j) >= 0) );
+    assert( (ACCESS(emtfTrks.mVInt, "trk_dR_match_nReco").at(j) >= 2) <= (ACCESS(emtfTrks.mVInt, "trk_dR_match_iReco2").at(j) >= 0) );
 
   } // End loop: for (int j = 0; j < nTrk; j++)
 

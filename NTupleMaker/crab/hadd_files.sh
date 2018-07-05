@@ -3,14 +3,14 @@
 data_tag=$1 ## String to match CMS primary datasets
 job_tag=$2  ## Tag of the particular crab job
 
-
+## In lxplus, run "which eos" and "which hadd" to find source files in your CMSSW version
 eos_cmd="/afs/cern.ch/project/eos/installation/scripts/bin/eos.select"
-hadd_cmd="/cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_0_0/external/slc6_amd64_gcc630/bin/hadd -O -f"
+hadd_cmd="/cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_2_0_pre5/external/slc6_amd64_gcc630/bin/hadd"
 
 eos_pre="root://eoscms.cern.ch/"
 eos_dir="/eos/cms/store/user/abrinke1/EMTF/Emulator/ntuples/"
-tmp_dir="/afs/cern.ch/work/a/abrinke1/tmp4"
-max_add=40
+tmp_dir="/afs/cern.ch/work/a/abrinke1/tmp"
+max_add=20
 
 # ## Clean up tmp directory
 `rm $tmp_dir/NTuple_*.root`
