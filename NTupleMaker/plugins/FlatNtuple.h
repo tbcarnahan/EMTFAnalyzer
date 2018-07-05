@@ -16,22 +16,22 @@
 #include "FWCore/Framework/interface/MakerMacros.h" // Necessary for DEFINE_FWK_MODULE
 
 // Output branches
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EventInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/GenMuonInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFHitInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFSimHitInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFTrackInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/EMTFUnpTrackInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/CSCSegInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoMuonInfo.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleBranches/RecoPairInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/EventInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/GenMuonInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/EMTFHitInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/EMTFSimHitInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/EMTFTrackInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/EMTFUnpTrackInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/CSCSegInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/RecoMuonInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/RecoPairInfo.h"
 
 // Object matchers
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoTrkDR.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/RecoUnpTrkDR.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/UnpEmuTrkDR.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/SimUnpHit.h"
-#include "EMTFAnalyzer/NTupleMaker/interface/FlatNtupleMatchers/LCTSeg.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Matchers/RecoTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Matchers/RecoUnpTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Matchers/UnpEmuTrkDR.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Matchers/SimUnpHit.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Matchers/LCTSeg.h"
 
 // CSC segment geometry
 #include "Geometry/Records/interface/MuonGeometryRecord.h"

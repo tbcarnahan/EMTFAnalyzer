@@ -9,5 +9,5 @@
 <export>
   <lib name="1"/>
 </export>
-<flags ADD_SUBDIR="1"/>  <!-- For the src/FlatNtupleBranches/ subdirectory -->
-<flags ADD_SUBDIR="1"/>  <!-- For the src/FlatNtupleMatchers/ subdirectory -->
+<flags ADD_SUBDIR="1"/>  <!-- For the src/Branches/ subdirectory -->
+<flags ADD_SUBDIR="1"/>  <!-- For the src/Matchers/ subdirectory -->
