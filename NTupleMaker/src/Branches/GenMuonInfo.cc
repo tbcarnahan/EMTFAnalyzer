@@ -11,7 +11,7 @@ void GenMuonInfo::Reset() {
   for (auto & it : mInts) it.second = DINT;
   for (auto & it : mVFlt) it.second.clear();
   for (auto & it : mVInt) it.second.clear();
-  INSERT(mInts, "nMuons", 0);
+  INSERT(mInts, "nGenMuons", 0);
 }
 
 void GenMuonInfo::Fill(const reco::GenParticle & genMuon) {
@@ -22,7 +22,7 @@ void GenMuonInfo::Fill(const reco::GenParticle & genMuon) {
   float _phi = genMuon.phi() * 180. / M_PI;
   if (_phi > 180) _phi -= 360;
 
-  INSERT(mInts, "nMuons", ACCESS(mInts, "nMuons") + 1);
+  INSERT(mInts, "nGenMuons", ACCESS(mInts, "nGenMuons") + 1);
 
   INSERT(mVFlt, "mu_pt",     genMuon.pt() );
   INSERT(mVFlt, "mu_eta",    genMuon.eta() );

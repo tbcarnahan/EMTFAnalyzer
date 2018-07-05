@@ -13,7 +13,7 @@
 ///  GEN muon information  ///
 //////////////////////////////
 struct GenMuonInfo {
-  std::vector<TString> ints = {{"nMuons"}};
+  std::vector<TString> ints = {{"nGenMuons"}};
   std::vector<TString> vFlt = {{"mu_pt", "mu_eta", "mu_theta", "mu_phi"}};
   std::vector<TString> vInt = {{"mu_charge"}};
   std::map<TString, int> mInts;
