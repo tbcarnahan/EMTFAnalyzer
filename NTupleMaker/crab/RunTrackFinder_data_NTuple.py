@@ -58,7 +58,8 @@ process.options = cms.untracked.PSet(
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v3', '')
 
 ## Global Tags
-process.GlobalTag.globaltag = '101X_dataRun2_HLT_v7'
+# process.GlobalTag.globaltag = '101X_dataRun2_Prompt_v11'
+process.GlobalTag.globaltag = '102X_dataRun2_Sep2018Rereco_v1'
 
 # from Configuration.AlCa.GlobalTag import GlobalTag as gtCustomise
 # process.GlobalTag.globaltag = gtCustomise(process.GlobalTag, 'auto:run2_data', '')
@@ -151,7 +152,7 @@ process.simEmtfDigisDataSimHit.CPPFEnable = cms.bool(False)
 ###################
 
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
-process.FlatNtupleData.skimTrig = cms.bool(False)
+process.FlatNtupleData.skimTrig = cms.bool(True)
 process.FlatNtupleData.skimEmtf = cms.bool(False)
 process.FlatNtupleData.isReco   = cms.bool(True)
 

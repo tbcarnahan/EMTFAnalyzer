@@ -30,13 +30,18 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   LocalPoint locPos = (cscSeg).localPosition();
   const CSCChamber * cscChamb = cscGeom->chamber(id);
   GlobalPoint globPos = cscChamb->toGlobal(locPos);
+
+  // globPos.phi() has bizzare properties when you multiply it directly
+  // It 'rotates' in a [-pi, pi] range instead of scaling
+  float globPos_theta = globPos.theta();
+  float globPos_phi   = globPos.phi();
   
   float chi2 =       (cscSeg).chi2();
   float time =       (cscSeg).time();
   float eta =        globPos.eta();
-  float theta =      globPos.theta() * 180. / M_PI;
+  float theta =      globPos_theta * 180. / M_PI;
   if (theta > 90) theta = 180 - theta;
-  float phi =        globPos.phi() * 180. / M_PI;
+  float phi =        globPos_phi * 180. / M_PI;
   float globX =      globPos.x();
   float globY =      globPos.y();
   float globZ =      globPos.z();
@@ -47,8 +52,8 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   float dirZ =       (cscSeg).localDirection().z();
   int nRecHits =     (cscSeg).nRecHits();
 
-  float bend_phi   = TMath::ATan2( dirX, abs(dirZ) );
   float bend_theta = TMath::ATan2( dirY, abs(dirZ) );
+  float bend_phi   = TMath::ATan2( dirX, abs(dirZ) );
 
   int endcap =  id.zendcap();
   int ring =    id.ring();
@@ -129,9 +134,8 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   INSERT(mVFlt, "seg_dirX",       dirX );
   INSERT(mVFlt, "seg_dirY",       dirY );
   INSERT(mVFlt, "seg_dirZ",       dirZ );
-  INSERT(mVFlt, "seg_bend_phi",   bend_phi );
   INSERT(mVFlt, "seg_bend_theta", bend_theta );
-  INSERT(mVInt, "seg_nRecHits",   nRecHits );
+  INSERT(mVFlt, "seg_bend_phi",   bend_phi );
 
   INSERT(mVInt, "seg_endcap",   endcap );
   INSERT(mVInt, "seg_ring",     ring );
@@ -139,6 +143,8 @@ void CSCSegInfo::Fill(const CSCSegment cscSeg, edm::ESHandle<CSCGeometry> cscGeo
   INSERT(mVInt, "seg_chamber",  chamber );
   INSERT(mVInt, "seg_sector",   sector );
   INSERT(mVInt, "seg_CSC_ID",   CSC_ID );
+
+  INSERT(mVInt, "seg_nRecHits",   nRecHits );
 
   INSERT(mVInt, "seg_wire_max",  wire_max );
   INSERT(mVInt, "seg_wire_min",  wire_min );

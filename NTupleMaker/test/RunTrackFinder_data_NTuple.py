@@ -44,8 +44,8 @@ import FWCore.PythonUtilities.LumiList as LumiList
 # process.source.lumisToProcess = LumiList.LumiList(filename = 'goodList.json').getVLuminosityBlockRange()
 
 ## Message Logger and Event range
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.options = cms.untracked.PSet(
@@ -58,7 +58,8 @@ process.options = cms.untracked.PSet(
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v3', '')
 
 ## Global Tags
-process.GlobalTag.globaltag = '101X_dataRun2_HLT_v7'
+# process.GlobalTag.globaltag = '101X_dataRun2_HLT_v7'
+process.GlobalTag.globaltag = '102X_dataRun2_Sep2018Rereco_v1'
 
 # from Configuration.AlCa.GlobalTag import GlobalTag as gtCustomise
 # process.GlobalTag.globaltag = gtCustomise(process.GlobalTag, 'auto:run2_data', '')
@@ -102,7 +103,9 @@ eos_cmd = '/afs/cern.ch/project/eos/installation/ams/bin/eos.select'
 # in_dir_name = '/store/data/Run2018B/SingleMuon/RAW-RECO/ZMu-PromptReco-v1/000/317/626/00000/'
 # in_dir_name = '/store/data/Run2018B/ZeroBias/RAW/ZMu-PromptReco-v1/000/317/626/00000/'
 # in_dir_name = '/store/data/Run2018B/DoubleMuon/RAW/v1/000/319/077/00000/'
-in_dir_name = '/store/data/Run2018B/ZeroBias/RAW/v1/000/319/077/00000/'
+# in_dir_name = '/store/data/Run2018B/ZeroBias/RAW/v1/000/319/077/00000/'
+# in_dir_name = '/store/data/Run2018C/Cosmics/RAW/v1/000/319/329/00000/'
+in_dir_name = '/store/data/Run2018D/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/322/633/00000/'
 
 # ## 2017 Cosmics, with RPC!
 # in_dir_name = '/store/express/Commissioning2017/ExpressCosmics/FEVT/Express-v1/000/291/622/ 00000/'
@@ -207,15 +210,15 @@ process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 process.simEmtfDigisData.verbosity  = cms.untracked.int32(0)
 process.simEmtfDigisData.CPPFEnable = cms.bool(True)
 
-process.simEmtfDigisData.FWConfig = cms.bool(True)
+# process.simEmtfDigisData.FWConfig = cms.bool(True)
 
-# ## Planned 2018 settings
-# process.simEmtfDigisData.FWConfig = cms.bool(False)
-# process.simEmtfDigisData.BXWindow = cms.int32(2)
-# process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
-# process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
-# process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
-# process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
+## Planned 2018 settings
+process.simEmtfDigisData.FWConfig = cms.bool(False)
+process.simEmtfDigisData.BXWindow = cms.int32(2)
+process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
+process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
+process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
+process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
 
 # ## Early 2018 actual settings (through end of April at least)
 # process.simEmtfDigisData.FWConfig = cms.bool(False)
@@ -242,7 +245,7 @@ process.simEmtfDigisDataSimHit.CPPFEnable = cms.bool(False)
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
 process.FlatNtupleData.skimTrig = cms.bool(False)
 process.FlatNtupleData.skimEmtf = cms.bool(False)
-process.FlatNtupleData.isReco   = cms.bool(False)
+process.FlatNtupleData.isReco   = cms.bool(True)
 
 RawToDigi_AWB = cms.Sequence(
     process.muonRPCDigis             + ## Unpacked RPC hits from RPC PAC
@@ -261,13 +264,16 @@ process.raw2digi_step = cms.Path(RawToDigi_AWB)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 # out_dir_name = '/afs/cern.ch/work/a/abrinke1/public/EMTF/Analyzer/ntuples/'
+# out_dir_name = '/afs/cern.ch/work/a/abrinke1/public/EMTF/Commissioning/2018/'
 out_dir_name = './'
 
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string(out_dir_name+'EMTF_ZeroBias_NTuple_319077_FW_emul_CPPF_unp_simHit.root')
-    # fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_315322_FW_emul_central_CPPF_print.root')
+    # fileName = cms.string(out_dir_name+'EMTF_ZeroBias_NTuple_319077_FW_emul_CPPF_unp_simHit_1k.root')
+    # fileName = cms.string(out_dir_name+'EMTF_ZeroBias_NTuple_319077_FW_emul_CPPF_unp_allHits_BX0_10k.root')
+    # fileName = cms.string(out_dir_name+'EMTF_Cosmics_NTuple_319329_FW_emul_CPPF_unp_500k.root')
+    fileName = cms.string(out_dir_name+'EMTF_ZMu_NTuple_322633_2018_emul_test.root')
     )
 
 

@@ -117,9 +117,9 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
 	PrintHit(iHit, i);
       }
       std::cout << "\n\n" << std::endl;
-      assert(foundHit);
+      // assert(foundHit);
     }
-    assert(not foundTwoHits);
+    // assert(not foundTwoHits);
 
   } // End loop: for (const auto& trk_hit : emtfTrk.Hits()) {
 

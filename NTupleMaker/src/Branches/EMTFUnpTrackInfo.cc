@@ -167,10 +167,10 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
       }
       std::cout << "\n\n" << std::endl;
       if (trk_hit.Is_CSC()) {
-	assert(foundHit || ReEmulLCTs);
+	// assert(foundHit || ReEmulLCTs);
       }
     }
-    assert(not foundTwoHits);
+    // assert(not foundTwoHits);
 
   } // End loop: for (const auto& trk_hit : emtfTrk.Hits()) {
 

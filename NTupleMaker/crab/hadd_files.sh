@@ -10,7 +10,7 @@ hadd_cmd="/cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_2_0_pre5/exter
 eos_pre="root://eoscms.cern.ch/"
 eos_dir="/eos/cms/store/user/abrinke1/EMTF/Emulator/ntuples/"
 tmp_dir="/afs/cern.ch/work/a/abrinke1/tmp"
-max_add=20
+max_add=23
 
 # ## Clean up tmp directory
 `rm $tmp_dir/NTuple_*.root`
@@ -53,11 +53,11 @@ for dir1 in `$eos_cmd ls ${eos_dir}`; do
 	    
     	    ## Assume only the most recent submission is the only valid one
     	    if test "${dir3#*$last_ver}" == "$dir3"; then
-    		echo "#####################################################################################"
-    		echo "Skipping old submission: ${eos_dir}$dir1/$dir2/$dir3"
-    		echo "#####################################################################################"
-    		echo ""
-    		continue
+		echo "#####################################################################################"
+                echo "Skipping old submission: ${eos_dir}$dir1/$dir2/$dir3"
+                echo "#####################################################################################"
+                echo ""
+                continue
     	    fi
 	    
     	    for dir4 in `$eos_cmd ls ${eos_dir}$dir1/$dir2/$dir3`; do
@@ -105,7 +105,8 @@ for dir1 in `$eos_cmd ls ${eos_dir}`; do
 		    echo ""
     		    `xrdcp $tmp_dir/NTuple_$nOut.root ${eos_pre}${eos_dir}$dir1/$dir2`
     		    `rm $tmp_dir/tuple_*.root`
-    		    `mv $tmp_dir/NTuple_$nOut.root $tmp_dir/NTuple_${dir1}_${nOut}.root`
+    		    # `rm $tmp_dir/NTuple_*.root`  ## If not using hadd_all_str to add all NTuple files into one big file
+    		    `mv $tmp_dir/NTuple_$nOut.root $tmp_dir/NTuple_${dir1}_${nOut}.root`  ## If using hadd_all_str to add all NTuple files into one big file
     		    echo ""
 		    hadd_all_str="${hadd_all_str} $tmp_dir/NTuple_${dir1}_${nOut}.root"
     		    let "nOut += 1"
