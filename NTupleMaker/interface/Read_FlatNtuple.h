@@ -82,7 +82,7 @@ std::vector<TString> vInt = {{
     "reco_ID_station", "reco_ID_nStations", "reco_charge",
     "reco_dR_match_emu_iTrk", "reco_dR_match_emu_iTrk2", "reco_dR_match_emu_nTrk", "reco_dR_match_emu_unique",
     "reco_dR_match_unp_iTrk", "reco_dR_match_unp_iTrk2", "reco_dR_match_unp_nTrk", "reco_dR_match_unp_unique",
-    "reco_trig_ID"
+    "reco_trig_ID",
 
     "recoPair_iReco1", "recoPair_iReco2",
 
