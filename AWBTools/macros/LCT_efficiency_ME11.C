@@ -5,25 +5,29 @@
 // #include "EMTFAnalyzer/NTupleMaker/interface/Read_FlatNtuple_Slim.h"
 
 const bool verbose = false;
-const int MAX_EVT = 1000;    // Max number of events to process
-const int PRT_EVT = 100; // Print every N events
+const int MAX_EVT = -1;    // Max number of events to process
+const int PRT_EVT = 10000; // Print every N events
 
+// RECO muon minimum pT
+const float MIN_PT = 20;
 // RECO muon eta ranges
 const std::vector<float> eta_min = {-2.4, -2.1, 1.7, 2.1};
 const std::vector<float> eta_max = {-2.1, -1.7, 2.1, 2.4};
 // EMTF mode thresholds
-const std::vector<int> mode_cuts = {8};
+const std::vector<int> mode_cuts = {0, 8};
 // EMTF pT thresholds
 const std::vector<int> pt_cuts = {0};
 
-const TString in_dir = "/afs/cern.ch/work/c/cfreer/public";
+// const TString in_dir = "/afs/cern.ch/work/c/cfreer/public";
+const TString in_dir = "root://eoscms.cern.ch//store/user/abrinke1/EMTF/Emulator/ntuples/SingleMuon";
 
 // Different files to compare (each one gets separate plots)
-std::vector<TString> in_file_names = { "EMTF_ZMu_NTuple_322492_2018_test.root" };
+// std::vector<TString> in_file_names = { "EMTF_ZMu_NTuple_322492_2018_test.root" };
+std::vector<TString> in_file_names = { "FlatNtuple_Run_2018D_v1_2018_09_19_SingleMuon_2018_emul_102X_ReReco_v1_321988_bugFix/NTuple_0.root" };
 
 const TString out_dir = "plots";
 
-const int phi_bins[3] = {36, -180, 180};
+const int phi_bins[3] = {37, -185, 185};
 
 const float BIT = 0.001;  // Small shift for filling inside bin edges
 
@@ -45,6 +49,7 @@ void LCT_efficiency_ME11(std::vector<TString> _in_file_names = {}, TString _labe
   for (const auto & file_name : in_file_names) {
     in_chains.push_back( new TChain("FlatNtupleData/tree") );
     in_chains.back()->Add(in_dir+"/"+file_name);
+    std::cout << "Loading file " << in_dir << "/" << file_name << std::endl;
   }
 
   std::vector<TH1F*> h_phi_num;  // Efficiency vs. phi numerator
@@ -105,6 +110,9 @@ void LCT_efficiency_ME11(std::vector<TString> _in_file_names = {}, TString _labe
       // Loop over RECO muons
       for (int iMu = 0; iMu < I("nRecoMuons"); iMu++) {   
 
+	// Require muon to pass minimum pT threshold
+	if ( F("reco_pt", iMu) < MIN_PT ) continue;
+
 	// Require muon to pass tight ID
 	if ( I("reco_ID_tight", iMu) != 1 ) continue;
 	// Require muon to be a "probe", i.e. at least one other muon fires the HLT
@@ -146,7 +154,7 @@ void LCT_efficiency_ME11(std::vector<TString> _in_file_names = {}, TString _labe
 
   std::cout << "\n******* Finished looping over events in all " << in_chains.size() << " files *******" << std::endl;
 
-  TFile out_file(out_dir+"/LCT_efficiency_ME11"+_label+".root", "RECREATE");
+  TFile out_file(out_dir+"/LCT_efficiency_ME11_minPt20_321988"+_label+".root", "RECREATE");
   out_file.cd();
 
   for (int i = 0; i < h_phi_num.size(); i++) {
