@@ -5,12 +5,12 @@
 // #include "EMTFAnalyzer/NTupleMaker/interface/Read_FlatNtuple_Slim.h"
 
 const bool verbose = false;
-const int MAX_EVT = -1;    // Max number of events to process
-const int PRT_EVT = 10000; // Print every N events
+const int MAX_EVT = 1000;    // Max number of events to process
+const int PRT_EVT = 100; // Print every N events
 
 // RECO muon eta ranges
-const std::vector<float> eta_min = {1.7, 2.1};
-const std::vector<float> eta_max = {2.1, 2.4};
+const std::vector<float> eta_min = {-2.4, -2.1, 1.7, 2.1};
+const std::vector<float> eta_max = {-2.1, -1.7, 2.1, 2.4};
 // EMTF mode thresholds
 const std::vector<int> mode_cuts = {8};
 // EMTF pT thresholds
@@ -27,7 +27,7 @@ const int phi_bins[3] = {36, -180, 180};
 
 const float BIT = 0.001;  // Small shift for filling inside bin edges
 
-TString STR(int x) { return std::to_string(x); }
+TString STR(int x) { return std::to_string(abs(x)); }
 TString STR(float x) { 
   std::ostringstream out;
   out << std::setprecision(2) << x;
@@ -57,13 +57,12 @@ void LCT_efficiency_ME11(std::vector<TString> _in_file_names = {}, TString _labe
       for (const auto & mode_cut : mode_cuts) {
 	for (const auto & pt_cut : pt_cuts) {
 
-	  //  TString h_name  = "file_"+i+"_eta_"+int(eta_min.at(j)*100)+"_to_"+int(eta_max.at(j)*100)+"_mode_"+mode_cut+"_pt_"+pt_cut;
-	  TString h_name  = "file_"+STR(i)+"_eta_"+STR(int(eta_min.at(j)*100))+"_to_"+STR(int(eta_max.at(j)*100))+"_mode_"+STR(mode_cut)+"_pt_"+STR(pt_cut);
-	  TString h_title = "from file "+STR(i)+", "+STR(eta_min.at(j))+" < |#eta| < "+STR(eta_max.at(j))+", modeity #geq "+STR(mode_cut)+", p_{T} #geq "+STR(pt_cut);
+	  TString h_name = "file_"+STR(i)+"_pos_eta_"+STR(int(eta_min.at(j)*100.1))+"_to_"+STR(int(eta_max.at(j)*100.1))+"_mode_"+STR(mode_cut)+"_pt_"+STR(pt_cut);
+	  if (eta_min.at(j) < 0) h_name = h_name.ReplaceAll("_pos_", "_neg_");
+	  TString h_title = "from file "+STR(i)+", "+STR(eta_min.at(j))+" < |#eta| < "+STR(eta_max.at(j))+", mode #geq "+STR(mode_cut)+", p_{T} #geq "+STR(pt_cut);
 	  
 	  h_phi_num.push_back( new TH1F( "h_phi_num_"+h_name, "RECO pT "+h_title+" (numerator)",   phi_bins[0], phi_bins[1], phi_bins[2] ) );
 	  h_phi_den.push_back( new TH1F( "h_phi_den_"+h_name, "RECO pT "+h_title+" (denominator)", phi_bins[0], phi_bins[1], phi_bins[2] ) );
-	  h_phi_eff.push_back( new TEfficiency( "h_phi_eff_"+h_name, "RECO pT "+h_title+" (efficiency)",  phi_bins[0], phi_bins[1], phi_bins[2] ) );
 
 	} // End loop: for (const auto & pt_cut : pt_cuts)
       } // End loop: for (const auto & mode_cut : mode_cuts)
@@ -118,8 +117,8 @@ void LCT_efficiency_ME11(std::vector<TString> _in_file_names = {}, TString _labe
 	      int iHist = (iChain * hChain) + (iEta * hEta) + (iMode * hMode) + iPt;
 
 	      // Fill all RECO muons in eta range
-	      if ( abs( F("reco_eta_St1", iMu) ) > eta_min.at(iEta) && 
-		   abs( F("reco_eta_St1", iMu) ) < eta_max.at(iEta) ) {
+	      if ( F("reco_eta_St1", iMu) > eta_min.at(iEta) && 
+		   F("reco_eta_St1", iMu) < eta_max.at(iEta) ) {
 
 		h_phi_den.at(iHist)->Fill( F("reco_phi_St1", iMu) );
 
@@ -152,9 +151,9 @@ void LCT_efficiency_ME11(std::vector<TString> _in_file_names = {}, TString _labe
 
   for (int i = 0; i < h_phi_num.size(); i++) {
 
-    TString h_name  = h_phi_eff.at(i)->GetName();
-    TString h_title = h_phi_eff.at(i)->GetTitle();
-    h_phi_eff.at(i) = new TEfficiency( (*h_phi_num.at(i)), (*h_phi_den.at(i)) );
+    TString h_name  = (TString(h_phi_den.at(i)->GetName())).ReplaceAll("_den_", "_eff_");
+    TString h_title = (TString(h_phi_den.at(i)->GetTitle())).ReplaceAll("denominator", "efficiency");
+    h_phi_eff.push_back( new TEfficiency( (*h_phi_num.at(i)), (*h_phi_den.at(i)) ) );
     h_phi_eff.at(i)->SetName (h_name);
     h_phi_eff.at(i)->SetTitle(h_title);
     h_phi_eff.at(i)->Write();
