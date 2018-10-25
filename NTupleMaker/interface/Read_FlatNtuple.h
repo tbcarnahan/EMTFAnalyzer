@@ -9,7 +9,7 @@ std::vector<TString> ints = {{
     "nUnpTracks", "nUnpTracksBX0",
     "nRecoMuons", "nRecoMuonsFwd", "nRecoMuonsTrig", "nRecoMuonsTrigCen",
     "nRecoPairs", "nRecoPairsFwd",
-    "nGenMuons",
+    // "nGenMuons",
   }};
 
 std::vector<TString> longs = {{
@@ -18,6 +18,7 @@ std::vector<TString> longs = {{
 
 std::vector<TString> vFlt = {{
     "hit_eta", "hit_theta", "hit_phi", "hit_phi_loc",
+    "hit_eta_sim", "hit_theta_sim", "hit_phi_sim",
     "sim_hit_eta", "sim_hit_theta", "sim_hit_phi", "sim_hit_phi_loc",
 
     "seg_chi2", "seg_time", "seg_eta", "seg_theta", "seg_phi", "seg_globX", "seg_globY", "seg_globZ",
@@ -45,7 +46,7 @@ std::vector<TString> vFlt = {{
     "recoPair_dR_St1", "recoPair_dEta_St1", "recoPair_dTheta_St1", "recoPair_dPhi_St1",
     "recoPair_dR_St2", "recoPair_dEta_St2", "recoPair_dTheta_St2", "recoPair_dPhi_St2",
 
-    "mu_pt", "mu_eta", "mu_theta", "mu_phi",
+    // "mu_pt", "mu_eta", "mu_theta", "mu_phi",
   }};
 
 std::vector<TString> vInt = {{
@@ -86,7 +87,7 @@ std::vector<TString> vInt = {{
 
     "recoPair_iReco1", "recoPair_iReco2",
 
-    "mu_charge"
+    // "mu_charge"
   }};
 
 std::vector<TString> vvInt = {{

@@ -36,8 +36,11 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   }
 
   INSERT(mVFlt, "hit_eta",          emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() ) );
+  INSERT(mVFlt, "hit_eta_sim",      emtfHit.Eta_sim() );
   INSERT(mVFlt, "hit_theta",        emtfHit.Theta() );
+  INSERT(mVFlt, "hit_theta_sim",    emtfHit.Theta_sim() );
   INSERT(mVFlt, "hit_phi",          emtfHit.Phi_glob() );
+  INSERT(mVFlt, "hit_phi_sim",      emtfHit.Phi_sim() );
   INSERT(mVFlt, "hit_phi_loc",      emtfHit.Phi_loc() );
   INSERT(mVInt, "hit_eta_int",      emtf::calc_eta_GMT( emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() ) ) );
   INSERT(mVInt, "hit_theta_int",    emtfHit.Theta_fp() );

@@ -17,7 +17,8 @@
 //////////////////////////////
 struct EMTFHitInfo {
   std::vector<TString> ints = {{"nHits", "nHitsCSC", "nHitsRPC", "nHitsBX0", "nHitsCSCBX0", "nHitsRPCBX0"}};
-  std::vector<TString> vFlt = {{"hit_eta", "hit_theta", "hit_phi", "hit_phi_loc"}};
+  std::vector<TString> vFlt = {{"hit_eta", "hit_theta", "hit_phi", "hit_phi_loc",
+				"hit_eta_sim", "hit_theta_sim", "hit_phi_sim"}};
   std::vector<TString> vInt = {{"hit_eta_int", "hit_theta_int", "hit_phi_int", "hit_endcap", "hit_sector", "hit_sector_index", "hit_station", 
 				"hit_ring", "hit_CSC_ID", "hit_chamber", "hit_FR", "hit_pattern", "hit_quality", "hit_roll", "hit_subsector", 
 				"hit_isCSC", "hit_isRPC", "hit_valid", "hit_BX", "hit_strip", "hit_strip_hi", "hit_strip_low", "hit_wire", "hit_neighbor",

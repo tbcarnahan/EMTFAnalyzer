@@ -52,33 +52,30 @@ process.options = cms.untracked.PSet(
     # SkipEvent = cms.untracked.vstring('ProductNotFound')
 )
 
-# ## Global Tags
-# from Configuration.AlCa.GlobalTag import GlobalTag
-# # process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
-# process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v3', '')
-
 ## Global Tags
-# process.GlobalTag.globaltag = '101X_dataRun2_HLT_v7'
-process.GlobalTag.globaltag = '102X_dataRun2_Sep2018Rereco_v1'
+from Configuration.AlCa.GlobalTag import GlobalTag
 
-# from Configuration.AlCa.GlobalTag import GlobalTag as gtCustomise
-# process.GlobalTag.globaltag = gtCustomise(process.GlobalTag, 'auto:run2_data', '')
+## For some reason, 'auto:run2_data' does not pick up the proper IOV for EMTF configuration via FW version
+## See email chain "URGENT!!! EMTF O2O no longer working?"
+## Instead, use one of the latest GTs from the twiki
+## https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions#Global_Tags_for_2018_data_taking
 
-# from Configuration.AlCa.autoCond_condDBv2 import autoCond
-# process.GlobalTag.globaltag = cms.string( autoCond['run2_data'] )
+# process.GlobalTag.globaltag = 'auto:run2_data'
+# process.GlobalTag.globaltag = '102X_dataRun2_Sep2018Rereco_v1'
+process.GlobalTag.globaltag   = '101X_dataRun2_Prompt_v11'
 
 
 # ## Default parameters for firmware version, pT LUT XMLs, and coordinate conversion LUTs
-# process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff') 
-# # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2017_data_cff') 
-# # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2016_data_cff') 
+# # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff')
+# process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2017_data_cff')
+# # process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_2016_data_cff')
 
-## Un-comment out this line to choose the GlobalTag settings rather than fakeEmtfParams settings
-## Comment out this line to use default FW version rather than true FW version in data
-## Update: seems to have no effect one way or the other in re-emulating 2017 data - AWB 26.04.18
-process.es_prefer_GlobalTag = cms.ESPrefer("PoolDBESSource","GlobalTag")
+# ## Un-comment out this line to choose the GlobalTag settings rather than fakeEmtfParams settings
+# ## Comment out this line to use default FW version rather than true FW version in data
+# ## Update: seems to have no effect one way or the other in re-emulating 2017 data - AWB 26.04.18
+# process.es_prefer_GlobalTag = cms.ESPrefer("PoolDBESSource","GlobalTag")
 
-## What is this supposed to do?  Causes segfault when re-emulating 2017 data - AWB 26.04.18
+# ## What is this supposed to do?  Causes segfault when re-emulating 2017 data - AWB 26.04.18
 # process.es_prefer_GlobalTag = cms.ESPrefer("PoolDBESSource","emtfParamsSource")
 
 
@@ -105,7 +102,8 @@ eos_cmd = '/afs/cern.ch/project/eos/installation/ams/bin/eos.select'
 # in_dir_name = '/store/data/Run2018B/DoubleMuon/RAW/v1/000/319/077/00000/'
 # in_dir_name = '/store/data/Run2018B/ZeroBias/RAW/v1/000/319/077/00000/'
 # in_dir_name = '/store/data/Run2018C/Cosmics/RAW/v1/000/319/329/00000/'
-in_dir_name = '/store/data/Run2018D/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/322/633/00000/'
+in_dir_name = '/store/data/Run2018D/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/321/988/00000/'
+# in_dir_name = '/store/data/Run2018D/ZeroBias/RAW/v1/000/323/487/00000/'
 
 # ## 2017 Cosmics, with RPC!
 # in_dir_name = '/store/express/Commissioning2017/ExpressCosmics/FEVT/Express-v1/000/291/622/ 00000/'
@@ -210,15 +208,15 @@ process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 process.simEmtfDigisData.verbosity  = cms.untracked.int32(0)
 process.simEmtfDigisData.CPPFEnable = cms.bool(True)
 
-# process.simEmtfDigisData.FWConfig = cms.bool(True)
+process.simEmtfDigisData.FWConfig = cms.bool(True)
 
-## Planned 2018 settings
-process.simEmtfDigisData.FWConfig = cms.bool(False)
-process.simEmtfDigisData.BXWindow = cms.int32(2)
-process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
-process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
-process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
-process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
+# ## Planned 2018 settings
+# process.simEmtfDigisData.FWConfig = cms.bool(False)
+# process.simEmtfDigisData.BXWindow = cms.int32(2)
+# process.simEmtfDigisData.spTBParams16.ThetaWindowZone0 = cms.int32(4)
+# process.simEmtfDigisData.spTBParams16.BugAmbigThetaWin = cms.bool(False)
+# process.simEmtfDigisData.spTBParams16.TwoStationSameBX = cms.bool(True)
+# process.simEmtfDigisData.spPAParams16.ModeQualVer      = cms.int32(2)
 
 # ## Early 2018 actual settings (through end of April at least)
 # process.simEmtfDigisData.FWConfig = cms.bool(False)
@@ -318,7 +316,7 @@ process.treeOut = cms.OutputModule("PoolOutputModule",
                                    )
 
 
-process.treeOut_step = cms.EndPath(process.treeOut) ## Keep output tree - AWB 08.07.16
+# process.treeOut_step = cms.EndPath(process.treeOut) ## Keep output tree - AWB 08.07.16
 
 # Schedule definition
 process.schedule = cms.Schedule(process.raw2digi_step,process.endjob_step) #,process.treeOut_step)
