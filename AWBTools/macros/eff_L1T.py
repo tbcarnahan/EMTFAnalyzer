@@ -3,7 +3,7 @@
 ########################################################
 ## eff_L1T.py   
 ## A script to find L1T efficiency from L1Ntuples
-## By David Curry
+## By Andrew Brinkerhoff
 ##
 ########################################################
 
@@ -11,27 +11,30 @@ print '------> Setting Environment'
 
 import sys
 import math
-import subprocess
+from subprocess import Popen,PIPE
 from ROOT import *
 import numpy as np
 from array import *
-from eff_modules import *
+import Helper as h
 
 print '------> Importing Root File'
 
 ## Configuration settings
-USE_EMUL = False
-MAX_EVT  = 10000000
-REP_EVT  = 10000
+USE_EMUL = False    ## Use emulated L1T muons instead of unpacked
+MAX_FILE = 3        ## Maximum number of input files (use "-1" for unlimited)
+MAX_EVT  = -1       ## Maximum number of events to process
+PRT_EVT  = 1000     ## Print every Nth event
 
-REQ_BX0     = True
-REQ_uGMT    = True
-REQ_L1_dEta = True
-REQ_HLT     = True
-TAG_ISO = 0.1
-TAG_PT  = 26
-PRB_PT  = 16
-TRG_PT  = 12
+REQ_BX0    = True  ## Require L1T muon to be in BX 0
+REQ_uGMT   = True  ## Require a final uGMT candidate, not just a TF muon
+REQ_HLT    = True  ## Require tag muon to be matched to unprescaled HLT muon
+## REQ_Z      = False ## Require tag and probe muon to satisfy 81 < mass < 101 GeV (not yet implemented - AWB 25.04.2019)
+
+MAX_dR  = 0.4   ## Maximum dR for L1T-offline matching
+TAG_ISO = 0.1   ## Maximum relative isolation for tag muon
+TAG_PT  = 26    ## Minimum offline pT for tag muon
+PRB_PT  = 26    ## Minimum offline pT for probe muon
+TRG_PT  = 22    ## Minimum L1T pT for probe muon
 
 
 ## L1NTuple branches
@@ -44,29 +47,34 @@ else:
     L1_tree = TChain('l1UpgradeEmuTree/L1UpgradeTree')
     tf_tree = TChain('l1UpgradeTfMuonEmuTree/L1UpgradeTfMuonTree')
 
-## Input file names
-eos_cmd = '/afs/cern.ch/project/eos/installation/pro/bin/eos.select'
-prefix = 'root://eoscms//eos/cms'
 
-# dir1 = '/store/group/dpg_trigger/comm_trigger/L1Trigger/safarzad/2017/Collision2017-wRECO-l1t-integration-v96p2_updatedHFSF/'
+# dir1 = '/eos/cms/store/group/dpg_trigger/comm_trigger/L1Trigger/safarzad/2017/Collision2017-wRECO-l1t-integration-v96p2_updatedHFSF/'
 # dir2 = 'SingleMuon/crab_Collision2017-wRECO-l1t-integration-v96p2_updatedHFSF__SingleMuon/170628_124037/0001/'
 # run_str = '_297606'
 
-dir1 = '/store/user/treis/data/i96p0/SingleMuon/crab_20170622_184540/170622_164616/0000/'
+# dir1 = '/eos/cms/store/user/treis/data/i96p0/SingleMuon/crab_20170622_184540/170622_164616/0000/'
+# dir2 = ''
+# run_str = '_2017B'
+
+## Full list of 2018 SingleMuon data files: https://indico.cern.ch/event/806643/contributions/3362250
+dir1 = '/eos/cms/store/user/arkadios/L1Ntpl/SingleMuon/SingleMuon_2018D_v2_runRange_324729to325172/181129_232407/0000/'
 dir2 = ''
-run_str = '_2017B'
+run_str = '_2018D'
 
 
 ## Load input files
-print prefix+dir1+dir2
-for in_file_name in subprocess.check_output([eos_cmd, 'ls', prefix+dir1+dir2]).splitlines():
+print dir1+dir2
+nFiles = 0
+for in_file_name in Popen(['ls', dir1+dir2], stdout=PIPE).communicate()[0].split():
     if not '.root' in in_file_name: continue
-    file_name = '%s%s%s%s' % (prefix, dir1, dir2, in_file_name)
-    # print 'Loading file %s' % in_file_name
+    file_name = '%s%s%s' % (dir1, dir2, in_file_name)
+    nFiles   += 1
+    print '  * Loading file #%d: %s' % (nFiles, in_file_name)
     evt_tree.Add(file_name)
     reco_tree.Add(file_name)
     L1_tree.Add(file_name)
     tf_tree.Add(file_name)
+    if nFiles == MAX_FILE: break
 
 
 ## Trigger settings
@@ -93,16 +101,17 @@ else: BX0_str = ''
 if REQ_uGMT: uGMT_str = '_uGMT'
 else: uGMT_str = ''
 
-## abs( (L1Upgrade__tfMuon.tfMuonHwEta*0.010875) - Muon.eta ) < 0.2
-if REQ_L1_dEta: dEta_str = '_dEta'
-else: dEta_str = ''
-
 ## Muon.hlt_isomu == 1 && Muon.hlt_isoDeltaR < 0.1 for probe.  And Muon.iso < 0.1 && Muon.pt < TAG_PT in denom.
 if REQ_HLT: HLT_str = '_HLT'
 else: HLT_str = ''
 
+## Invariant mass of tag and probe muon pair must be between 81 and 101 GeV
+## if REQ_Z: Z_str = '_Zmass'  (not yet implemented - AWB 25.04.2019) 
+## else: Z_str = ''
+Z_str = ''
+
 ## Histogram filename
-out_file = TFile('plots/L1T_eff_Pt%d%s%s%s%s%s_sectM6.root' % (TRG_PT, run_str, dEta_str, BX0_str, uGMT_str, HLT_str), 'recreate')
+out_file = TFile('plots/L1T_eff_Pt%d%s%s%s%s%s.root' % (TRG_PT, run_str, BX0_str, uGMT_str, HLT_str, Z_str), 'recreate')
 
 
 ## ================ Histograms ======================
@@ -119,6 +128,8 @@ h_phi = {}
 h_pt_trg  = {}
 h_eta_trg = {}
 h_phi_trg = {}
+h_eta_trg_vs_PF = {}
+h_phi_trg_vs_PF = {}
 for TF in trig_TF.keys():
     h_pt [TF] = TH1D('h_pt_%s' % TF,  '', len(scale_pt_temp)-1,  scale_pt)
     h_eta[TF] = TH1D('h_eta_%s' % TF, '', eta_bins[0], eta_bins[1], eta_bins[2])
@@ -130,13 +141,18 @@ for TF in trig_TF.keys():
         h_eta_trg[key] = TH1D('h_eta_%s' % key, '', eta_bins[0], eta_bins[1], eta_bins[2])
         h_phi_trg[key] = TH1D('h_phi_%s' % key, '', phi_bins[0], phi_bins[1], phi_bins[2])
 
+        h_eta_trg_vs_PF[key] = TH2D('h_eta_%s_vs_PF' % key, '', eta_bins[0], eta_bins[1], eta_bins[2], eta_bins[0], eta_bins[1], eta_bins[2])
+        h_phi_trg_vs_PF[key] = TH2D('h_phi_%s_vs_PF' % key, '', phi_bins[0], phi_bins[1], phi_bins[2], phi_bins[0], phi_bins[1], phi_bins[2])
+
+h_nProbes_vs_nProbes = TH2D('h_nTags_vs_nProbes', '', 5, -0.5, 4.5, 5, -0.5, 4.5)
+
 
 ## ================================================
 
 # Loop over over events in TFile
 for iEvt in range(evt_tree.GetEntries()):
-    if iEvt > MAX_EVT: break
-    if iEvt % REP_EVT is 0: print 'Event #', iEvt
+    if MAX_EVT > 0 and iEvt > MAX_EVT: break
+    if iEvt % PRT_EVT is 0: print 'Event #', iEvt
     
     evt_tree.GetEntry(iEvt)
     # if not (evt_tree.Event.run == 273725 or evt_tree.Event.run == 273730):
@@ -145,341 +161,228 @@ for iEvt in range(evt_tree.GetEntries()):
     tf_tree.GetEntry(iEvt)
     reco_tree.GetEntry(iEvt)
 
+    ## uGMT muon tree
     uGMT_tree = L1_tree.L1Upgrade
-    bmtf_tree = tf_tree.L1UpgradeBmtfMuon
-    omtf_tree = tf_tree.L1UpgradeOmtfMuon
-    emtf_tree = tf_tree.L1UpgradeEmtfMuon
+
+    TFs = {}  ## Track-finder trees by name
+    TFs['BMTF']  = tf_tree.L1UpgradeBmtfMuon
+    TFs['OMTF']  = tf_tree.L1UpgradeOmtfMuon
+    TFs['EMTF']  = tf_tree.L1UpgradeEmtfMuon
 
     if reco_tree.Muon.nMuons < 2: continue
 
-    ## === Look for a tag muon ===
-    isTag, isProbe = False, False
-    isBMTFtag, isOMTFtagIn, isOMTFtagOut, isEMTFtag = False, False, False, False
-    isBMTFprobe, isOMTFprobeIn, isOMTFprobeOut, isEMTFprobe = False, False, False, False
-    isTrigger_emtf, isTrigger_omtfIn, isTrigger_omtfOut, isTrigger_bmtf = False, False, False, False
+    ## Lists of tag and probe RECO muon indices
+    iTags, iProbes = [], []
+    ## Lists of track-finder indices matching tag and probe muons
+    tfTags, tfProbes, tfTrigs = {}, {}, {}
+    for iTF in ['BMTF', 'OMTF', 'EMTF']:
+        tfTags[iTF], tfProbes[iTF], tfTrigs[iTF] = {}, {}, {}
 
+    ##########################################################
+    ###  Loop over RECO muons to find all valid tag muons  ###
+    ##########################################################
     for iTag in range(reco_tree.Muon.nMuons):
 
-        recoAbsEta = abs(reco_tree.Muon.eta[iTag])
+        ## Compute tag muon coordinates at 2nd station, require to be valid
+        recoEta = reco_tree.Muon.etaSt2[iTag]
+        recoPhi = reco_tree.Muon.phiSt2[iTag]
+        if (recoEta < -99 or recoPhi < -99): continue
+
+        recoAbsEta = abs(recoEta)
         recoIsMed = np.array([-99], dtype=np.bool)
         recoIsMed = reco_tree.Muon.isMediumMuon[iTag]
-        
-        if REQ_HLT and reco_tree.Muon.hlt_isomu[iTag] != 1: continue
-        if REQ_HLT and reco_tree.Muon.hlt_isoDeltaR[iTag] > 0.1: continue
+
+        ## Require tag muon to pass Muon POG medium ID
         if not recoIsMed: continue
-        if reco_tree.Muon.pt[iTag] < TAG_PT: continue
+        ## Require tag muon to be matched to HLT single muon trigger
+        if REQ_HLT and reco_tree.Muon.hlt_isomu[iTag]    != 1:   continue
+        if REQ_HLT and reco_tree.Muon.hlt_isoDeltaR[iTag] > 0.1: continue
+        ## Require tag muon to pass pT and isolation cuts
+        if reco_tree.Muon.pt[iTag]  < TAG_PT:  continue
         if reco_tree.Muon.iso[iTag] > TAG_ISO: continue
 
-        if recoAbsEta > 1.0: 
-            
-            ## Did the tag trigger
-            for iTrk in range(emtf_tree.nTfMuons):
-                if not emtf_tree.tfMuonHwQual[iTrk] in trig_WP['SingleMu']: continue
-                if (emtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TAG_PT - 5.01: continue
-                isBMTFtag = True
-                bmtf_iTag = iTag
-                
-        if recoAbsEta < 1.0: 
-            
-            for iTrk in range(bmtf_tree.nTfMuons):
-                if not bmtf_tree.tfMuonHwQual[iTrk] in trig_WP['SingleMu']: continue
-                if (bmtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TAG_PT - 5.01: continue
-                isEMTFtag = True
-                emtf_iTag = iTag
-                
-        if recoAbsEta > 1.4: 
-            
-            for iTrk in range(emtf_tree.nTfMuons):
-                if not emtf_tree.tfMuonHwQual[iTrk] in trig_WP['SingleMu']: continue
-                if (emtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TAG_PT - 5.01: continue
-                isOMTFtagIn = True
-                omtfIn_iTag = iTag
+        ## Find track-finder muons which could be matched to the tag muon
 
-        if recoAbsEta < 0.6: 
-            
-            for iTrk in range(bmtf_tree.nTfMuons):
-                if not bmtf_tree.tfMuonHwQual[iTrk] in trig_WP['SingleMu']: continue
-                if (bmtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TAG_PT - 5.01: continue
-                isOMTFtagOut = True
-                omtfOut_iTag = iTag
+        ## Loop over all tracks in each track-finder
+        for iTF in ['BMTF', 'OMTF', 'EMTF']:
+            ## Loop over the tracks in each track-finder
+            for iTrk in range(TFs[iTF].nTfMuons):
+                ## Require track-finder to fire with SingleMuon quality (>= 12)
+                if not TFs[iTF].tfMuonHwQual[iTrk] in trig_WP['SingleMu']: continue
+                ## Require track-finder pT to be >= offline cut - 4 GeV
+                if    (TFs[iTF].tfMuonHwPt[iTrk] - 1)*0.5 < TAG_PT - 4.01: continue
+                ## Scaling from hardware eta to integer value
+                trk_eta = TFs[iTF].tfMuonHwEta[iTrk]*0.010875
+                ## Scaling from degrees to radians
+                trk_phi = TFs[iTF].tfMuonGlobalPhi[iTrk]*3.14159/180.
+                ## For some reason, it seems this is filled in a buggy way and needs to be rescaled - AWB 22.04.2019
+                trk_phi *= (1.0/1.6)
+                ## Wrap-around values > pi
+                if (trk_phi > 3.14159): trk_phi -= 2*3.14159
+                ## Require track with be within specified dR of RECO muon
+                if h.CalcDR( trk_eta, trk_phi, recoEta, recoPhi ) > MAX_dR: continue
 
+                ## If all requirements are met, we have an L1 track for this tag muon
+                if not iTag in iTags:
+                    iTags.append(iTag)
+                if not iTag in tfTags[iTF].keys():
+                    tfTags[iTF][iTag] = [iTrk]
+                else:
+                    tfTags[iTF][iTag].append(iTrk)
+
+    ## End loop: for iTag in range(reco_tree.Muon.nMuons):
+
+
+    ## Quit the event if there are no tag muons
+    if len(iTags) == 0: continue
+
+
+    ############################################################
+    ###  Loop over RECO muons to find all valid probe muons  ###
+    ############################################################
     for iProbe in range(reco_tree.Muon.nMuons):
 
-        recoEta = reco_tree.Muon.eta[iProbe]
-        recoPhi = reco_tree.Muon.phi[iProbe] * 180. / 3.14159
+        ## Compute tag muon coordinates at 2nd station, require to be valid
+        recoEta = reco_tree.Muon.etaSt2[iProbe]
+        recoPhi = reco_tree.Muon.phiSt2[iProbe]
+        if (recoEta < -99 or recoPhi < -99): continue
+
+        recoPhiDeg = recoPhi * 180. / 3.14159
         recoAbsEta = abs(recoEta)
         recoPt = min(reco_tree.Muon.pt[iProbe], max_pt)
         recoIsMed = np.array([-99], dtype=np.bool)
         recoIsMed = reco_tree.Muon.isMediumMuon[iProbe]
 
+        ## Require probe muon to pass Muon POG medium ID
+        if not recoIsMed:   continue
+        ## Require probe muon to pass minimum pT cut
         if recoPt < PRB_PT: continue
-        if not recoIsMed: continue
 
-## L1Upgrade__tfMuon matches L1Upgrade.muon (Bx, HwQual <--> Qual, HwEta <--> lEta, HwPt <--> lEt) 
+        ## Try to find at least on valid tag muon for this probe
+        xTag = -1
+        ## Loop over tag muon candidates
+        for iTag in iTags:
+            ## Make sure tag and probe are not the same muon
+            if iTag == iProbe: continue
+            ## Require tag and probe muons to be well separated
+            tagEta = reco_tree.Muon.etaSt2[iTag]
+            tagPhi = reco_tree.Muon.phiSt2[iTag]
+            if h.CalcDR( tagEta, tagPhi, recoEta, recoPhi ) < 2*MAX_dR: continue
+            ## If tag passes requirements, store its index and quit the loop
+            xTag = iTag
+            break
+        ## End loop: for iTag in iTags
 
-        if isBMTFtag and recoAbsEta < trig_TF['BMTF'][1]:
-            if isBMTFprobe: continue
-            isBMTFprobe = True
-            if iProbe == bmtf_iTag: print 'Weird error in isBMTFtag: iTag = %d, iProbe = %d' % (chosen_iTag, iProbe)
+        ## Valid probe only if there is a corresponding tag
+        if xTag < 0: continue
+        else: iProbes.append(iProbe)
 
-            h_pt ['uGMT'].Fill(recoPt)
-            h_eta['uGMT'].Fill(recoEta)
-            h_phi['uGMT'].Fill(recoPhi)
-            h_pt ['BMTF'].Fill(recoPt)
-            h_eta['BMTF'].Fill(recoEta)
-            h_phi['BMTF'].Fill(recoPhi)
-            h_eta['OMTF'].Fill(recoEta)
+        ## Fill denominator distributions for the probe muon in uGMT
+        h_pt ['uGMT'].Fill(recoPt)
+        h_eta['uGMT'].Fill(recoEta)
+        h_phi['uGMT'].Fill(recoPhiDeg)
 
+        ## Count number of fired triggers from each track-finder, and the uGMT
+        nTrig = {}
+        for iTF in ['uGMT', 'BMTF', 'OMTF', 'EMTF']:
+            nTrig[iTF] = {}
             for WP in trig_WP.keys():
-                isTrigger_bmtf = False
-                # If TandP exist look for trigger (fill numerator) 
-                for iTrk in range(bmtf_tree.nTfMuons):
-                    if not bmtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if (bmtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(bmtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if REQ_BX0 and bmtf_tree.tfMuonBx[iTrk] != 0: continue
-                
+                nTrig[iTF][WP] = 0
+
+        ## Mapping from L1Upgrade__tfMuon to L1Upgrade.muon : Bx <--> Bx, HwQual <--> Qual, HwEta <--> lEta, HwPt <--> lEt
+
+        ## Loop over track-finder regions for efficiency plots
+        for iTF in ['BMTF', 'OMTF', 'EMTF']:
+
+            ## Fill denominator distribution for eta for all track-finders
+            h_eta[iTF].Fill(recoEta)
+            ## For other distributions, require RECO muon to fall in correct eta range
+            if recoAbsEta > trig_TF[iTF][0] and recoAbsEta < trig_TF[iTF][1]:
+                h_pt [iTF].Fill(recoPt)
+                h_phi[iTF].Fill(recoPhiDeg)
+            ## If muon is not in track-finder eta range, skip loop over tracks
+            else: continue
+
+
+            ## Loop over tracks in all track-finders, to handle overlap regions
+            for jTF in ['BMTF', 'OMTF', 'EMTF']:
+                for jTrk in range(TFs[jTF].nTfMuons):
+
+                    ## Global eta and phi coordinates from track-finder hardware values
+                    ## Scaling from hardware eta to integer value
+                    trk_eta = TFs[jTF].tfMuonHwEta[jTrk]*0.010875
+                    ## Scaling from degrees to radians
+                    trk_phi = TFs[jTF].tfMuonGlobalPhi[jTrk]*3.14159/180.
+                    ## For some reason, it seems this is filled in a buggy way and needs to be rescaled - AWB 22.04.2019
+                    trk_phi *= (1.0/1.6)
+                    ## Wrap-around values > pi
+                    if (trk_phi > 3.14159): trk_phi -= 2*3.14159
+
+                    ## Require track with be within specified dR of RECO muon
+                    if h.CalcDR( trk_eta, trk_phi, recoEta, recoPhi ) > MAX_dR: continue
+                    ## Require track to be in the specified bunch crossing
+                    if REQ_BX0 and TFs[jTF].tfMuonBx[jTrk] != 0: continue
+
                     uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (bmtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and
-                            bmtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            bmtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
+                    ## Loop over uGMT muons to find a match
+                    for kTrk in range(uGMT_tree.nMuons):
+                        if ( TFs[jTF].tfMuonBx   [jTrk] == uGMT_tree.muonBx  [kTrk] and
+                             TFs[jTF].tfMuonHwEta[jTrk] == uGMT_tree.muonIEta[kTrk] and
+                             TFs[jTF].tfMuonHwPt [jTrk] == uGMT_tree.muonIEt [kTrk] ): uGMT_match = True
+                            # print 'TF eta = %.3f, phi = %.3f' % (TFs[jTF].tfMuonHwEta[jTrk]*0.010875, TFs[jTF].tfMuonGlobalPhi[jTrk]*3.14159/180.)
+                            # print 'MT eta = %.3f, phi = %.3f' % (uGMT_tree.muonEta[kTrk], uGMT_tree.muonPhi[kTrk])
+                            # if (uGMT_tree.muonPhi[kTrk] > 0): print 'TF / MT ratio = %.4f' % (TFs[jTF].tfMuonGlobalPhi[jTrk]*(3.14159/180.) / uGMT_tree.muonPhi[kTrk])
+                    ## Require track-finder track to be matched to a uGMT track
                     if REQ_uGMT and not uGMT_match: continue
 
-                    h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                    h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                    h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                    h_pt_trg['BMTF_%s' % WP].Fill(recoPt)
-                    h_eta_trg['BMTF_%s' % WP].Fill(recoEta)
-                    h_phi_trg['BMTF_%s' % WP].Fill(recoPhi)
-                    isTrigger_bmtf = True
-                    break
-                
-                ## Also check for OMTFIn tracks
-                for iTrk in range(omtf_tree.nTfMuons):
-                    if not omtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if (omtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(omtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if abs(omtf_tree.tfMuonHwEta[iTrk]*0.010875) > 1.0: continue
-                    if REQ_BX0 and omtf_tree.tfMuonBx[iTrk] != 0: continue
-                
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (omtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and 
-                            omtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            omtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                    if REQ_uGMT and not uGMT_match: continue
 
-                    h_eta_trg['OMTF_%s' % WP].Fill(recoEta)
+                    ## Loop over trigger working-points for efficiency measurements
+                    for WP in trig_WP.keys():
 
-                    if not isTrigger_bmtf: 
-                        h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                        h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                        h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                        isTrigger_bmtf = True
-                    break
+                        ## Require track to pass quality cut for working-point
+                        if not TFs[jTF].tfMuonHwQual[jTrk] in trig_WP[WP]: continue
+                        ## Require track to pass pT cut for working-point
+                        if    (TFs[jTF].tfMuonHwPt[jTrk] - 1)*0.5 < TRG_PT - 0.01: continue
 
+                        ## Count the tracks matching this probe muon and passing this working point
+                        nTrig['uGMT'][WP] += 1
+                        nTrig   [jTF][WP] += 1
 
-        if isEMTFtag and recoAbsEta > trig_TF['EMTF'][0] and recoAbsEta < trig_TF['EMTF'][1]: 
-            if isEMTFprobe: continue
-            isEMTFprobe = True
-            if iProbe == emtf_iTag: print 'Weird error in isEMTFtag: iTag = %d, iProbe = %d' % (chosen_iTag, iProbe)
+                        ## Don't need to fill any plots if we already found a matching track in this track-finder
+                        if nTrig[jTF][WP] > 1: continue
 
-            h_pt ['uGMT'].Fill(recoPt)
-            h_eta['uGMT'].Fill(recoEta)
-            h_phi['uGMT'].Fill(recoPhi)
-            h_pt ['EMTF'].Fill(recoPt)
-            h_eta['EMTF'].Fill(recoEta)
-            h_phi['EMTF'].Fill(recoPhi)
-            h_eta['OMTF'].Fill(recoEta)
+                        ## Fill numerator distribution for eta
+                        h_eta_trg      ['%s_%s' % (jTF, WP)].Fill(recoEta)
+                        h_eta_trg_vs_PF['%s_%s' % (jTF, WP)].Fill(recoEta, trk_eta)
 
-            for WP in trig_WP.keys():
-                isTrigger_emtf = False
-                for iTrk in range(emtf_tree.nTfMuons):
-                    if not emtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if WP == 'SingleMu7' and emtf_tree.tfMuonHwQual[iTrk] == 11 and emtf_tree.tfMuonLink[iTrk] != 71: continue
-                    if (emtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(emtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if REQ_BX0 and emtf_tree.tfMuonBx[iTrk] != 0: continue
+                        ## For the remainder of the plots, only fill them if we haven't already
+                        if nTrig['uGMT'][WP] > 1: continue
 
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (emtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and
-                            emtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            emtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                    if REQ_uGMT and not uGMT_match: continue
+                        h_pt_trg       ['%s_%s' % (iTF, WP)].Fill(recoPt)
+                        h_phi_trg      ['%s_%s' % (iTF, WP)].Fill(recoPhiDeg)
+                        h_phi_trg_vs_PF['%s_%s' % (iTF, WP)].Fill(recoPhiDeg, trk_phi*180/3.14159)
 
-                    h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                    h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                    h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                    h_pt_trg['EMTF_%s' % WP].Fill(recoPt)
-                    h_eta_trg['EMTF_%s' % WP].Fill(recoEta)
-                    h_phi_trg['EMTF_%s' % WP].Fill(recoPhi)
-                    isTrigger_emtf = True
-                    break
+                        h_pt_trg       ['uGMT_%s' % WP ].Fill(recoPt)
+                        h_eta_trg      ['uGMT_%s' % WP ].Fill(recoEta)
+                        h_phi_trg      ['uGMT_%s' % WP ].Fill(recoPhiDeg)
+                        h_eta_trg_vs_PF['uGMT_%s' % WP ].Fill(recoEta, trk_eta)
+                        h_phi_trg_vs_PF['uGMT_%s' % WP ].Fill(recoPhiDeg, trk_phi*180/3.14159)
 
-                ## Also check for OMTFOut tracks
-                for iTrk in range(omtf_tree.nTfMuons):
-                    if not omtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if (omtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(omtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if abs(omtf_tree.tfMuonHwEta[iTrk]*0.010875) < 1.0: continue
-                    if REQ_BX0 and omtf_tree.tfMuonBx[iTrk] != 0: continue
+                    ## End loop: for WP in trig_WP.keys()
+                ## End loop: for jTrk in range(TFs[jTF].nTfMuons)
+            ## End loop: for jTF in ['BMTF', 'OMTF', 'EMTF']:
+        ## End loop: for iTF in ['BMTF', 'OMTF', 'EMTF']:
+    ## End loop: for iProbe in range(reco_tree.Muon.nMuons):
 
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (omtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and 
-                            omtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            omtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                        if REQ_uGMT and not uGMT_match: continue
+    h_nTags_vs_nProbes.Fill(len(iProbes), len(iTags))
 
-                    h_eta_trg['OMTF_%s' % WP].Fill(recoEta)
-
-                    if not isTrigger_emtf:
-                        h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                        h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                        h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                        isTrigger_emtf = True
-                    break
+## End loop: for iEvt in range(evt_tree.GetEntries()):
 
 
-        if isOMTFtagIn and recoAbsEta > trig_TF['OMTF'][0] and recoAbsEta < 1.0: 
-            if isOMTFprobeIn: continue
-            isOMTFprobeIn = True
-            if iProbe == omtfIn_iTag: print 'Weird error in isOMTFtagIn: iTag = %d, iProbe = %d' % (chosen_iTag, iProbe)
 
-            h_pt ['uGMT'].Fill(recoPt)
-            h_eta['uGMT'].Fill(recoEta)
-            h_phi['uGMT'].Fill(recoPhi)
-            h_pt ['OMTF'].Fill(recoPt)
-            h_eta['OMTF'].Fill(recoEta)
-            h_phi['OMTF'].Fill(recoPhi)
-            h_eta['BMTF'].Fill(recoEta)
-
-            for WP in trig_WP.keys():
-                isTrigger_omtfIn = False
-                for iTrk in range(omtf_tree.nTfMuons):
-                    if not omtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if (omtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(omtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if REQ_BX0 and omtf_tree.tfMuonBx[iTrk] != 0: continue
-                
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (omtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and 
-                            omtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            omtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                    if REQ_uGMT and not uGMT_match: continue
-
-                    h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                    h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                    h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                    h_pt_trg['OMTF_%s' % WP].Fill(recoPt)
-                    h_eta_trg['OMTF_%s' % WP].Fill(recoEta)
-                    h_phi_trg['OMTF_%s' % WP].Fill(recoPhi)
-                    isTrigger_omtfIn = True
-                    break
-
-                ## Also check for BMTF tracks
-                for iTrk in range(bmtf_tree.nTfMuons):
-                    if not bmtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if (bmtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(bmtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if REQ_BX0 and bmtf_tree.tfMuonBx[iTrk] != 0: continue
-                    
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (bmtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and 
-                            bmtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            bmtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                    if REQ_uGMT and not uGMT_match: continue
-
-                    h_eta_trg['BMTF_%s' % WP].Fill(recoEta)
-                    
-                    if not isTrigger_omtfIn:
-                        h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                        h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                        h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                        isTrigger_omtfIn = True
-                    break
-
-        if isOMTFtagOut and recoAbsEta > 1.0 and recoAbsEta < trig_TF['OMTF'][1]: 
-            if isOMTFprobeOut: continue
-            isOMTFprobeOut = True
-            if iProbe == omtfOut_iTag: print 'Weird error in isOMTFtagOut: iTag = %d, iProbe = %d' % (chosen_iTag, iProbe)
-
-            h_pt ['uGMT'].Fill(recoPt)
-            h_eta['uGMT'].Fill(recoEta)
-            h_phi['uGMT'].Fill(recoPhi)
-            h_pt ['OMTF'].Fill(recoPt)
-            h_eta['OMTF'].Fill(recoEta)
-            h_phi['OMTF'].Fill(recoPhi)
-            h_eta['EMTF'].Fill(recoEta)
-
-            for WP in trig_WP.keys():
-                isTrigger_omtfOut = False
-                for iTrk in range(omtf_tree.nTfMuons):
-                    if not omtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if (omtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(omtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if REQ_BX0 and omtf_tree.tfMuonBx[iTrk] != 0: continue
-                
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (omtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and 
-                            omtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            omtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                    if REQ_uGMT and not uGMT_match: continue
-
-                    h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                    h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                    h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                    h_pt_trg['OMTF_%s' % WP].Fill(recoPt)
-                    h_eta_trg['OMTF_%s' % WP].Fill(recoEta)
-                    h_phi_trg['OMTF_%s' % WP].Fill(recoPhi)
-                    isTrigger_omtfOut = True
-                    break
-
-                ## Also check for EMTF tracks
-                for iTrk in range(emtf_tree.nTfMuons):
-                    if not emtf_tree.tfMuonHwQual[iTrk] in trig_WP[WP]: continue
-                    if WP == 'SingleMu7' and emtf_tree.tfMuonHwQual[iTrk] == 11 and emtf_tree.tfMuonLink[iTrk] != 71: continue
-                    if (emtf_tree.tfMuonHwPt[iTrk] - 1)*0.5 < TRG_PT - 0.01: continue
-                    if REQ_L1_dEta and abs(emtf_tree.tfMuonHwEta[iTrk]*0.010875 - recoEta) > 0.2: continue
-                    if REQ_BX0 and emtf_tree.tfMuonBx[iTrk] != 0: continue
-                    
-                    uGMT_match = False
-                    for jTrk in range(uGMT_tree.nMuons):
-                        if (emtf_tree.tfMuonBx[iTrk] == uGMT_tree.muonBx[jTrk] and 
-                            emtf_tree.tfMuonHwEta[iTrk] == uGMT_tree.muonIEta[jTrk] and 
-                            emtf_tree.tfMuonHwPt[iTrk] == uGMT_tree.muonIEt[jTrk]): uGMT_match = True
-                    if REQ_uGMT and not uGMT_match: continue
-
-                    h_eta_trg['EMTF_%s' % WP].Fill(recoEta)
-
-                    if not isTrigger_omtfOut:
-                        h_pt_trg['uGMT_%s' % WP].Fill(recoPt)
-                        h_eta_trg['uGMT_%s' % WP].Fill(recoEta)
-                        h_phi_trg['uGMT_%s' % WP].Fill(recoPhi)
-                        isTrigger_omtfOut = True
-                    break
-
-
-# Save the Hists
-
-
-#c1 = TCanvas('c1')
-#c1.cd()
-#heta.Draw('AP')
-
-#c2 = TCanvas('c2')
-#c2.cd()
-#heta_trigger.Draw()
-
-#c3 = TCanvas('c3')
-#c3.cd()
-#tg_eta = TGraphAsymmErrors(heta_trigger, heta, '')
-#tg_eta.Draw()
+############################################################
+###  Write output file with histograms and efficiencies  ###
+############################################################
 
 out_file.cd()
 
@@ -487,7 +390,7 @@ nWP = 0
 for WP in trig_WP.keys():
     nWP += 1
     print '\n***********************************'
-    print '*** %s_%d%s%s%s%s efficiency ***' % (WP, TRG_PT, dEta_str, BX0_str, uGMT_str, HLT_str)
+    print '*** %s_%d%s%s%s%s efficiency ***' % (WP, TRG_PT, BX0_str, uGMT_str, HLT_str, Z_str)
     print '***********************************'
     for TF in trig_TF.keys():
         key = '%s_%s' % (TF, WP)
@@ -513,8 +416,13 @@ for WP in trig_WP.keys():
         h_phi_trg[key].SetName(h_phi_trg[key].GetName()+'_eff')
         h_phi_trg[key].Write()
 
+        h_eta_trg_vs_PF[key].Write()
+        h_phi_trg_vs_PF[key].Write()
+
+    ## End loop: for TF in trig_TF.keys()
+## End loop: for WP in trig_WP.keys()
+
+h_nTags_vs_nProbes.Write()
+
 
 del out_file
-
-
-#raw_input('Press return to continue...')
