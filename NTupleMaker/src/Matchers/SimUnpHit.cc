@@ -15,6 +15,8 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
   int nSimCSCs[9][1152] = {{0}};
   int nRPCs[9][1152]    = {{0}};
   int nSimRPCs[9][1152] = {{0}};
+  int nGEMs[9][1152]    = {{0}};
+  int nSimGEMs[9][1152] = {{0}};
 
   // Count CSC and RPC hits per BX, endcap, station, ring, and chamber
   for (int i = 0; i < nHits; i++) {
@@ -22,12 +24,16 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
       nCSCs [ACCESS(*iHit, "hit_BX").at(i) + 4] [HitChamberID(iHit, i)] += 1;
     if ( ACCESS(*iHit, "hit_isRPC").at(i) )
       nRPCs [ACCESS(*iHit, "hit_BX").at(i) + 4] [HitChamberID(iHit, i)] += 1;
+    if ( ACCESS(*iHit, "hit_isGEM").at(i) )
+      nGEMs [ACCESS(*iHit, "hit_BX").at(i) + 4] [HitChamberID(iHit, i)] += 1;
   }
   for (int j = 0; j < nSimHits; j++) {
     if ( ACCESS(*jHit, "sim_hit_isCSC").at(j) )
       nSimCSCs [ACCESS(*jHit, "sim_hit_BX").at(j) + 4] [SimHitChamberID(jHit, j)] += 1;
     if ( ACCESS(*jHit, "sim_hit_isRPC").at(j) )
       nSimRPCs [ACCESS(*jHit, "sim_hit_BX").at(j) + 4] [SimHitChamberID(jHit, j)] += 1;
+    if ( ACCESS(*jHit, "sim_hit_isGEM").at(j) )
+      nSimGEMs [ACCESS(*jHit, "sim_hit_BX").at(j) + 4] [SimHitChamberID(jHit, j)] += 1;
   }
 
   // Find matches between EMTF hits and simulated hits
@@ -46,6 +52,7 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
       // SameChamberHits, MatchingHits, and IdenticalHits defined in interface/Matchers/HelperFunctions.h
       if (ACCESS(*jHit, "sim_hit_isCSC").at(j) != ACCESS(*iHit, "hit_isCSC").at(i)) continue;
       if (ACCESS(*jHit, "sim_hit_isRPC").at(j) != ACCESS(*iHit, "hit_isRPC").at(i)) continue;
+      if (ACCESS(*jHit, "sim_hit_isgem").at(j) != ACCESS(*iHit, "hit_isgem").at(i)) continue;
       if (SameChamberHits(iHit, i, jHit, j) == false) continue;
       if (abs(simHitBX - hitBX) > 1) continue;
 
@@ -63,6 +70,11 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
 
 	if ( (nSimRPCs[hitBX + 3][hitID]    + nSimRPCs[hitBX + 4][hitID]    + nSimRPCs[hitBX + 5][hitID])    == 1 &&
 	     (nRPCs[simHitBX + 3][simHitID] + nRPCs[simHitBX + 4][simHitID] + nRPCs[simHitBX + 5][simHitID]) == 1 ) foundMatch = true;
+      }
+      else if ( ACCESS(*iHit, "hit_isGEM").at(i) == 1 ) {
+
+	if ( (nSimGEMs[hitBX + 3][hitID]    + nSimGEMs[hitBX + 4][hitID]    + nSimGEMs[hitBX + 5][hitID])    == 1 &&
+	     (nGEMs[simHitBX + 3][simHitID] + nGEMs[simHitBX + 4][simHitID] + nGEMs[simHitBX + 5][simHitID]) == 1 ) foundMatch = true;
       }
 
       // Fill hit and sim_hit with matching information
@@ -93,6 +105,14 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
 		    << " = " << nSimRPCs[hitBX + 3][hitID]
 		    << "/"   << nSimRPCs[hitBX + 4][hitID]
 		    << "/"   << nSimRPCs[hitBX + 5][hitID] << std::endl;
+	  std::cout << "nGEMs in BX " << hitBX - 1 << "/" << hitBX << "/" << hitBX + 1
+		    << " = " << nGEMs[hitBX + 3][hitID]
+		    << "/"   << nGEMs[hitBX + 4][hitID]
+		    << "/"   << nGEMs[hitBX + 5][hitID] << std::endl;
+	  std::cout << "nSimGEMs in BX " << hitBX - 1 << "/" << hitBX << "/" << hitBX + 1
+		    << " = " << nSimGEMs[hitBX + 3][hitID]
+		    << "/"   << nSimGEMs[hitBX + 4][hitID]
+		    << "/"   << nSimGEMs[hitBX + 5][hitID] << std::endl;
 	  PrintHit(iHit, i);
 	  PrintSimHit(jHit, j);
 	  PrintSimHit(jHit, ACCESS(*iHit, "hit_match_iSimHit").at(i));
@@ -124,6 +144,14 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
 		    << " = " << nSimRPCs[simHitBX + 3][simHitID]
 		    << "/"   << nSimRPCs[simHitBX + 4][simHitID]
 		    << "/"   << nSimRPCs[simHitBX + 5][simHitID] << std::endl;
+	  std::cout << "nGEMs in BX " << simHitBX - 1 << "/" << simHitBX << "/" << simHitBX + 1
+		    << " = " << nGEMs[simHitBX + 3][simHitID]
+		    << "/"   << nGEMs[simHitBX + 4][simHitID]
+		    << "/"   << nGEMs[simHitBX + 5][simHitID] << std::endl;
+	  std::cout << "nSimGEMs in BX " << simHitBX - 1 << "/" << simHitBX << "/" << simHitBX + 1
+		    << " = " << nSimGEMs[simHitBX + 3][simHitID]
+		    << "/"   << nSimGEMs[simHitBX + 4][simHitID]
+		    << "/"   << nSimGEMs[simHitBX + 5][simHitID] << std::endl;
 	  PrintSimHit(jHit, j);
 	  PrintHit(iHit, i);
 	  PrintHit(iHit, ACCESS(*jHit, "sim_hit_match_iHit").at(j));

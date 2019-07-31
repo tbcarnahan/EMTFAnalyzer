@@ -24,7 +24,7 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
   const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
 
   INSERT(mInts, "nTracks", ACCESS(mInts, "nTracks") + 1 );
-  if (emtfTrk.BX() == 0) 
+  if (emtfTrk.BX() == 0)
     INSERT(mInts, "nTracksBX0", ACCESS(mInts, "nTracksBX0") + 1 );
 
   INSERT(mVFlt, "trk_pt",            emtfTrk.Pt() );
@@ -56,17 +56,20 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
   INSERT(mVFlt, "trk_dR_match_dPhi",      DFLT);
   INSERT(mVFlt, "trk_dR_match_dR",        DFLT);
 
-  INSERT(mVVInt, "trk_iHit", DVINT ); 
+  INSERT(mVVInt, "trk_iHit", DVINT );
 
   int _nTrkHits = 0, _nTrkRPC = 0, _nTrkNeighbor = 0;
   int _minBX =  9999, _minPh =  9999, _minTh =  9999;
   int _maxBX = -9999, _maxPh = -9999, _maxTh = -9999;
+  int _nTrkGEM = 0;
 
   for (const auto& trk_hit : emtfTrk.Hits()) {
 
     _nTrkHits += 1;
     if (trk_hit.Is_RPC() == 1)
       _nTrkRPC += 1;
+    if (trk_hit.Is_GEM() == 1)
+      _nTrkGEM += 1;
     if (trk_hit.Neighbor() == 1)
       _nTrkNeighbor += 1;
 
@@ -75,37 +78,37 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
 
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
-	   trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&  
-	   trk_hit.BX()         == ACCESS(*iHit, "hit_BX").at(i) && 
-	   trk_hit.Endcap()     == ACCESS(*iHit, "hit_endcap").at(i) &&
-	   trk_hit.Sector()     == ACCESS(*iHit, "hit_sector").at(i) &&
-	   trk_hit.Sector_idx() == ACCESS(*iHit, "hit_sector_index").at(i) &&
-	   trk_hit.Subsector()  == ACCESS(*iHit, "hit_subsector").at(i) &&
-	   trk_hit.Station()    == ACCESS(*iHit, "hit_station").at(i) &&
-	   trk_hit.Ring()       == ACCESS(*iHit, "hit_ring").at(i) &&
-	   trk_hit.Chamber()    == ACCESS(*iHit, "hit_chamber").at(i) &&
-	   ( ( trk_hit.Is_CSC() && 
-	       trk_hit.CSC_ID()  == ACCESS(*iHit, "hit_CSC_ID").at(i) &&
-	       trk_hit.Pattern() == ACCESS(*iHit, "hit_pattern").at(i) &&
-	       trk_hit.Quality() == ACCESS(*iHit, "hit_quality").at(i) &&
-	       trk_hit.Strip()   == ACCESS(*iHit, "hit_strip").at(i) &&
-	       trk_hit.Wire()    == ACCESS(*iHit, "hit_wire").at(i)   ) ||
-	     ( trk_hit.Is_RPC() &&
-	       trk_hit.Roll()      == ACCESS(*iHit, "hit_roll").at(i) &&
-	       trk_hit.Strip_hi()  == ACCESS(*iHit, "hit_strip_hi").at(i) &&
-	       trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) &&
-	       trk_hit.Phi_fp()    == ACCESS(*iHit, "hit_phi_int").at(i) &&
-	       trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) ) ) ) {
+           trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
+           trk_hit.BX()         == ACCESS(*iHit, "hit_BX").at(i) &&
+           trk_hit.Endcap()     == ACCESS(*iHit, "hit_endcap").at(i) &&
+           trk_hit.Sector()     == ACCESS(*iHit, "hit_sector").at(i) &&
+           trk_hit.Sector_idx() == ACCESS(*iHit, "hit_sector_index").at(i) &&
+           trk_hit.Subsector()  == ACCESS(*iHit, "hit_subsector").at(i) &&
+           trk_hit.Station()    == ACCESS(*iHit, "hit_station").at(i) &&
+           trk_hit.Ring()       == ACCESS(*iHit, "hit_ring").at(i) &&
+           trk_hit.Chamber()    == ACCESS(*iHit, "hit_chamber").at(i) &&
+           ( ( trk_hit.Is_CSC() &&
+               trk_hit.CSC_ID()  == ACCESS(*iHit, "hit_CSC_ID").at(i) &&
+               trk_hit.Pattern() == ACCESS(*iHit, "hit_pattern").at(i) &&
+               trk_hit.Quality() == ACCESS(*iHit, "hit_quality").at(i) &&
+               trk_hit.Strip()   == ACCESS(*iHit, "hit_strip").at(i) &&
+               trk_hit.Wire()    == ACCESS(*iHit, "hit_wire").at(i)   ) ||
+             ( trk_hit.Is_RPC() &&
+               trk_hit.Roll()      == ACCESS(*iHit, "hit_roll").at(i) &&
+               trk_hit.Strip_hi()  == ACCESS(*iHit, "hit_strip_hi").at(i) &&
+               trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) &&
+               trk_hit.Phi_fp()    == ACCESS(*iHit, "hit_phi_int").at(i) &&
+               trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) ) ) ) {
 
-	INSERT(mVVInt, "trk_iHit", i );
-	if (foundHit) foundTwoHits = true;
-	foundHit = true;
-	_minBX = std::min(_minBX, trk_hit.BX());
-	_maxBX = std::max(_maxBX, trk_hit.BX());
-	_minPh = std::min(_minPh, trk_hit.Phi_fp());
-	_maxPh = std::max(_maxPh, trk_hit.Phi_fp());
-	_minTh = std::min(_minTh, trk_hit.Theta_fp());
-	_maxTh = std::max(_maxTh, trk_hit.Theta_fp());
+        INSERT(mVVInt, "trk_iHit", i );
+        if (foundHit) foundTwoHits = true;
+        foundHit = true;
+        _minBX = std::min(_minBX, trk_hit.BX());
+        _maxBX = std::max(_maxBX, trk_hit.BX());
+        _minPh = std::min(_minPh, trk_hit.Phi_fp());
+        _maxPh = std::max(_maxPh, trk_hit.Phi_fp());
+        _minTh = std::min(_minTh, trk_hit.Theta_fp());
+        _maxTh = std::max(_maxTh, trk_hit.Theta_fp());
       }
 
     } // End loop: for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++)

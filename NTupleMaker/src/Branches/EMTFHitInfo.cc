@@ -14,25 +14,31 @@ void EMTFHitInfo::Reset() {
   INSERT(mInts, "nHits", 0);
   INSERT(mInts, "nHitsCSC", 0);
   INSERT(mInts, "nHitsRPC", 0);
+  INSERT(mInts, "nHitsGEM", 0);
   INSERT(mInts, "nHitsBX0", 0);
   INSERT(mInts, "nHitsCSCBX0", 0);
   INSERT(mInts, "nHitsRPCBX0", 0);
+  INSERT(mInts, "nHitsGEMBX0", 0);
 }
 
 void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   // std::cout << "Filling EMTFHitInfo" << std::endl;
 
   INSERT(mInts, "nHits", ACCESS(mInts, "nHits") + 1 );
-  if (emtfHit.Is_CSC() == 1) 
+  if (emtfHit.Is_CSC() == 1)
     INSERT(mInts, "nHitsCSC", ACCESS(mInts, "nHitsCSC") + 1 );
-  if (emtfHit.Is_RPC() == 1) 
+  if (emtfHit.Is_RPC() == 1)
     INSERT(mInts, "nHitsRPC", ACCESS(mInts, "nHitsRPC") + 1 );
+  if (emtfHit.Is_GEM() == 1)
+    INSERT(mInts, "nHitsGEM", ACCESS(mInts, "nHitsGEM") + 1 );
   if (emtfHit.BX() == 0) {
     INSERT(mInts, "nHitsBX0", ACCESS(mInts, "nHitsBX0") + 1 );
-    if (emtfHit.Is_CSC() == 1) 
+    if (emtfHit.Is_CSC() == 1)
       INSERT(mInts, "nHitsCSCBX0", ACCESS(mInts, "nHitsCSCBX0") + 1 );
-    if (emtfHit.Is_RPC() == 1) 
+    if (emtfHit.Is_RPC() == 1)
       INSERT(mInts, "nHitsRPCBX0", ACCESS(mInts, "nHitsRPCBX0") + 1 );
+    if (emtfHit.Is_GEM() == 1)
+      INSERT(mInts, "nHitsGEMBX0", ACCESS(mInts, "nHitsGEMBX0") + 1 );
   }
 
   INSERT(mVFlt, "hit_eta",          emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() ) );
@@ -61,6 +67,7 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "hit_subsector",    emtfHit.Subsector() );
   INSERT(mVInt, "hit_isCSC",        emtfHit.Is_CSC() );
   INSERT(mVInt, "hit_isRPC",        emtfHit.Is_RPC() );
+  INSERT(mVInt, "hit_isGEM",        emtfHit.Is_GEM() );
   INSERT(mVInt, "hit_valid",        emtfHit.Valid() );
   INSERT(mVInt, "hit_BX",           emtfHit.BX() );
   INSERT(mVInt, "hit_strip",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Strip()) );
