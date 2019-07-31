@@ -61,7 +61,7 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
 
   INSERT(mVVInt, "unp_trk_iHit", DVINT );
 
-  int _nTrkHits = 0, _nTrkRPC = 0, _nTrkNeighbor = 0, _TrkHitMode = 0;
+  int _nTrkHits = 0, _nTrkRPC = 0, _nTrkGEM = 0, _nTrkNeighbor = 0, _TrkHitMode = 0;
   int _minBX =  9999, _minPh =  9999, _minTh =  9999;
   int _maxBX = -9999, _maxPh = -9999, _maxTh = -9999;
 

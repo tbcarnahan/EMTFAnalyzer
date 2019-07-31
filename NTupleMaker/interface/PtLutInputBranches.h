@@ -55,7 +55,7 @@ typedef struct {
   int hit_eta_int[N_TRK][4], hit_theta_int[N_TRK][4], hit_phi_int[N_TRK][4];
   int hit_endcap[N_TRK][4], hit_sector[N_TRK][4], hit_sector_index[N_TRK][4], hit_station[N_TRK][4], hit_ring[N_TRK][4];
   int hit_CSC_ID[N_TRK][4], hit_chamber[N_TRK][4], hit_FR[N_TRK][4], hit_pattern[N_TRK][4];
-  int hit_roll[N_TRK][4], hit_subsector[N_TRK][4], hit_isRPC[N_TRK][4], hit_valid[N_TRK][4], hit_isGEM[N_TRK][4;
+  int hit_roll[N_TRK][4], hit_subsector[N_TRK][4], hit_isRPC[N_TRK][4], hit_valid[N_TRK][4], hit_isGEM[N_TRK][4];
   int hit_BX[N_TRK][4], hit_strip[N_TRK][4], hit_wire[N_TRK][4];
 
   void Initialize();

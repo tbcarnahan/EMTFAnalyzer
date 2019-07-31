@@ -106,6 +106,7 @@ void EMTFTrackBranch::Fill(unsigned int i, l1t::EMTFTrack emtfTrk) {
 
   int _nHits = 0;
   int _nRPC  = 0;
+  int _nGEM  = 0;
   for (const auto& trk_hit : emtfTrk.Hits()) {
     _nHits += 1;
     unsigned int j = trk_hit.Station() - 1;

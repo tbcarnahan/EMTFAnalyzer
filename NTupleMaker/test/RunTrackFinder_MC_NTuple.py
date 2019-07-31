@@ -10,7 +10,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('reL1T', eras.Run2_2016)
+process = cms.Process('reL1T', eras.Phase2)
 
 ## Import standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -42,7 +42,7 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 ## Global Tags
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '106X_upgrade2023_realistic_v3', '')
 
 ## Default parameters for firmware version, pT LUT XMLs, and coordinate conversion LUTs
 process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff')
@@ -51,7 +51,7 @@ process.load('L1Trigger.L1TMuonEndCap.fakeEmtfParams_cff')
 readFiles = cms.untracked.vstring()
 process.source = cms.Source(
     'PoolSource',
-    fileNames = readFiles
+    fileNames = cms.untracked.vstring(['/store/mc/PhaseIITDRSpring19DR/Mu_FlatPt2to100-pythia8-gun/AODSIM/NoPU_106X_upgrade2023_realistic_v3-v1/60000/DD70299D-BD42-DF4E-9234-11D6813B690A.root'])
     )
 
 
@@ -69,7 +69,7 @@ for in_file_name in subprocess.check_output([eos_cmd, 'ls', in_dir_name]).splitl
 # dir_str += '/store/mc/RunIISpring16DR80/SingleMu_Pt1To1000_FlatRandomOneOverPt/GEN-SIM-RAW/NoPURAW_NZS_withHLT_80X_mcRun2_asymptotic_v14-v1/60000/'
 
 # readFiles.extend([
-        
+
 #         # ## Tau-to-3-mu MC
 #         # 'root://eoscms.cern.ch//eos/cms/store/user/wangjian/DsTau3Mu_FullSim_1007/merged_fltr.root'
 
@@ -124,8 +124,8 @@ process.L1RePack_step = cms.Path(SimL1Emulator_AWB)
 ## Includes L1TRawToDigi, defined in L1Trigger/Configuration/python/L1TRawToDigi_cff.py
 # process.raw2digi_step = cms.Path(process.RawToDigi)
 
-process.simCscTriggerPrimitiveDigis.CSCComparatorDigiProducer = cms.InputTag('unpackCSC', 'MuonCSCComparatorDigi')
-process.simCscTriggerPrimitiveDigis.CSCWireDigiProducer       = cms.InputTag('unpackCSC', 'MuonCSCWireDigi')
+#process.simCscTriggerPrimitiveDigis.CSCComparatorDigiProducer = cms.InputTag('unpackCSC', 'MuonCSCComparatorDigi')
+#process.simCscTriggerPrimitiveDigis.CSCWireDigiProducer       = cms.InputTag('unpackCSC', 'MuonCSCWireDigi')
 
 process.load('L1Trigger.L1TMuonEndCap.simEmtfDigis_cfi')
 
@@ -186,7 +186,12 @@ process.ntuple = cms.EDAnalyzer('PtLutInput',
                                 emtfTrackTag  = cms.InputTag("simEmtfDigis"),  ## EMTF emulator output tracks
                                 )
 
-RawToDigi_AWB = cms.Sequence(process.simCscTriggerPrimitiveDigis+process.muonCSCDigis+process.muonRPCDigis+process.csctfDigis+process.simEmtfDigis+process.ntuple)
+RawToDigi_AWB = cms.Sequence(#process.simCscTriggerPrimitiveDigis +
+                             #process.muonCSCDigis +
+                             #process.muonRPCDigis +
+                             #process.csctfDigis +
+                             process.simEmtfDigis +
+                             process.ntuple)
 process.raw2digi_step = cms.Path(RawToDigi_AWB)
 
 ## Defined in Configuration/StandardSequences/python/EndOfProcess_cff.py
@@ -207,12 +212,13 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 #     )
 
 out_dir_name = '/afs/cern.ch/work/a/abrinke1/public/EMTF/Analyzer/ntuples/'
+out_dir_name = ''
 
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
     # fileName = cms.string("EMTF_MC_NTuple_Tau3Mu.root")
-    fileName = cms.string(out_dir_name+'EMTF_MC_NTuple_SingleMu_RPC_300k_17_07_07.root')
+    fileName = cms.string(out_dir_name+'EMTF_MC_NTuple_SingleMu_2019_07_30.root')
     # fileName = cms.string('EMTF_MC_NTuple_SingleMu_RPC_test.root')
     # fileName = cms.string(out_dir_name+'EMTF_MC_NTuple_JPsi_RPC_1_file.root')
     )
@@ -240,7 +246,7 @@ outCommands = cms.untracked.vstring(
 
     )
 
-# process.treeOut = cms.OutputModule("PoolOutputModule", 
+# process.treeOut = cms.OutputModule("PoolOutputModule",
 #                                    # fileName = cms.untracked.string("EMTF_MC_Tree_RelValNuGun_UP15_1k.root"),
 #                                    # fileName = cms.untracked.string("EMTF_MC_Tree_tau_to_3_mu_RPC_debug.root"),
 #                                    fileName = cms.untracked.string(out_dir_name+'EMTF_MC_Tree_SingleMu_noRPC_300k.root'),
