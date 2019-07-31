@@ -1,4 +1,3 @@
-
 #include "EMTFAnalyzer/NTupleMaker/interface/PtLutInputBranches.h"
 
 void GenMuonBranch::Initialize() {
@@ -18,7 +17,7 @@ void EMTFHitBranch::Initialize() {
     sector[i]  = DINT; sector_index[i] = DINT; station[i] = DINT; ring[i]    = DINT;
     CSC_ID[i]  = DINT; chamber[i]      = DINT; FR[i]      = DINT; pattern[i] = DINT;
     roll[i]    = DINT; subsector[i]    = DINT; isRPC[i]   = DINT; valid[i]   = DINT;
-    BX[i]      = DINT; strip[i]        = DINT; wire[i]    = DINT;
+    BX[i]      = DINT; strip[i]        = DINT; wire[i]    = DINT; isGEM[i]   = DINT;
   }
 }
 
@@ -29,14 +28,14 @@ void EMTFTrackBranch::Initialize() {
     pt_int[i] = DINT; eta_int[i] = DINT; theta_int[i]    = DINT; phi_int[i] = DINT; BX[i]      = DINT;
     endcap[i] = DINT; sector[i]  = DINT; sector_index[i] = DINT; mode[i]    = DINT; charge[i]  = DINT;
 
-    nHits[i] = 0; nRPC[i] = 0;
+    nHits[i] = 0; nRPC[i] = 0; nGEM[i] = 0;
     for (unsigned int j = 0; j < 4; j++) {
       hit_eta[i][j]     = DFLT; hit_theta[i][j]        = DFLT; hit_phi[i][j]     = DFLT; hit_phi_loc[i][j] = DFLT;
       hit_eta_int[i][j] = DINT; hit_theta_int[i][j]    = DINT; hit_phi_int[i][j] = DINT; hit_endcap[i][j]  = DINT;
       hit_sector[i][j]  = DINT; hit_sector_index[i][j] = DINT; hit_station[i][j] = DINT; hit_ring[i][j]    = DINT;
       hit_CSC_ID[i][j]  = DINT; hit_chamber[i][j]      = DINT; hit_FR[i][j]      = DINT; hit_pattern[i][j] = DINT;
       hit_roll[i][j]    = DINT; hit_subsector[i][j]    = DINT; hit_isRPC[i][j]   = DINT; hit_valid[i][j]   = DINT;
-      hit_BX[i][j]      = DINT; hit_strip[i][j]        = DINT; hit_wire[i][j]    = DINT;
+      hit_BX[i][j]      = DINT; hit_strip[i][j]        = DINT; hit_wire[i][j]    = DINT; hit_isGEM[i][j]   = DINT;
     }
   }
 }
@@ -59,7 +58,7 @@ void GenMuonBranch::Fill(unsigned int i, reco::GenParticle genMuon) {
 void EMTFHitBranch::Fill(unsigned int i, l1t::EMTFHit emtfHit) {
   int   _eta_int = emtf::calc_eta_GMT( emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() ) );
   float _eta_flt = emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() );
-  
+
   nHits           = i+1;
   eta[i]          = _eta_flt;
   theta[i]        = emtfHit.Theta();
@@ -80,6 +79,7 @@ void EMTFHitBranch::Fill(unsigned int i, l1t::EMTFHit emtfHit) {
   roll[i]         = emtfHit.Roll();
   subsector[i]    = emtfHit.Subsector();
   isRPC[i]        = (emtfHit.Subsystem() == 2 ? 1 : 0);
+  isGEM[i]        = (emtfHit.Subsystem() == 3 ? 1 : 0);
   valid[i]        = emtfHit.Valid();
   BX[i]           = emtfHit.BX();
   strip[i]        = (emtfHit.Subsystem() == 2 ? (emtfHit.Strip_hi() + emtfHit.Strip_low()) / 2 : emtfHit.Strip());
@@ -113,7 +113,7 @@ void EMTFTrackBranch::Fill(unsigned int i, l1t::EMTFTrack emtfTrk) {
 
     int   _eta_int_hit = emtf::calc_eta_GMT( emtf::calc_eta_from_theta_deg( trk_hit.Theta(), trk_hit.Endcap() ) );
     float _eta_flt_hit = emtf::calc_eta_from_theta_deg( trk_hit.Theta(), trk_hit.Endcap() );
-  
+
     hit_eta[i][j]          = _eta_flt_hit;
     hit_theta[i][j]        = trk_hit.Theta();
     hit_phi[i][j]          = trk_hit.Phi_glob();
@@ -133,12 +133,15 @@ void EMTFTrackBranch::Fill(unsigned int i, l1t::EMTFTrack emtfTrk) {
     hit_roll[i][j]         = trk_hit.Roll();
     hit_subsector[i][j]    = trk_hit.Subsector();
     hit_isRPC[i][j]        = (trk_hit.Subsystem() == 2 ? 1 : 0);
+    hit_isGEM[i][j]        = (trk_hit.Subsystem() == 3 ? 1 : 0);
     hit_valid[i][j]        = trk_hit.Valid();
     hit_BX[i][j]           = trk_hit.BX();
     hit_strip[i][j]        = (trk_hit.Subsystem() == 2 ? (trk_hit.Strip_hi() + trk_hit.Strip_low()) / 2 : trk_hit.Strip());
     hit_wire[i][j]         = (trk_hit.Subsystem() == 2 ? DINT : trk_hit.Wire());
     if (trk_hit.Subsystem() == 2) _nRPC += 1;
+    if (trk_hit.Subsystem() == 3) _nGEM += 1;
   }
   nHits[i] = _nHits;
   nRPC[i]  = _nRPC;
+  nGEM[i]  = _nGEM;
 }

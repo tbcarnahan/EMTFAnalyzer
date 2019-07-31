@@ -27,7 +27,7 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   const std::map<TString, std::vector<int> > * iHit = &(hits.mVInt);
 
   INSERT(mInts, "nUnpTracks", ACCESS(mInts, "nUnpTracks") + 1 );
-  if (emtfTrk.BX() == 0) 
+  if (emtfTrk.BX() == 0)
     INSERT(mInts, "nUnpTracksBX0", ACCESS(mInts, "nUnpTracksBX0") + 1 );
 
   INSERT(mVFlt, "unp_trk_pt",            emtfTrk.Pt() );
@@ -59,7 +59,7 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
   INSERT(mVFlt, "unp_trk_dR_match_dPhi",      DFLT);
   INSERT(mVFlt, "unp_trk_dR_match_dR",        DFLT);
 
-  INSERT(mVVInt, "unp_trk_iHit", DVINT ); 
+  INSERT(mVVInt, "unp_trk_iHit", DVINT );
 
   int _nTrkHits = 0, _nTrkRPC = 0, _nTrkNeighbor = 0, _TrkHitMode = 0;
   int _minBX =  9999, _minPh =  9999, _minTh =  9999;
@@ -70,6 +70,8 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
     _nTrkHits += 1;
     if (trk_hit.Is_RPC() == 1)
       _nTrkRPC += 1;
+    if (trk_hit.Is_GEM() == 1)
+      _nTrkGEM += 1;
     if (trk_hit.Neighbor() == 1)
       _nTrkNeighbor += 1;
 
@@ -77,72 +79,72 @@ void EMTFUnpTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & 
     bool foundTwoHits = false;
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
 
-      if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) && 
-	   trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&  
-	   trk_hit.Endcap()     == ACCESS(*iHit, "hit_endcap").at(i) &&
-	   trk_hit.Sector()     == ACCESS(*iHit, "hit_sector").at(i) &&
-	   trk_hit.Sector_idx() == ACCESS(*iHit, "hit_sector_index").at(i) &&
-	   // trk_hit.Subsector()  == ACCESS(*iHit, "hit_subsector").at(i) &&  // Unpacker uses "-1" for CSC LCTs in stations 2 - 4, emulator uses "0"
-	   trk_hit.Station()    == ACCESS(*iHit, "hit_station").at(i) &&
-	   trk_hit.Ring()       == ACCESS(*iHit, "hit_ring").at(i) &&
-	   trk_hit.Chamber()    == ACCESS(*iHit, "hit_chamber").at(i) &&
-	   ( ( trk_hit.Is_CSC() && 
-	       trk_hit.BX()      == ACCESS(*iHit, "hit_BX").at(i)      &&
-	       trk_hit.CSC_ID()  == ACCESS(*iHit, "hit_CSC_ID").at(i)  &&
-	       // trk_hit.Pattern() == ACCESS(*iHit, "hit_pattern").at(i) &&  // Subject to corrupt unpacked values, patched by emulator - AWB 28.09.17
-	       // trk_hit.Quality() == ACCESS(*iHit, "hit_quality").at(i) &&  // Subject to corrupt unpacked values, patched by emulator - AWB 28.09.17
-	       ( ( trk_hit.Ring() == 4 && (trk_hit.Strip() % 128) == (ACCESS(*iHit, "hit_strip").at(i) % 128) ) ||
-		 ( trk_hit.Strip() == ACCESS(*iHit, "hit_strip").at(i) ) ) ) || // Unpacker allows strip > 128 for ME1/1a ("ring 4")
-	           // trk_hit.Wire()  == ACCESS(*iHit, "hit_wire").at(i)        // Match only strip, for cases with two LCTs in the same chamber  
-	     ( trk_hit.Is_RPC() &&
-	       abs(trk_hit.BX() - ACCESS(*iHit, "hit_BX").at(i)) < 2      &&  // Unpacked RPC hits often off by 1 BX - AWB 25.09.17
-	       trk_hit.Theta_fp() == ACCESS(*iHit, "hit_theta_int").at(i) &&
-	       trk_hit.Phi_fp()   == ACCESS(*iHit, "hit_phi_int").at(i)    ) ) ) {
-	
-	if ( trk_hit.Is_CSC() && trk_hit.Wire() == ACCESS(*iHit, "hit_wire").at(i) &&
-	     ( trk_hit.Pattern() != ACCESS(*iHit, "hit_pattern").at(i) ||
-	       trk_hit.Quality() != ACCESS(*iHit, "hit_quality").at(i) ) ) {
-	  std::cout << "\n\n***  Bizzare EMTF unpacked CSC LCT corrupt pattern or quality  ***" << std::endl;
-	  PrintEMTFHit(trk_hit);
-	  PrintHit(iHit, i);
-	  std::cout << "\n\n" << std::endl;
-	}
+      if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
+           trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
+           trk_hit.Endcap()     == ACCESS(*iHit, "hit_endcap").at(i) &&
+           trk_hit.Sector()     == ACCESS(*iHit, "hit_sector").at(i) &&
+           trk_hit.Sector_idx() == ACCESS(*iHit, "hit_sector_index").at(i) &&
+           // trk_hit.Subsector()  == ACCESS(*iHit, "hit_subsector").at(i) &&  // Unpacker uses "-1" for CSC LCTs in stations 2 - 4, emulator uses "0"
+           trk_hit.Station()    == ACCESS(*iHit, "hit_station").at(i) &&
+           trk_hit.Ring()       == ACCESS(*iHit, "hit_ring").at(i) &&
+           trk_hit.Chamber()    == ACCESS(*iHit, "hit_chamber").at(i) &&
+           ( ( trk_hit.Is_CSC() &&
+               trk_hit.BX()      == ACCESS(*iHit, "hit_BX").at(i)      &&
+               trk_hit.CSC_ID()  == ACCESS(*iHit, "hit_CSC_ID").at(i)  &&
+               // trk_hit.Pattern() == ACCESS(*iHit, "hit_pattern").at(i) &&  // Subject to corrupt unpacked values, patched by emulator - AWB 28.09.17
+               // trk_hit.Quality() == ACCESS(*iHit, "hit_quality").at(i) &&  // Subject to corrupt unpacked values, patched by emulator - AWB 28.09.17
+               ( ( trk_hit.Ring() == 4 && (trk_hit.Strip() % 128) == (ACCESS(*iHit, "hit_strip").at(i) % 128) ) ||
+                 ( trk_hit.Strip() == ACCESS(*iHit, "hit_strip").at(i) ) ) ) || // Unpacker allows strip > 128 for ME1/1a ("ring 4")
+	           // trk_hit.Wire()  == ACCESS(*iHit, "hit_wire").at(i)        // Match only strip, for cases with two LCTs in the same chamber
+             ( trk_hit.Is_RPC() &&
+               abs(trk_hit.BX() - ACCESS(*iHit, "hit_BX").at(i)) < 2      &&  // Unpacked RPC hits often off by 1 BX - AWB 25.09.17
+               trk_hit.Theta_fp() == ACCESS(*iHit, "hit_theta_int").at(i) &&
+               trk_hit.Phi_fp()   == ACCESS(*iHit, "hit_phi_int").at(i)    ) ) ) {
+
+        if ( trk_hit.Is_CSC() && trk_hit.Wire() == ACCESS(*iHit, "hit_wire").at(i) &&
+             ( trk_hit.Pattern() != ACCESS(*iHit, "hit_pattern").at(i) ||
+               trk_hit.Quality() != ACCESS(*iHit, "hit_quality").at(i) ) ) {
+          std::cout << "\n\n***  Bizzare EMTF unpacked CSC LCT corrupt pattern or quality  ***" << std::endl;
+          PrintEMTFHit(trk_hit);
+          PrintHit(iHit, i);
+          std::cout << "\n\n" << std::endl;
+        }
 
 
-	if (not foundHit) {
-	  INSERT(mVVInt, "unp_trk_iHit", i );
-	  _TrkHitMode += pow(2, (4 - trk_hit.Station()));
-	} else if ( trk_hit.Is_CSC() && ACCESS(*iHit, "hit_wire").at(i) != ACCESS(*iHit, "hit_wire").at( mVVInt.at("unp_trk_iHit").back().back() ) ) {
-	  // std::cout << "\nTwo matched CSC LCTs: unpacked track theta_int = " << ACCESS(mVInt, "unp_trk_theta_int").back()
-	  // 	    << ", previous emulated hit theta_int = " << ACCESS(*iHit, "hit_theta_int").at( mVVInt.at("unp_trk_iHit").back().back() )
-	  // 	    << ", new hit theta_int = " << ACCESS(*iHit, "hit_theta_int").at(i) << ". " << std::endl;
-	  // PrintEMTFHit(trk_hit);
-	  // PrintHit(iHit, mVVInt.at("unp_trk_iHit").back().back());
-	  // PrintHit(iHit, i);
-	  if ( std::abs(ACCESS(mVInt, "unp_trk_theta_int").back() - ACCESS(*iHit, "hit_theta_int").at(i)) < 
-	       std::abs(ACCESS(mVInt, "unp_trk_theta_int").back() - ACCESS(*iHit, "hit_theta_int").at( mVVInt.at("unp_trk_iHit").back().back() )) ) {
-	    // std::cout << "Using new one.\n" << std::endl;
-	    mVVInt.at("unp_trk_iHit").back().pop_back(); // Remove the previous CSC LCT
-	    INSERT(mVVInt, "unp_trk_iHit", i );          // Insert the new CSC LCT
-	  } else {
-	    // std::cout << "Keeping old one.\n" << std::endl;
-	  }
-	} else if ( trk_hit.Is_RPC() ) {
-	  std::cout << "\nTwo matched RPC hits: unpacked track hit in BX " << trk_hit.BX() 
-		    << ", previous emulated hit in BX " << ACCESS(*iHit, "hit_BX").at( ACCESS(mVVInt, "unp_trk_iHit").back().back() )
-		    << ", new hit in BX " << ACCESS(*iHit, "hit_BX").at(i) << ". ";
-	  assert( ACCESS(*iHit, "hit_BX").at( ACCESS(mVVInt, "unp_trk_iHit").back().back() ) != ACCESS(*iHit, "hit_BX").at(i) );
-	  if (trk_hit.BX() == ACCESS(*iHit, "hit_BX").at(i) ) {
-	    mVVInt.at("unp_trk_iHit").back().pop_back(); // Remove the previous RPC hit
-	    INSERT(mVVInt, "unp_trk_iHit", i );          // Insert the new RPC hit
-	    std::cout << "Using new one.\n" << std::endl;
-	  } else {
-	    std::cout << "Keeping old one.\n" << std::endl;
-	  }
-	} else if (foundHit) {
-	  foundTwoHits = true;
-	}
-	foundHit = true;
+        if (not foundHit) {
+          INSERT(mVVInt, "unp_trk_iHit", i );
+          _TrkHitMode += pow(2, (4 - trk_hit.Station()));
+        } else if ( trk_hit.Is_CSC() && ACCESS(*iHit, "hit_wire").at(i) != ACCESS(*iHit, "hit_wire").at( mVVInt.at("unp_trk_iHit").back().back() ) ) {
+          // std::cout << "\nTwo matched CSC LCTs: unpacked track theta_int = " << ACCESS(mVInt, "unp_trk_theta_int").back()
+          // 	    << ", previous emulated hit theta_int = " << ACCESS(*iHit, "hit_theta_int").at( mVVInt.at("unp_trk_iHit").back().back() )
+          // 	    << ", new hit theta_int = " << ACCESS(*iHit, "hit_theta_int").at(i) << ". " << std::endl;
+          // PrintEMTFHit(trk_hit);
+          // PrintHit(iHit, mVVInt.at("unp_trk_iHit").back().back());
+          // PrintHit(iHit, i);
+          if ( std::abs(ACCESS(mVInt, "unp_trk_theta_int").back() - ACCESS(*iHit, "hit_theta_int").at(i)) <
+               std::abs(ACCESS(mVInt, "unp_trk_theta_int").back() - ACCESS(*iHit, "hit_theta_int").at( mVVInt.at("unp_trk_iHit").back().back() )) ) {
+            // std::cout << "Using new one.\n" << std::endl;
+            mVVInt.at("unp_trk_iHit").back().pop_back(); // Remove the previous CSC LCT
+            INSERT(mVVInt, "unp_trk_iHit", i );          // Insert the new CSC LCT
+          } else {
+            // std::cout << "Keeping old one.\n" << std::endl;
+          }
+        } else if ( trk_hit.Is_RPC() ) {
+          std::cout << "\nTwo matched RPC hits: unpacked track hit in BX " << trk_hit.BX()
+                    << ", previous emulated hit in BX " << ACCESS(*iHit, "hit_BX").at( ACCESS(mVVInt, "unp_trk_iHit").back().back() )
+                    << ", new hit in BX " << ACCESS(*iHit, "hit_BX").at(i) << ". ";
+          assert( ACCESS(*iHit, "hit_BX").at( ACCESS(mVVInt, "unp_trk_iHit").back().back() ) != ACCESS(*iHit, "hit_BX").at(i) );
+          if (trk_hit.BX() == ACCESS(*iHit, "hit_BX").at(i) ) {
+            mVVInt.at("unp_trk_iHit").back().pop_back(); // Remove the previous RPC hit
+            INSERT(mVVInt, "unp_trk_iHit", i );          // Insert the new RPC hit
+            std::cout << "Using new one.\n" << std::endl;
+          } else {
+            std::cout << "Keeping old one.\n" << std::endl;
+          }
+        } else if (foundHit) {
+          foundTwoHits = true;
+        }
+        foundHit = true;
       }
 
     } // End loop: for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++)

@@ -69,11 +69,11 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
 
   // Sort GEN muons by eta, high to low
-  std::stable_sort(gen_etas.begin(), gen_etas.end(), 
+  std::stable_sort(gen_etas.begin(), gen_etas.end(),
   		   [](auto &left, auto &right) {
   		     return left.second > right.second; } );
-  
-  
+
+
   // Get indices of EMTF hits in event
   std::vector<std::tuple<int, int, int, float>> hit_sect_stat_etas;
   if ( emtfHits.isValid() ) {
@@ -92,7 +92,7 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
 
   // Sort EMTF hits by sector (low to high), then eta (high to low)
-  std::stable_sort(hit_sect_stat_etas.begin(), hit_sect_stat_etas.end(), 
+  std::stable_sort(hit_sect_stat_etas.begin(), hit_sect_stat_etas.end(),
   		   [](auto &left, auto &right) {
   		     return ( std::get<1>(left) == std::get<1>(right) ?       // If same sector
   			      ( std::get<2>(left) == std::get<2>(right) ?     // If same station
@@ -115,7 +115,7 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
 
   // Sort EMTF tracks by sector (low to high), then eta (high to low)
-  std::stable_sort(trk_sect_etas.begin(), trk_sect_etas.end(), 
+  std::stable_sort(trk_sect_etas.begin(), trk_sect_etas.end(),
   		   [](auto &left, auto &right) {
   		     return ( std::get<1>(left) == std::get<1>(right) ?       // If same sector
   			      std::get<2>(left)  > std::get<2>(right) :       // Sort by eta (high-to-low)
@@ -140,7 +140,7 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       int iGen = -1;
       for (reco::GenParticle genMuon: *genMuons) {
   	iGen += 1;
-  	if (iGen != idx) 
+  	if (iGen != idx)
   	  continue;
 
   	_muon.Fill(i, genMuon);
@@ -156,7 +156,7 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       int iHit = -1;
       for (l1t::EMTFHit emtfHit: *emtfHits) {
   	iHit += 1;
-  	if (iHit != idx) 
+  	if (iHit != idx)
   	  continue;
 
   	_hit.Fill(i, emtfHit);
@@ -164,7 +164,7 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       } // End for (l1t::EMTFHit emtfHit: *emtfHits)
     } // End if (i < hit_sect_stat_etas.size())
   } // End for (uint i = 0; i < N_HIT; i++)
-  
+
   // Fill EMTF track branches
   for (uint i = 0; i < N_TRK; i++) {
     if (i < trk_sect_etas.size()) {
@@ -172,18 +172,18 @@ void PtLutInput::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       int iTrk = -1;
       for (l1t::EMTFTrack emtfTrk: *emtfTracks) {
   	iTrk += 1;
-  	if (iTrk != idx) 
+  	if (iTrk != idx)
   	  continue;
 
   	_track.Fill(i, emtfTrk);
-	
+
       } // End for (l1t::EMTFTrack emtfTrk: *emtfTracks)
     } // End if (i < trk_sect_etas.size())
   } // End for (uint i = 0; i < N_TRK; i++)
-      
+
   out_tree->Fill();
   return;
-      
+
 } // End PtLutInput::analyze
 
 
@@ -198,26 +198,26 @@ void PtLutInput::beginJob() {
   // https://twiki.cern.ch/twiki/bin/view/Main/RootNotes#Conventions_and_Types
   // https://root.cern.ch/root/html534/guides/users-guide/Trees.html#adding-a-branch-to-hold-a-list-of-variables
 
-  out_tree->Branch("muon", &_muon, 
+  out_tree->Branch("muon", &_muon,
 		   "nMuons/I:pt[2]/F:eta[2]/F:theta[2]/F:phi[2]/F:charge[2]/I");
-  out_tree->Branch("hit", &_hit, 
+  out_tree->Branch("hit", &_hit,
 		   "nHits/I:eta[24]/F:theta[24]/F:phi[24]/F:phi_loc[24]/F:"
 		   "eta_int[24]/I:theta_int[24]/I:phi_int[24]/I:"
 		   "endcap[24]/I:sector[24]/I:sector_index[24]/I:station[24]/I:"
 		   "ring[24]/I:CSC_ID[24]/I:chamber[24]/I:FR[24]/I:pattern[24]/I:"
 		   "roll[24]/I:subsector[24]/I:isRPC[24]/I:valid[24]/I:BX[24]/I:"
-		   "strip[24]/I:wire[24]/I");
+		   "strip[24]/I:wire[24]/I:isGEM[24]/I");
   out_tree->Branch("track", &_track,
 		   "nTracks/I:pt[4]/F:eta[4]/F:theta[4]/F:phi[4]/F:phi_loc[4]/F:"
 		   "pt_int[4]/I:eta_int[4]/I:theta_int[4]/I:phi_int[4]/I:BX[4]/I:"
 		   "endcap[4]/I:sector[4]/I:sector_index[4]/I:mode[4]/I:charge[4]/I:"
-		   "nHits[4]/I:nRPC[4]/I:"
+		   "nHits[4]/I:nRPC[4]/I:nGEM[4]/I:"
 		   "hit_eta[4][4]/F:hit_theta[4][4]/F:hit_phi[4][4]/F:hit_phi_loc[4][4]/F:"
 		   "hit_eta_int[4][4]/I:hit_theta_int[4][4]/I:hit_phi_int[4][4]/I:"
 		   "hit_endcap[4][4]/I:hit_sector[4][4]/I:hit_sector_index[4][4]/I:hit_station[4][4]/I:"
 		   "hit_ring[4][4]/I:hit_CSC_ID[4][4]/I:hit_chamber[4][4]/I:hit_FR[4][4]/I:hit_pattern[4][4]/I:"
 		   "hit_roll[4][4]/I:hit_subsector[4][4]/I:hit_isRPC[4][4]/I:hit_valid[4][4]/I:hit_BX[4][4]/I:"
-		   "hit_strip[4][4]/I:hit_wire[4][4]/I");
+		   "hit_strip[4][4]/I:hit_wire[4][4]/I:hit_isGEM[4][4]/");
 
 } // End PtLutInput::beginJob
 
