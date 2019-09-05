@@ -217,7 +217,7 @@ void PtLutInput::beginJob() {
 		   "hit_endcap[4][4]/I:hit_sector[4][4]/I:hit_sector_index[4][4]/I:hit_station[4][4]/I:"
 		   "hit_ring[4][4]/I:hit_CSC_ID[4][4]/I:hit_chamber[4][4]/I:hit_FR[4][4]/I:hit_pattern[4][4]/I:"
 		   "hit_roll[4][4]/I:hit_subsector[4][4]/I:hit_isRPC[4][4]/I:hit_valid[4][4]/I:hit_BX[4][4]/I:"
-		   "hit_strip[4][4]/I:hit_wire[4][4]/I:hit_isGEM[4][4]/");
+		   "hit_strip[4][4]/I:hit_wire[4][4]/I:hit_isGEM[4][4]/I");
 
 } // End PtLutInput::beginJob
 
