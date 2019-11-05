@@ -58,7 +58,11 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "hit_ring",         emtfHit.Ring() );
   INSERT(mVInt, "hit_CSC_ID",       ( emtfHit.Is_RPC() ? DINT : emtfHit.CSC_ID()) );
   INSERT(mVInt, "hit_chamber",      emtfHit.Chamber() );
-  assert( calc_FR_bit(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber()) == isFront(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem()) );
+  //  std::cout << calc_FR_bit(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber()) << " " <<  isFront(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem()) << std::endl;
+  if (emtfHit.Is_CSC() == 1 or emtfHit.Is_RPC() == 1) {
+    assert( calc_FR_bit(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber()) ==
+            isFront(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem()) );
+  }
   // INSERT(mVInt, "hit_FR",           calc_FR_bit(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber()) );
   INSERT(mVInt, "hit_FR",           isFront( emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem() ) );
   INSERT(mVInt, "hit_pattern",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Pattern()) );

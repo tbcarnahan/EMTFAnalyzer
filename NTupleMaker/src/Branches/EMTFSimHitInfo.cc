@@ -23,15 +23,15 @@ void EMTFSimHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   // std::cout << "Filling EMTFSimHitInfo" << std::endl;
 
   INSERT(mInts, "nSimHits", ACCESS(mInts, "nSimHits") + 1 );
-  if (emtfHit.Is_CSC() == 1) 
+  if (emtfHit.Is_CSC() == 1)
     INSERT(mInts, "nSimHitsCSC", ACCESS(mInts, "nSimHitsCSC") + 1 );
-  if (emtfHit.Is_RPC() == 1) 
+  if (emtfHit.Is_RPC() == 1)
     INSERT(mInts, "nSimHitsRPC", ACCESS(mInts, "nSimHitsRPC") + 1 );
   if (emtfHit.BX() == 0) {
     INSERT(mInts, "nSimHitsBX0", ACCESS(mInts, "nSimHitsBX0") + 1 );
-    if (emtfHit.Is_CSC() == 1) 
+    if (emtfHit.Is_CSC() == 1)
       INSERT(mInts, "nSimHitsCSCBX0", ACCESS(mInts, "nSimHitsCSCBX0") + 1 );
-    if (emtfHit.Is_RPC() == 1) 
+    if (emtfHit.Is_RPC() == 1)
       INSERT(mInts, "nSimHitsRPCBX0", ACCESS(mInts, "nSimHitsRPCBX0") + 1 );
   }
 
@@ -61,6 +61,7 @@ void EMTFSimHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "sim_hit_roll",         (!emtfHit.Is_RPC() ? DINT : emtfHit.Roll()) );
   INSERT(mVInt, "sim_hit_subsector",    emtfHit.Subsector() );
   INSERT(mVInt, "sim_hit_isCSC",        emtfHit.Is_CSC() );
+  INSERT(mVInt, "sim_hit_isGEM",        emtfHit.Is_GEM() );
   INSERT(mVInt, "sim_hit_isRPC",        emtfHit.Is_RPC() );
   INSERT(mVInt, "sim_hit_valid",        emtfHit.Valid() );
   INSERT(mVInt, "sim_hit_BX",           emtfHit.BX() );

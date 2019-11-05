@@ -56,9 +56,11 @@ inline void PrintEMTFHit( const l1t::EMTFHit & hit ) {
   else if (hit.Is_GEM()) {
     std::cout << "GEM hit in BX " << hit.BX() << ", endcap " << hit.Endcap() << ", station " << hit.Station()
               << ", ring " << hit.Ring() << ", chamber " << hit.Chamber() << ", roll " << hit.Roll()
-              << ", neighbor " << hit.Neighbor() << ", strip " << hit.Strip() << std::endl;
+              << ", neighbor " << hit.Neighbor() << ", pad " << hit.Strip() << std::endl;
   }
-  else std::cout << "EMTF hit is neither CSC nor RPC nor GEM?!?" << std::endl;
+  else {
+    std::cout << "EMTF hit is neither CSC nor RPC nor GEM?!? " << hit.Is_CSC() << hit.Is_RPC() << hit.Is_GEM() <<std::endl;
+  }
 }
 
 inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const int i) {
@@ -89,9 +91,9 @@ inline void PrintHit( const std::map<TString, std::vector<int> > * iHit , const 
               << ", chamber " << ACCESS(*iHit, "hit_chamber").at(i)
               << ", roll " << ACCESS(*iHit, "hit_roll").at(i)
               << ", neighbor " << ACCESS(*iHit, "hit_neighbor").at(i)
-              << ", strip " << ACCESS(*iHit, "hit_strip").at(i);
+              << ", strip " << ACCESS(*iHit, "hit_strip").at(i) << std::endl;
   }
-  else std::cout << "iHit with index " << i << " is neither CSC nor RPC nor GEM?!?" << std::endl;
+  else std::cout << "iHit with index " << i << " is neither CSC nor RPC nor GEM?!? " << ACCESS(*iHit, "hit_isCSC").at(i)<<ACCESS(*iHit, "hit_isRPC").at(i)<<ACCESS(*iHit, "hit_isGEM").at(i)<<std::endl;
 }
 
 #endif  // #ifndef BranchesEMTFHitInfo_h

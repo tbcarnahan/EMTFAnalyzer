@@ -76,9 +76,10 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
     bool foundHit = false;
     bool foundTwoHits = false;
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-
+      std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
            trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
+           trk_hit.Is_GEM()     == ACCESS(*iHit, "hit_isGEM").at(i) &&
            trk_hit.BX()         == ACCESS(*iHit, "hit_BX").at(i) &&
            trk_hit.Endcap()     == ACCESS(*iHit, "hit_endcap").at(i) &&
            trk_hit.Sector()     == ACCESS(*iHit, "hit_sector").at(i) &&
@@ -98,7 +99,11 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
                trk_hit.Strip_hi()  == ACCESS(*iHit, "hit_strip_hi").at(i) &&
                trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) &&
                trk_hit.Phi_fp()    == ACCESS(*iHit, "hit_phi_int").at(i) &&
-               trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) ) ) ) {
+               trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) ) ||
+             ( trk_hit.Is_GEM() &&
+               trk_hit.Strip() == ACCESS(*iHit, "hit_strip").at(i) )
+             )
+           ) {
 
         INSERT(mVVInt, "trk_iHit", i );
         if (foundHit) foundTwoHits = true;
@@ -117,7 +122,7 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
       std::cout << "Found no match (or two matches) in emulator for the following emulator hit:" << std::endl;
       PrintEMTFHit(trk_hit);
       for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-	PrintHit(iHit, i);
+        PrintHit(iHit, i);
       }
       std::cout << "\n\n" << std::endl;
       // assert(foundHit);

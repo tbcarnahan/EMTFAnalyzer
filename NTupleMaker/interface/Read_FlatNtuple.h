@@ -4,6 +4,8 @@ std::vector<TString> ints = {{
     "evt_run", "evt_LS", "evt_BX",
     "nHits", "nHitsCSC", "nHitsRPC", "nHitsBX0", "nHitsCSCBX0", "nHitsRPCBX0",
     "nSimHits", "nSimHitsCSC", "nSimHitsRPC", "nSimHitsBX0", "nSimHitsCSCBX0", "nSimHitsRPCBX0",
+    "nHitsGEM", "nHitsGEMBX0",
+    "nSimHitsGEM", "nSimHitsGEMBX0",
     "nSegs", "nSegsBX0",
     "nTracks", "nTracksBX0",
     "nUnpTracks", "nUnpTracksBX0",
