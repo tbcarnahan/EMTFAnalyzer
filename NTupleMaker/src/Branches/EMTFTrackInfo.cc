@@ -96,41 +96,39 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
 
       // ...wrong location
       if (trk_hit.Endcap() != ACCESS(*iHit, "hit_endcap").at(i)) continue;
+      if (trk_hit.Sector() != ACCESS(*iHit, "hit_sector").at(i)) continue;
+      if (trk_hit.Sector_idx() != ACCESS(*iHit, "hit_sector_index").at(i)) continue;
+      if (trk_hit.Subsector() != ACCESS(*iHit, "hit_subsector").at(i)) continue;
       if (trk_hit.Station() != ACCESS(*iHit, "hit_station").at(i)) continue;
       if (trk_hit.Ring() != ACCESS(*iHit, "hit_ring").at(i)) continue;
-      if (trk_hit.Sector() != ACCESS(*iHit, "hit_sector").at(i)) continue;
       if (trk_hit.Chamber() != ACCESS(*iHit, "hit_chamber").at(i)) continue;
 
-      // std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
+      // ...wrong timing
+      if (trk_hit.BX() != ACCESS(*iHit, "hit_BX").at(i)) continue;
 
-      if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
-           trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
-           trk_hit.Is_GEM()     == ACCESS(*iHit, "hit_isGEM").at(i) &&
-           trk_hit.BX()         == ACCESS(*iHit, "hit_BX").at(i) &&
-           trk_hit.Endcap()     == ACCESS(*iHit, "hit_endcap").at(i) &&
-           trk_hit.Sector()     == ACCESS(*iHit, "hit_sector").at(i) &&
-           trk_hit.Sector_idx() == ACCESS(*iHit, "hit_sector_index").at(i) &&
-           trk_hit.Subsector()  == ACCESS(*iHit, "hit_subsector").at(i) &&
-           trk_hit.Station()    == ACCESS(*iHit, "hit_station").at(i) &&
-           trk_hit.Ring()       == ACCESS(*iHit, "hit_ring").at(i) &&
-           trk_hit.Chamber()    == ACCESS(*iHit, "hit_chamber").at(i) &&
-           ( ( trk_hit.Is_CSC() &&
-               trk_hit.CSC_ID()  == ACCESS(*iHit, "hit_CSC_ID").at(i) &&
-               trk_hit.Pattern() == ACCESS(*iHit, "hit_pattern").at(i) &&
-               trk_hit.Quality() == ACCESS(*iHit, "hit_quality").at(i) &&
-               trk_hit.Strip()   == ACCESS(*iHit, "hit_strip").at(i) &&
-               trk_hit.Wire()    == ACCESS(*iHit, "hit_wire").at(i)   ) ||
-             ( trk_hit.Is_RPC() &&
-               trk_hit.Roll()      == ACCESS(*iHit, "hit_roll").at(i) &&
-               trk_hit.Strip_hi()  == ACCESS(*iHit, "hit_strip_hi").at(i) &&
-               trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) &&
-               trk_hit.Phi_fp()    == ACCESS(*iHit, "hit_phi_int").at(i) &&
-               trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) ) ||
-             ( trk_hit.Is_GEM() &&
-               trk_hit.Strip() == ACCESS(*iHit, "hit_strip").at(i) )
-             )
-           ) {
-        INSERT(mVVInt, "trk_iHit", i );
+      // now check each individual case
+      const bool case_CSC = (trk_hit.Is_CSC() &&
+                             trk_hit.CSC_ID()  == ACCESS(*iHit, "hit_CSC_ID").at(i) &&
+                             trk_hit.Pattern() == ACCESS(*iHit, "hit_pattern").at(i) &&
+                             trk_hit.Quality() == ACCESS(*iHit, "hit_quality").at(i) &&
+                             trk_hit.Strip()   == ACCESS(*iHit, "hit_strip").at(i) &&
+                             trk_hit.Wire()    == ACCESS(*iHit, "hit_wire").at(i) );
+
+      const bool case_RPC = (trk_hit.Is_RPC() &&
+                             trk_hit.Roll()      == ACCESS(*iHit, "hit_roll").at(i) &&
+                             trk_hit.Strip_hi()  == ACCESS(*iHit, "hit_strip_hi").at(i) &&
+                             trk_hit.Strip_low() == ACCESS(*iHit, "hit_strip_low").at(i) &&
+                             trk_hit.Phi_fp()    == ACCESS(*iHit, "hit_phi_int").at(i) &&
+                             trk_hit.Theta_fp()  == ACCESS(*iHit, "hit_theta_int").at(i) );
+
+      const bool case_GEM = (trk_hit.Is_GEM() &&
+                             trk_hit.Strip() == ACCESS(*iHit, "hit_strip").at(i) );
+
+      if (case_CSC or case_RPC or case_GEM) {
+
+        std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
+
+        INSERT(mVVInt, "trk_iHit", i);
         if (foundHit) foundTwoHits = true;
         foundHit = true;
         _minBX = std::min(_minBX, trk_hit.BX());

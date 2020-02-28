@@ -149,6 +149,13 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   recoPairInfo.Reset();
 
   // ignore hits we are not interested in
+  emtfHitInfo.ignoreGE11 = ignoreGE11_;
+  emtfHitInfo.ignoreGE21 = ignoreGE21_;
+  emtfHitInfo.ignoreRE31 = ignoreRE31_;
+  emtfHitInfo.ignoreRE41 = ignoreRE41_;
+  emtfHitInfo.ignoreDT = ignoreDT_;
+  emtfHitInfo.ignoreME0 = ignoreME0_;
+
   emtfTrackInfo.ignoreGE11 = ignoreGE11_;
   emtfTrackInfo.ignoreGE21 = ignoreGE21_;
   emtfTrackInfo.ignoreRE31 = ignoreRE31_;
@@ -224,17 +231,6 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Fill EMTF hit branches
   if ( emtfHits.isValid() ) {
     for (l1t::EMTFHit emtfHit: *emtfHits) {
-
-      // ignore hits we are not interested in
-      if (emtfHit.Ring()==1) {
-        if (emtfHit.Is_GEM() and emtfHit.Station()==1 and ignoreGE11_) continue;
-        if (emtfHit.Is_GEM() and emtfHit.Station()==2 and ignoreGE21_) continue;
-        if (emtfHit.Is_RPC() and emtfHit.Station()==3 and ignoreRE31_) continue;
-        if (emtfHit.Is_RPC() and emtfHit.Station()==4 and ignoreRE41_) continue;
-      }
-      if (emtfHit.Is_DT() and ignoreDT_) continue;
-      if (emtfHit.Is_ME0() and ignoreME0_) continue;
-
       emtfHitInfo.Fill(emtfHit);
     } // End for (l1t::EMTFHit emtfHit: *emtfHits)
   }

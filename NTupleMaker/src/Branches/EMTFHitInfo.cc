@@ -24,6 +24,16 @@ void EMTFHitInfo::Reset() {
 void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   // std::cout << "Filling EMTFHitInfo" << std::endl;
 
+  // ignore hits we are not interested in
+  if (emtfHit.Ring()==1) {
+    if (emtfHit.Is_GEM() and emtfHit.Station()==1 and ignoreGE11) return;
+    if (emtfHit.Is_GEM() and emtfHit.Station()==2 and ignoreGE21) return;
+    if (emtfHit.Is_RPC() and emtfHit.Station()==3 and ignoreRE31) return;
+    if (emtfHit.Is_RPC() and emtfHit.Station()==4 and ignoreRE41) return;
+  }
+  if (emtfHit.Is_DT() and ignoreDT) return;
+  if (emtfHit.Is_ME0() and ignoreME0) return;
+
   INSERT(mInts, "nHits", ACCESS(mInts, "nHits") + 1 );
   if (emtfHit.Is_CSC() == 1)
     INSERT(mInts, "nHitsCSC", ACCESS(mInts, "nHitsCSC") + 1 );
