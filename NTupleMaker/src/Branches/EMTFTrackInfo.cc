@@ -101,7 +101,7 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
       if (trk_hit.Sector() != ACCESS(*iHit, "hit_sector").at(i)) continue;
       if (trk_hit.Chamber() != ACCESS(*iHit, "hit_chamber").at(i)) continue;
 
-      std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
+      // std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
 
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
            trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
