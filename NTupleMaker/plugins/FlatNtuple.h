@@ -108,6 +108,9 @@ class FlatNtuple : public edm::EDAnalyzer {
   // Config parameters
   bool isMC, isReco, skimTrig, skimEmtf, skimPair;
 
+  // Expert station config parameters
+  bool ignoreRE31_, ignoreRE41_, ignoreGE21_, ignoreGE11_;
+
   // User defined settings
   std::vector<std::string> muonTriggers_;  // List of unprescale SingleMuon triggers
 

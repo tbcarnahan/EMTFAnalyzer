@@ -21,6 +21,12 @@ FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
                               cppfUnpDigiTag   = cms.InputTag("emtfStage2Digis"),
                               emtfSimHitTag    = cms.InputTag("simEmtfDigisSimHit"),
 
+                              ## option to exclude GEM and iRPC hits from the NTuple-making!
+                              ignoreGE11 = cms.bool(False),
+                              ignoreGE21 = cms.bool(True),
+                              ignoreRE31 = cms.bool(True),
+                              ignoreRE41 = cms.bool(True),
+
                               # RECO muon extrapolation to 1st station
                               muProp1st = cms.PSet(
                                   useTrack          = cms.string("tracker"),  # 'none' to use Candidate P4; or 'tracker', 'muon', 'global'

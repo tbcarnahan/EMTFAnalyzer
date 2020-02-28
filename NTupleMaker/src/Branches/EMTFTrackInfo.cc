@@ -76,6 +76,11 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
     bool foundHit = false;
     bool foundTwoHits = false;
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
+
+      // ignore matches
+      if (trk_hit.Endcap() != ACCESS(*iHit, "hit_endcap").at(i)) continue;
+      if (trk_hit.Station() != ACCESS(*iHit, "hit_station").at(i)) continue;
+
       std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
            trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
