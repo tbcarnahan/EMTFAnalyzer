@@ -22,6 +22,7 @@ FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
                               emtfSimHitTag    = cms.InputTag("simEmtfDigisSimHit"),
 
                               ## option to exclude GEM and iRPC hits from the NTuple-making!
+                              ignoreME0 = cms.bool(True),
                               ignoreGE11 = cms.bool(False),
                               ignoreGE21 = cms.bool(True),
                               ignoreRE31 = cms.bool(True),

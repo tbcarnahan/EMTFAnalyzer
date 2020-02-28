@@ -29,6 +29,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   ignoreRE31_ = iConfig.getParameter<bool>("ignoreRE31");
   ignoreRE41_ = iConfig.getParameter<bool>("ignoreRE41");
   ignoreDT_ = iConfig.getParameter<bool>("ignoreDT");
+  ignoreME0_ = iConfig.getParameter<bool>("ignoreME0");
 
   // Input collections
   if (isMC)   GenMuon_token      = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
@@ -153,6 +154,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   emtfTrackInfo.ignoreRE31 = ignoreRE31_;
   emtfTrackInfo.ignoreRE41 = ignoreRE41_;
   emtfTrackInfo.ignoreDT = ignoreDT_;
+  emtfTrackInfo.ignoreME0 = ignoreME0_;
 
   // std::cout << "About to fill event info" << std::endl;
   // Fill event info
@@ -231,6 +233,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         if (emtfHit.Is_RPC() and emtfHit.Station()==4 and ignoreRE41_) continue;
       }
       if (emtfHit.Is_DT() and ignoreDT_) continue;
+      if (emtfHit.Is_ME0() and ignoreME0_) continue;
 
       emtfHitInfo.Fill(emtfHit);
     } // End for (l1t::EMTFHit emtfHit: *emtfHits)

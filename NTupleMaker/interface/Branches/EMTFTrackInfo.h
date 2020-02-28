@@ -45,6 +45,7 @@ struct EMTFTrackInfo {
   bool ignoreRE31;
   bool ignoreRE41;
   bool ignoreDT;
+  bool ignoreME0;
 };
 
 

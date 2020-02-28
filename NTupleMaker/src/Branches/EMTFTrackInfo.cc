@@ -73,6 +73,7 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
       if (trk_hit.Is_RPC() and trk_hit.Station()==4 and ignoreRE41) continue;
     }
     if (trk_hit.Is_DT() and ignoreDT) continue;
+    if (trk_hit.Is_ME0() and ignoreME0) continue;
 
     _nTrkHits += 1;
     if (trk_hit.Is_RPC() == 1)

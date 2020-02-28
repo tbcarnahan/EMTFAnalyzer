@@ -101,15 +101,20 @@ class FlatNtuple : public edm::EDAnalyzer {
   virtual void analyze (const edm::Event&, const edm::EventSetup&);
   virtual void endRun  (const edm::Run&,   const edm::EventSetup&);
   virtual void endJob  ();
-  
+
   // File in/out
   edm::Service<TFileService> fs;
-  
+
   // Config parameters
   bool isMC, isReco, skimTrig, skimEmtf, skimPair;
 
   // Expert station config parameters
-  bool ignoreRE31_, ignoreRE41_, ignoreGE21_, ignoreGE11_, ignoreDT_;
+  bool ignoreME0_;
+  bool ignoreGE11_;
+  bool ignoreGE21_;
+  bool ignoreRE31_;
+  bool ignoreRE41_;
+  bool ignoreDT_;
 
   // User defined settings
   std::vector<std::string> muonTriggers_;  // List of unprescale SingleMuon triggers
