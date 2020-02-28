@@ -87,11 +87,22 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
     bool foundTwoHits = false;
     for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
 
-      // ignore matches
+      // ignore possible matches that have...
+
+      // ...wrong type
+      if (trk_hit.Is_CSC() != ACCESS(*iHit, "hit_isCSC").at(i)) continue;
+      if (trk_hit.Is_RPC() != ACCESS(*iHit, "hit_isRPC").at(i)) continue;
+      if (trk_hit.Is_GEM() != ACCESS(*iHit, "hit_isGEM").at(i)) continue;
+
+      // ...wrong location
       if (trk_hit.Endcap() != ACCESS(*iHit, "hit_endcap").at(i)) continue;
       if (trk_hit.Station() != ACCESS(*iHit, "hit_station").at(i)) continue;
+      if (trk_hit.Ring() != ACCESS(*iHit, "hit_ring").at(i)) continue;
+      if (trk_hit.Sector() != ACCESS(*iHit, "hit_sector").at(i)) continue;
+      if (trk_hit.Chamber() != ACCESS(*iHit, "hit_chamber").at(i)) continue;
 
       std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
+
       if ( trk_hit.Is_CSC()     == ACCESS(*iHit, "hit_isCSC").at(i) &&
            trk_hit.Is_RPC()     == ACCESS(*iHit, "hit_isRPC").at(i) &&
            trk_hit.Is_GEM()     == ACCESS(*iHit, "hit_isGEM").at(i) &&
@@ -119,7 +130,6 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
                trk_hit.Strip() == ACCESS(*iHit, "hit_strip").at(i) )
              )
            ) {
-
         INSERT(mVVInt, "trk_iHit", i );
         if (foundHit) foundTwoHits = true;
         foundHit = true;
@@ -130,16 +140,11 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
         _minTh = std::min(_minTh, trk_hit.Theta_fp());
         _maxTh = std::max(_maxTh, trk_hit.Theta_fp());
       }
-
     } // End loop: for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++)
     if ((not foundHit) or foundTwoHits) {
       std::cout << "\n\n***  Rare EMTF track matching bug  ***" << std::endl;
       std::cout << "Found no match (or two matches) in emulator for the following emulator hit:" << std::endl;
       PrintEMTFHit(trk_hit);
-      for (int i = 0; i < ACCESS(hits.mInts, "nHits"); i++) {
-        PrintHit(iHit, i);
-      }
-      std::cout << "\n\n" << std::endl;
       // assert(foundHit);
     }
     // assert(not foundTwoHits);
