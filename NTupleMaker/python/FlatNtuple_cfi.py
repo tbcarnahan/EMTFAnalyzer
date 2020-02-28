@@ -26,6 +26,7 @@ FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
                               ignoreGE21 = cms.bool(True),
                               ignoreRE31 = cms.bool(True),
                               ignoreRE41 = cms.bool(True),
+                              ignoreDT = cms.bool(True),
 
                               # RECO muon extrapolation to 1st station
                               muProp1st = cms.PSet(

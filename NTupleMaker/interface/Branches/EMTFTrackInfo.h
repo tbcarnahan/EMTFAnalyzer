@@ -39,6 +39,12 @@ struct EMTFTrackInfo {
   void Reset();
   inline void CheckSize() { CHECKSIZE(mVFlt); CHECKSIZE(mVInt); CHECKSIZE(mVVInt); }
   void Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hits);
+
+  bool ignoreGE11;
+  bool ignoreGE21;
+  bool ignoreRE31;
+  bool ignoreRE41;
+  bool ignoreDT;
 };
 
 

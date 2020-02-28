@@ -28,6 +28,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   ignoreGE21_ = iConfig.getParameter<bool>("ignoreGE21");
   ignoreRE31_ = iConfig.getParameter<bool>("ignoreRE31");
   ignoreRE41_ = iConfig.getParameter<bool>("ignoreRE41");
+  ignoreDT_ = iConfig.getParameter<bool>("ignoreDT");
 
   // Input collections
   if (isMC)   GenMuon_token      = consumes<std::vector<reco::GenParticle>> (iConfig.getParameter<edm::InputTag>("genMuonTag"));
@@ -146,6 +147,13 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   recoMuonInfo.Reset();
   recoPairInfo.Reset();
 
+  // ignore hits we are not interested in
+  emtfTrackInfo.ignoreGE11 = ignoreGE11_;
+  emtfTrackInfo.ignoreGE21 = ignoreGE21_;
+  emtfTrackInfo.ignoreRE31 = ignoreRE31_;
+  emtfTrackInfo.ignoreRE41 = ignoreRE41_;
+  emtfTrackInfo.ignoreDT = ignoreDT_;
+
   // std::cout << "About to fill event info" << std::endl;
   // Fill event info
   eventInfo.Fill(iEvent);
@@ -222,13 +230,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         if (emtfHit.Is_RPC() and emtfHit.Station()==3 and ignoreRE31_) continue;
         if (emtfHit.Is_RPC() and emtfHit.Station()==4 and ignoreRE41_) continue;
       }
-
-      if ( emtfHit.Subsystem() == 1)
-        std::cout << emtfHit.Station() << " " << emtfHit.Ring() << " " << emtfHit.Chamber()
-                  << " " << emtfHit.Subsystem() << emtfHit.CreateCSCCorrelatedLCTDigi() << std::endl;
-      if ( emtfHit.Subsystem() == 3)
-        std::cout << emtfHit.Station() << " " << emtfHit.Ring() << " " << emtfHit.Chamber()
-                  << " " << emtfHit.Subsystem() << emtfHit.CreateGEMPadDigi() << std::endl;
+      if (emtfHit.Is_DT() and ignoreDT_) continue;
 
       emtfHitInfo.Fill(emtfHit);
     } // End for (l1t::EMTFHit emtfHit: *emtfHits)

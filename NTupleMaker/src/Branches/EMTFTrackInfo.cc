@@ -65,6 +65,15 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
 
   for (const auto& trk_hit : emtfTrk.Hits()) {
 
+    // ignore hits we are not interested in
+    if (trk_hit.Ring()==1) {
+      if (trk_hit.Is_GEM() and trk_hit.Station()==1 and ignoreGE11) continue;
+      if (trk_hit.Is_GEM() and trk_hit.Station()==2 and ignoreGE21) continue;
+      if (trk_hit.Is_RPC() and trk_hit.Station()==3 and ignoreRE31) continue;
+      if (trk_hit.Is_RPC() and trk_hit.Station()==4 and ignoreRE41) continue;
+    }
+    if (trk_hit.Is_DT() and ignoreDT) continue;
+
     _nTrkHits += 1;
     if (trk_hit.Is_RPC() == 1)
       _nTrkRPC += 1;
