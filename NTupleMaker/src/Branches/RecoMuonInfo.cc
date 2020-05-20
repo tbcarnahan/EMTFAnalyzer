@@ -32,23 +32,23 @@ void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
   float eta_St2   = -999.;
   float theta_St2 = -999.;
   float phi_St2   = -999.;
-  
+
   TrajectoryStateOnSurface station1 = muProp1st.extrapolate(mu);
   if (station1.isValid()) {
     eta_St1   = station1.globalPosition().eta();
-    theta_St1 = emtf::range_theta_deg( emtf::calc_theta_deg( eta_St1 ) );
+    theta_St1 = emtf::calc_theta_deg( eta_St1 );
     phi_St1   = station1.globalPosition().phi();
     phi_St1   = emtf::rad_to_deg( phi_St1 );
   }
-  
+
   TrajectoryStateOnSurface station2 = muProp2nd.extrapolate(mu);
   if (station2.isValid()) {
     eta_St2   = station2.globalPosition().eta();
-    theta_St2 = emtf::range_theta_deg( emtf::calc_theta_deg( eta_St2 ) );
+    theta_St2 = emtf::calc_theta_deg( eta_St2 );
     phi_St2   = station2.globalPosition().phi();
     phi_St2   = emtf::rad_to_deg( phi_St2 );
   }
-  
+
   // RECO muon selection cuts
   if ( mu.pt() < 0.5 ) return;
   if ( abs(mu.eta())   < min_eta                      &&
@@ -58,7 +58,7 @@ void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
        abs(eta_St1)  > max_eta &&
        abs(eta_St2)  > max_eta  ) return;
   if ( not (muon::isLooseMuon(mu) || muon::isSoftMuon(mu, vertex) || mu.isStandAloneMuon()) ) return;
-  
+
   INSERT(mInts, "nRecoMuons", ACCESS(mInts, "nRecoMuons") + 1);
   if ( not ( abs(mu.eta())   < 1.2                      &&
 	     ( (abs(eta_St1) < 1.2) || (eta_St1 < -3) ) &&
@@ -98,7 +98,7 @@ void RecoMuonInfo::Fill(const reco::Muon mu, const reco::Vertex vertex,
   INSERT(mVFlt, "reco_eta",        mu.eta() );
   INSERT(mVFlt, "reco_eta_St1",    eta_St1 );
   INSERT(mVFlt, "reco_eta_St2",    eta_St2 );
-  INSERT(mVFlt, "reco_theta",      emtf::range_theta_deg( emtf::calc_theta_deg( mu.eta() ) ) );
+  INSERT(mVFlt, "reco_theta",      emtf::calc_theta_deg( mu.eta() ) );
   INSERT(mVFlt, "reco_theta_St1",  theta_St1 );
   INSERT(mVFlt, "reco_theta_St2",  theta_St2 );
   INSERT(mVFlt, "reco_phi",        emtf::rad_to_deg( mu.phi() ) );
@@ -138,13 +138,13 @@ void RecoMuonInfo::HltMatch( const reco::Muon muon,
 			     const edm::Handle<trigger::TriggerEvent>& trigEvent,
 			     std::vector<std::string> trigModLabels,
 			     const double _muon_trig_dR, const double _muon_trig_pt ) {
-  
+
   // std::cout << "Inside RecoMuonInfo::HltMatch, muon has charge = " << muon.charge() << ", pT = " << muon.pt()
   // 	    << ", eta = " << muon.eta() << ", phi() = " << muon.phi() << ", isolation = " << ACCESS(mVFlt, "reco_iso").back() << std::endl;
 
   double matchDR = 999.;  // deltaR between HLT muon and RECO muon
   int    matchID = DINT;  // bitmask of which HLT muons are matched to the RECO muon
-  
+
   const trigger::TriggerObjectCollection trigObjs = trigEvent->getObjects();
 
   for (unsigned i = 0; i < trigModLabels.size(); i++) {
@@ -153,26 +153,26 @@ void RecoMuonInfo::HltMatch( const reco::Muon muon,
     if (iFilter < trigEvent->sizeFilters()) {
       const trigger::Keys triggerKeys(trigEvent->filterKeys(iFilter));
       const trigger::Vids triggerVids(trigEvent->filterIds(iFilter));
-	
+
       for (unsigned iVid = 0; iVid < triggerVids.size(); iVid++) {
 	const trigger::TriggerObject trigObject = trigObjs.at(triggerKeys.at(iVid));
 	if (deltaR(muon, trigObject) < _muon_trig_dR && muon.pt() > _muon_trig_pt) {
 	  matchDR  = std::min(matchDR, deltaR(muon, trigObject));
 	  matchID  = std::max(matchID, 0);
 	  matchID |= int(pow(2, i));
-	  // std::cout << "  * Trigger " << i << ": matched with dR = " << matchDR << " to module:" << trigModLabels.at(i) 
+	  // std::cout << "  * Trigger " << i << ": matched with dR = " << matchDR << " to module:" << trigModLabels.at(i)
 	  // 	    << ", key:" << triggerKeys.at(iVid) << ", object ID = " << trigObject.id()
 	  // 	    << ", pT = " << trigObject.pt() << ", eta = " << trigObject.eta() << ", phi = " << trigObject.phi() << std::endl;
 	}
       }
     }
   }
-  
+
   INSERT(mVFlt, "reco_trig_dR", matchDR);
   INSERT(mVInt, "reco_trig_ID", matchID);
   if (matchID > 0) {
     INSERT(mInts, "nRecoMuonsTrig", ACCESS(mInts, "nRecoMuonsTrig") + 1);
     if (abs(muon.eta()) < 1.2) INSERT(mInts, "nRecoMuonsTrigCen", ACCESS(mInts, "nRecoMuonsTrigCen") + 1);
   }
-  
+
 } // End function: RecoMuonInfo::HltMatch()
