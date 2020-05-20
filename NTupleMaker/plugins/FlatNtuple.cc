@@ -1,4 +1,3 @@
-
 // Make NTuples for input to BDT training
 // Runs off of the new 2017 EMTF emultor
 // Andrew Brinkerhoff - 27.06.17
@@ -48,6 +47,8 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   EMTFSimHit_token   = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfSimHitTag"));
   EMTFTrack_token    = consumes<std::vector<l1t::EMTFTrack>> (iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
   EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>> (iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
+  GEMCoPad_token = consumes<GEMCoPadDigiCollection> (iConfig.getParameter<edm::InputTag>("gemCoPadTag"));
+
 } // End FlatNtuple::FlatNtuple
 
 // Destructor
@@ -133,9 +134,15 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(EMTFTrack_token, emtfTracks);
   edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
   iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
+  edm::Handle<GEMCoPadDigiCollection> gemCoPadsH;
+  iEvent.getByToken(GEMCoPad_token, gemCoPadsH);
+  const GEMCoPadDigiCollection& gemCoPads = *gemCoPadsH.product();
 
   edm::ESHandle<CSCGeometry> cscGeom;
   iSetup.get<MuonGeometryRecord>().get(cscGeom);
+
+  edm::ESHandle<GEMGeometry> gemGeom;
+  iSetup.get<MuonGeometryRecord>().get(gemGeom);
 
   // Reset branch values
   eventInfo.Reset();
@@ -227,10 +234,82 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
 
 
+  // here, need to do the association with GEM hits
+  std::vector<l1t::EMTFHit> associatedGEMCoPads;
+  if ( emtfHits.isValid() ) {
+    for (l1t::EMTFHit emtfHit: *emtfHits) {
+      // ME1/1 stubs!
+      if (emtfHit.Is_CSC() == 1 and
+          emtfHit.Station() == 1 and
+          emtfHit.Ring() == 1) {
+        // ME1/1 detid
+        const auto& cscId = emtfHit.CSC_DetId();
+        CSCDetId key_id(cscId.endcap(), cscId.station(), cscId.ring(), cscId.chamber(), 3);
+
+
+        // ME1/1 chamber
+        const auto& cscChamber = cscGeom->chamber(cscId);
+
+        // CSC GP
+        const auto& lct = emtfHit.CreateCSCCorrelatedLCTDigi();
+        float fractional_strip = lct.getFractionalStrip();
+        const auto& layer_geo = cscChamber->layer(3)->geometry();
+        // LCT::getKeyWG() also starts from 0
+        float wire = layer_geo->middleWireOfGroup(lct.getKeyWG() + 1);
+        const LocalPoint& csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
+        const GlobalPoint& csc_gp = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect);
+
+        // corresponding GE1/1 detid
+        const GEMDetId gemId(cscId.zendcap(),
+                             1,
+                             1,
+                             0,
+                             cscId.chamber(),
+                             0);
+        const auto& gemChamber = gemGeom->chamber(gemId);
+
+        // copad collection
+        const auto& co_pads_in_det = gemCoPads.get(gemId);
+
+        // best copad
+        GEMCoPadDigi best;
+
+        // at most the width of an ME11 chamber
+        float minDPhi = 0.18;
+        // loop on the GEM coincidence pads
+        // find the closest matching one
+        for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it) {
+          // pick the first layer in the copad!
+          const auto& copad = (*it);
+          const LocalPoint& gem_lp = gemGeom->etaPartition(gemId)->centreOfPad(copad.pad(1));
+          const GlobalPoint& gem_gp = gemGeom->idToDet(gemId)->surface().toGlobal(gem_lp);
+          float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
+          if (currentDPhi < minDPhi) {
+            best = copad;
+            minDPhi = currentDPhi;
+          }
+        }
+        // create a new EMTFHit with the
+        // best matching coincidence pad
+        l1t::EMTFHit bestEMTFHit;
+        bestEMTFHit.set_subsystem(3);
+        bestEMTFHit.SetGEMDetId(gemId);
+        bestEMTFHit.set_roll(best.roll());
+        bestEMTFHit.set_strip(best.pad(1));
+        associatedGEMCoPads.push_back(bestEMTFHit);
+      }
+    }
+  }
+
+  // make a combined collection
+  l1t::EMTFHitCollection mergedHits;
+  mergedHits.insert(std::end(mergedHits), std::begin(*emtfHits), std::end(*emtfHits));
+  mergedHits.insert(std::end(mergedHits), std::begin(associatedGEMCoPads), std::end(associatedGEMCoPads));
+
   std::cout << "About to fill EMTF hit branches" << std::endl;
   // Fill EMTF hit branches
   if ( emtfHits.isValid() ) {
-    for (l1t::EMTFHit emtfHit: *emtfHits) {
+    for (l1t::EMTFHit emtfHit: mergedHits) {
       emtfHitInfo.Fill(emtfHit);
     } // End for (l1t::EMTFHit emtfHit: *emtfHits)
   }
@@ -238,6 +317,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     std::cout << "ERROR: could not get emtfHits from event!!!" << std::endl;
     return;
   }
+
 
   /*
   std::cout << "About to fill EMTF simHit branches" << std::endl;

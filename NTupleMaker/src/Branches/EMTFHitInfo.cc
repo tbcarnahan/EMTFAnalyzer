@@ -22,7 +22,7 @@ void EMTFHitInfo::Reset() {
 }
 
 void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
-  // std::cout << "Filling EMTFHitInfo" << std::endl;
+  std::cout << "Filling EMTFHitInfo" << std::endl;
 
   // ignore hits we are not interested in
   if (emtfHit.Ring()==1) {
