@@ -266,7 +266,6 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                              0,
                              cscId.chamber(),
                              0);
-        const auto& gemChamber = gemGeom->chamber(gemId);
 
         // copad collection
         const auto& co_pads_in_det = gemCoPads.get(gemId);
@@ -282,15 +281,15 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
           // pick the first layer in the copad!
           const auto& copad = (*it);
 
-        const GEMDetId gemId(cscId.zendcap(),
-                             1,
-                             1,
-                             1,
-                             cscId.chamber(),
-                             copad.roll());
+          const GEMDetId gemCoId(cscId.zendcap(),
+                                 1,
+                                 1,
+                                 1,
+                                 cscId.chamber(),
+                                 copad.roll());
 
-          const LocalPoint& gem_lp = gemGeom->etaPartition(gemId)->centreOfPad(copad.pad(1));
-          const GlobalPoint& gem_gp = gemGeom->idToDet(gemId)->surface().toGlobal(gem_lp);
+          const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
+          const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
           float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
           if (currentDPhi < minDPhi) {
             best = copad;
