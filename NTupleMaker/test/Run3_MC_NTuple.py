@@ -60,11 +60,11 @@ process.source = cms.Source(
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
 process.load('EMTFAnalyzer.NTupleMaker.PtLutInput_cfi')
 
-process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigis","","L1")
-process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigis","","L1")
+process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
 
-process.PtLutInputMC.emtfHitTag = cms.InputTag("simEmtfDigis","","L1")
-process.PtLutInputMC.emtfTrackTag = cms.InputTag("simEmtfDigis","","L1")
+process.PtLutInputMC.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.PtLutInputMC.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
 
 process.Analysis = cms.Sequence(process.FlatNtupleMC)# * process.PtLutInputMC)
 process.Analysis_step = cms.Path(process.Analysis)
@@ -73,7 +73,7 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string('EMTF_MC_NTuple_SingleMu_20200219.root')
+    fileName = cms.string('EMTF_MC_NTuple_SingleMu_20200522.root')
     )
 
 # Schedule definition

@@ -281,6 +281,14 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it) {
           // pick the first layer in the copad!
           const auto& copad = (*it);
+
+        const GEMDetId gemId(cscId.zendcap(),
+                             1,
+                             1,
+                             1,
+                             cscId.chamber(),
+                             copad.roll());
+
           const LocalPoint& gem_lp = gemGeom->etaPartition(gemId)->centreOfPad(copad.pad(1));
           const GlobalPoint& gem_gp = gemGeom->idToDet(gemId)->surface().toGlobal(gem_lp);
           float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
