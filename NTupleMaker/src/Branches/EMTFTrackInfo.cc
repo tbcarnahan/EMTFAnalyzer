@@ -126,7 +126,7 @@ void EMTFTrackInfo::Fill(const l1t::EMTFTrack & emtfTrk, const EMTFHitInfo & hit
 
       if (case_CSC or case_RPC or case_GEM) {
 
-        std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
+        // std::cout << "EMTFTrackInfo::Fill hit " << i << std::endl;
 
         INSERT(mVVInt, "trk_iHit", i);
         if (foundHit) foundTwoHits = true;
