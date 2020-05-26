@@ -246,7 +246,6 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         const auto& cscId = emtfHit.CSC_DetId();
         CSCDetId key_id(cscId.endcap(), cscId.station(), cscId.ring(), cscId.chamber(), 3);
 
-
         // ME1/1 chamber
         const auto& cscChamber = cscGeom->chamber(cscId);
 

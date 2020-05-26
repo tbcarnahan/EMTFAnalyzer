@@ -52,7 +52,7 @@ void SimUnpHit::Match( EMTFHitInfo & emtfHits, EMTFSimHitInfo & emtfSimHits ) {
       // SameChamberHits, MatchingHits, and IdenticalHits defined in interface/Matchers/HelperFunctions.h
       if (ACCESS(*jHit, "sim_hit_isCSC").at(j) != ACCESS(*iHit, "hit_isCSC").at(i)) continue;
       if (ACCESS(*jHit, "sim_hit_isRPC").at(j) != ACCESS(*iHit, "hit_isRPC").at(i)) continue;
-      if (ACCESS(*jHit, "sim_hit_isgem").at(j) != ACCESS(*iHit, "hit_isgem").at(i)) continue;
+      if (ACCESS(*jHit, "sim_hit_isGEM").at(j) != ACCESS(*iHit, "hit_isGEM").at(i)) continue;
       if (SameChamberHits(iHit, i, jHit, j) == false) continue;
       if (abs(simHitBX - hitBX) > 1) continue;
 
