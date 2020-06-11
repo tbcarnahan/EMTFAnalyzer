@@ -35,7 +35,6 @@
 
 // CSC segment geometry
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
 // RECO muons
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
@@ -49,9 +48,6 @@
 
 // HLT configuration
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
-
-// GEM Copads
-#include "DataFormats/GEMDigi/interface/GEMCoPadDigiCollection.h"
 
 class FlatNtuple : public edm::EDAnalyzer {
 
@@ -139,7 +135,6 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFSimHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFUnpTrack_token;
-  edm::EDGetTokenT<GEMCoPadDigiCollection>                 GEMCoPad_token;
 
   // Event counters for metadata
   int nEventsProc_, nEventsSel_;

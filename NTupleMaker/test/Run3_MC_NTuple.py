@@ -57,17 +57,23 @@ process.source = cms.Source(
 ###################
 ###  NTuplizer  ###
 ###################
+process.load('EMTFAnalyzer.NTupleMaker.GEMEMTFMatcher_cfi')
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
 process.load('EMTFAnalyzer.NTupleMaker.PtLutInput_cfi')
 
-process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
-process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.GEMEMTFMatcher.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.GEMEMTFMatcher.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.GEMEMTFMatcher.gemCoPadTag = cms.InputTag("simCscTriggerPrimitiveDigis","","ReL1")
+
+process.FlatNtupleMC.emtfHitTag = cms.InputTag("GEMEMTFMatcher")
+process.FlatNtupleMC.emtfTrackTag = cms.InputTag("GEMEMTFMatcher")
 
 process.PtLutInputMC.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
 process.PtLutInputMC.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
 
+process.matcher = cms.Sequence(process.GEMEMTFMatcher)
 process.Analysis = cms.Sequence(process.FlatNtupleMC)# * process.PtLutInputMC)
-process.Analysis_step = cms.Path(process.Analysis)
+process.Analysis_step = cms.Path(process.matcher * process.Analysis)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 ## NTuple output File

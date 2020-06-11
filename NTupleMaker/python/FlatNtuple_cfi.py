@@ -7,10 +7,11 @@ FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
                               skimEmtf         = cms.bool(False), # Discard events with no EMTF tracks in BX 0
                               skimPair         = cms.bool(False), # Discard events with no RECO muon pairs
                               genMuonTag       = cms.InputTag("genParticles"),
-                              emtfHitTag       = cms.InputTag("simEmtfDigis"),
-                              emtfTrackTag     = cms.InputTag("simEmtfDigis"),
+                              #emtfHitTag       = cms.InputTag("simEmtfDigis"),
+                              #emtfTrackTag     = cms.InputTag("simEmtfDigis"),
+                              emtfHitTag       = cms.InputTag("GEMEMTFMatcher"),
+                              emtfTrackTag     = cms.InputTag("GEMEMTFMatcher"),
                               emtfUnpTrackTag  = cms.InputTag(""),
-                              gemCoPadTag      = cms.InputTag("simCscTriggerPrimitiveDigis"),
 
                               cscSegmentTag    = cms.InputTag("cscSegments"),
                               recoMuonTag      = cms.InputTag("muons"),

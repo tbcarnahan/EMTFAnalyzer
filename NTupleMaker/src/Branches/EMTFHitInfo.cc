@@ -39,16 +39,18 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
     INSERT(mInts, "nHitsCSC", ACCESS(mInts, "nHitsCSC") + 1 );
   if (emtfHit.Is_RPC() == 1)
     INSERT(mInts, "nHitsRPC", ACCESS(mInts, "nHitsRPC") + 1 );
-  if (emtfHit.Is_GEM() == 1)
+  if (emtfHit.Is_GEM() == 1) {
     INSERT(mInts, "nHitsGEM", ACCESS(mInts, "nHitsGEM") + 1 );
+  }
   if (emtfHit.BX() == 0) {
     INSERT(mInts, "nHitsBX0", ACCESS(mInts, "nHitsBX0") + 1 );
     if (emtfHit.Is_CSC() == 1)
       INSERT(mInts, "nHitsCSCBX0", ACCESS(mInts, "nHitsCSCBX0") + 1 );
     if (emtfHit.Is_RPC() == 1)
       INSERT(mInts, "nHitsRPCBX0", ACCESS(mInts, "nHitsRPCBX0") + 1 );
-    if (emtfHit.Is_GEM() == 1)
+    if (emtfHit.Is_GEM() == 1) {
       INSERT(mInts, "nHitsGEMBX0", ACCESS(mInts, "nHitsGEMBX0") + 1 );
+    }
   }
 
   INSERT(mVFlt, "hit_eta",          emtf::calc_eta_from_theta_deg( emtfHit.Theta(), emtfHit.Endcap() ) );
