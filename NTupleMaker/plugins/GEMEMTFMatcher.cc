@@ -26,6 +26,7 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/Matchers/LCTSeg.h"
 
 // CSC segment geometry
+#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
@@ -119,13 +120,10 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       const auto& trackHits = track.Hits();
 
-      // ignore tracks with |eta| < 1.55 and |eta| > 2.15
-      if (std::abs(track.Eta()) < 1.55 || std::abs(track.Eta()) > 2.15) continue;
-
       // here, need to do the association with GEM hits
       for (const l1t::EMTFHit& emtfHit: trackHits) {
 
-        // ME1/1 stubs!
+        // require ME1/1 stubs!
         if (emtfHit.Is_CSC() == 1 and
             emtfHit.Station() == 1 and
             emtfHit.Ring() == 1) {
@@ -150,44 +148,44 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           const LocalPoint& csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
           const GlobalPoint& csc_gp = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect);
 
-          // corresponding GE1/1 detid
-          const GEMDetId gemId(cscId.zendcap(),
-                               1,
-                               1,
-                               0,
-                               cscId.chamber(),
-                               0);
-
-          // copad collection
-          const auto& co_pads_in_det = gemCoPads.get(gemId);
-
-          // best copad
+            // best copad
           GEMCoPadDigi best;
+          GEMDetId bestId;
 
-          // at most the width of an ME11 chamber
-          float minDPhi = 0.18;
-          // loop on the GEM coincidence pads
-          // find the closest matching one
-          for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it) {
-            // pick the first layer in the copad!
-            const auto& copad = (*it);
+          // have to consider +1/0/-1 GEM chambers
+          for (int deltaChamber = -1; deltaChamber <= 1; deltaChamber++){
 
-            // select in-time coincidence pads
-            if ( std::abs(copad.bx(1)) != 0) continue;
+            // corresponding GE1/1 detid
+            const GEMDetId gemId(cscId.zendcap(), 1, 1, 0,
+                                 (cscId.chamber() + deltaChamber) % 36,
+                                 0);
 
-            const GEMDetId gemCoId(cscId.zendcap(),
-                                   1,
-                                   1,
-                                   1,
-                                   cscId.chamber(),
-                                   copad.roll());
+            // copad collection
+            const auto& co_pads_in_det = gemCoPads.get(gemId);
 
-            const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
-            const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
-            float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
-            if (currentDPhi < minDPhi) {
-              best = copad;
-              minDPhi = currentDPhi;
+            // at most the width of an ME11 chamber
+            float minDPhi = 0.5;
+            // loop on the GEM coincidence pads
+            // find the closest matching one
+            for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it) {
+              // pick the first layer in the copad!
+              const auto& copad = (*it);
+
+              // select in-time coincidence pads
+              if ( std::abs(copad.bx(1)) != 0) continue;
+
+              const GEMDetId gemCoId(cscId.zendcap(), 1, 1, 1,
+                                     (cscId.chamber() + deltaChamber) % 36,
+                                     copad.roll());
+
+              const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
+              const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
+              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
+              if (currentDPhi < minDPhi) {
+                best = copad;
+                bestId = gemCoId;
+                minDPhi = currentDPhi;
+              }
             }
           }
           if (best.isValid()) {
@@ -195,11 +193,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             // best matching coincidence pad
             l1t::EMTFHit bestEMTFHit;
             bestEMTFHit.set_subsystem(3);
-            bestEMTFHit.SetGEMDetId(gemId);
-            bestEMTFHit.set_endcap(cscId.zendcap());
+            bestEMTFHit.SetGEMDetId(bestId);
+            bestEMTFHit.set_endcap(bestId.region());
             bestEMTFHit.set_station(1);
             bestEMTFHit.set_ring(1);
-            bestEMTFHit.set_chamber(cscId.chamber());
+            bestEMTFHit.set_chamber(bestId.chamber());
             bestEMTFHit.set_sector(sector);
             bestEMTFHit.set_subsector(subsector);
             bestEMTFHit.set_roll(best.roll());
