@@ -195,10 +195,17 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             bestEMTFHit.set_roll(best.roll());
             bestEMTFHit.set_strip(best.pad(1));
             bestEMTFHit.set_bx(best.bx(1));
+            bestEMTFHit.set_valid(1);
+            bestEMTFHit.set_endcap(cscId.zendcap());
+            bestEMTFHit.set_station(1);
+            bestEMTFHit.set_ring(1);
+            bestEMTFHit.set_chamber(cscId.chamber());
 
             // push the new hit to the track and to the hit collection
             track.push_Hit(bestEMTFHit);
             oc2->push_back(bestEMTFHit);
+            // An EMTF track can only be matched to 1 copad!
+            break;
           }
         }
       }
