@@ -134,6 +134,10 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           const auto& cscId = emtfHit.CSC_DetId();
           CSCDetId key_id(cscId.endcap(), cscId.station(), cscId.ring(), cscId.chamber(), 3);
 
+          // sector and subsector
+          const int sector(CSCTriggerNumbering::triggerSectorFromLabels(key_id));
+          const int subsector(CSCTriggerNumbering::triggerSubSectorFromLabels(key_id));
+
           // ME1/1 chamber
           const auto& cscChamber = cscGeom->chamber(cscId);
 
@@ -192,14 +196,18 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             l1t::EMTFHit bestEMTFHit;
             bestEMTFHit.set_subsystem(3);
             bestEMTFHit.SetGEMDetId(gemId);
-            bestEMTFHit.set_roll(best.roll());
-            bestEMTFHit.set_strip(best.pad(1));
-            bestEMTFHit.set_bx(best.bx(1));
-            bestEMTFHit.set_valid(1);
             bestEMTFHit.set_endcap(cscId.zendcap());
             bestEMTFHit.set_station(1);
             bestEMTFHit.set_ring(1);
             bestEMTFHit.set_chamber(cscId.chamber());
+            bestEMTFHit.set_sector(sector);
+            bestEMTFHit.set_subsector(subsector);
+            bestEMTFHit.set_roll(best.roll());
+            bestEMTFHit.set_strip(best.pad(1));
+            bestEMTFHit.set_strip_hi(best.pad(1));
+            bestEMTFHit.set_strip_low(best.pad(2));
+            bestEMTFHit.set_bx(best.bx(1));
+            bestEMTFHit.set_valid(1);
 
             // push the new hit to the track and to the hit collection
             track.push_Hit(bestEMTFHit);
