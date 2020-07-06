@@ -158,6 +158,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  double glob_theta;
 	  double glob_eta;
 	  double glob_rho;
+	  double loc_phi;
 
           // have to consider +1/0/-1 GEM chambers
           for (int deltaChamber = -1; deltaChamber <= 1; deltaChamber++){
@@ -200,6 +201,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		glob_eta = gem_gp.eta();
 		glob_rho = gem_gp.perp();
 
+		loc_phi = emtf::rad_to_deg(gem_lp.phi().value());
+
               }
             }
           }
@@ -227,10 +230,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    
 	    int fph = emtf::calc_phi_loc_int(glob_phi, sector);                                                               
             int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());                                                                   
-	    std::cout << "fph: " << fph << " glob_phi: " << glob_phi << " sector: " << sector << std::endl;                                                                                                       
+	    std::cout << "fph: " << fph << " glob_phi: " << glob_phi << " sector: " << sector << std::endl;                                                                       std::cout << "th: " << th << "glob_theta: " << glob_theta << std::endl;                                
+
             if (0 > fph || fph > 4920) {break;}                                                                     
-            if (0 > th || th > 32) {break;}
-            if (th == 0b11111) {break;}  // RPC hit valid when data is not all ones
+            //if (0 > th || th > 32) {break;}
+            //if (th == 0b11111) {break;}  // RPC hit valid when data is not all ones
             fph <<= 2;                   // upgrade to full CSC precision by adding 2 zeros         
             th <<= 2;                    // upgrade to full CSC precision by adding 2 zeros                                                   
             th = (th == 0) ? 1 : th;     // protect against invalid value
@@ -239,6 +243,12 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    bestEMTFHit.set_theta_sim(glob_theta);
 	    bestEMTFHit.set_eta_sim(glob_eta);
 	    bestEMTFHit.set_rho_sim(glob_rho);
+
+	    bestEMTFHit.set_phi_loc(loc_phi);
+	    bestEMTFHit.set_phi_glob(glob_phi);
+	    bestEMTFHit.set_eta(emtf::calc_eta_from_theta_deg(glob_theta, bestEMTFHit.Endcap() ));
+	    bestEMTFHit.set_theta(glob_theta);
+
 
 	    bestEMTFHit.set_phi_fp(fph);   // Full-precision integer phi
 	    bestEMTFHit.set_theta_fp(th);  // Full-precision integer theta
