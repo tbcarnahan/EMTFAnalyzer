@@ -33,6 +33,10 @@
 // GEM Copads
 #include "DataFormats/GEMDigi/interface/GEMCoPadDigiCollection.h"
 
+int count = 0;
+int count_ME11 = 0;
+int count_GE11 = 0;
+
 class GEMEMTFMatcher : public edm::EDProducer {
 
  public:
@@ -122,11 +126,16 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // here, need to do the association with GEM hits
       for (const l1t::EMTFHit& emtfHit: trackHits) {
+	
+	//std::cout << "Is CSC?: " << emtfHit.Is_CSC() << ", Station?: " << emtfHit.Station() << ", Ring?: " << emtfHit.Ring() << std::endl;
 
+	count++;
         // require ME1/1 stubs!
         if (emtfHit.Is_CSC() == 1 and
             emtfHit.Station() == 1 and
             emtfHit.Ring() == 1) {
+
+	  count_ME11++;
 
           // ME1/1 detid
           const auto& cscId = emtfHit.CSC_DetId();
@@ -152,6 +161,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           GEMCoPadDigi best;
           GEMDetId bestId;
 
+	  double glob_phi;
+	  double glob_theta;
+	  double glob_eta;
+	  double glob_rho;
+
           // have to consider +1/0/-1 GEM chambers
           for (int deltaChamber = -1; deltaChamber <= 1; deltaChamber++){
 
@@ -159,6 +173,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             const GEMDetId gemId(cscId.zendcap(), 1, 1, 0,
                                  (cscId.chamber() + deltaChamber) % 36,
                                  0);
+
+
 
             // copad collection
             const auto& co_pads_in_det = gemCoPads.get(gemId);
@@ -185,13 +201,35 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 best = copad;
                 bestId = gemCoId;
                 minDPhi = currentDPhi;
+		
+		glob_phi = emtf::rad_to_deg(gem_gp.phi().value());
+		glob_theta = emtf::rad_to_deg(gem_gp.theta());
+		glob_eta = gem_gp.eta();
+		glob_rho = gem_gp.perp();
+
               }
             }
           }
           if (best.isValid()) {
+	    l1t::EMTFHit bestEMTFHit;	    
+
+	    
+	    //std::cout << glob_phi << " " << glob_theta << " " << glob_eta << " " << glob_rho << std::endl;
+
+	    int fph = emtf::calc_phi_loc_int(glob_phi, bestEMTFHit.PC_sector());
+	    int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());
+	    std::cout << "fph: " << fph << " glob_phi: " << glob_phi << " PC_sector: " << bestEMTFHit.PC_sector() << std::endl; 
+
+
+	    if (0 > fph || fph > 1250) {break;}
+	    //if (0 > th || th > 32) {break;}
+	    //if (th == 0b11111) {break;}  // RPC hit valid when data is not all ones
+	    fph <<= 2;                   // upgrade to full CSC precision by adding 2 zeros
+	    th <<= 2;                    // upgrade to full CSC precision by adding 2 zeros
+	    th = (th == 0) ? 1 : th;     // protect against invalid value
+
             // create a new EMTFHit with the
             // best matching coincidence pad
-            l1t::EMTFHit bestEMTFHit;
             bestEMTFHit.set_subsystem(3);
             bestEMTFHit.SetGEMDetId(bestId);
             bestEMTFHit.set_endcap(bestId.region());
@@ -206,10 +244,19 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             bestEMTFHit.set_strip_low(best.pad(2));
             bestEMTFHit.set_bx(best.bx(1));
             bestEMTFHit.set_valid(1);
+	    
+	    bestEMTFHit.set_phi_sim(glob_phi);
+	    bestEMTFHit.set_theta_sim(glob_theta);
+	    bestEMTFHit.set_eta_sim(glob_eta);
+	    bestEMTFHit.set_rho_sim(glob_rho);
+
+	    bestEMTFHit.set_phi_fp(fph);   // Full-precision integer phi
+	    bestEMTFHit.set_theta_fp(th);  // Full-precision integer theta
 
             // push the new hit to the track and to the hit collection
             track.push_Hit(bestEMTFHit);
             oc2->push_back(bestEMTFHit);
+	    
             // An EMTF track can only be matched to 1 copad!
             break;
           }
@@ -230,6 +277,7 @@ void GEMEMTFMatcher::beginJob() {
 
   // Called once per job after ending event loop
 void GEMEMTFMatcher::endJob() {
+  std::cout << "All hits: " << count << ", ME11 valid hits: " << count_ME11 << ", GE11 valid hits if ME11 true: " << count_GE11 << std::endl;
 }
 
 
