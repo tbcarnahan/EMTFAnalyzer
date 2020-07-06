@@ -33,10 +33,6 @@
 // GEM Copads
 #include "DataFormats/GEMDigi/interface/GEMCoPadDigiCollection.h"
 
-int count = 0;
-int count_ME11 = 0;
-int count_GE11 = 0;
-
 class GEMEMTFMatcher : public edm::EDProducer {
 
  public:
@@ -128,14 +124,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       for (const l1t::EMTFHit& emtfHit: trackHits) {
 	
 	//std::cout << "Is CSC?: " << emtfHit.Is_CSC() << ", Station?: " << emtfHit.Station() << ", Ring?: " << emtfHit.Ring() << std::endl;
-
-	count++;
+	
         // require ME1/1 stubs!
         if (emtfHit.Is_CSC() == 1 and
             emtfHit.Station() == 1 and
             emtfHit.Ring() == 1) {
-
-	  count_ME11++;
 
           // ME1/1 detid
           const auto& cscId = emtfHit.CSC_DetId();
@@ -212,21 +205,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           }
           if (best.isValid()) {
 	    l1t::EMTFHit bestEMTFHit;	    
-
-	    
+    
 	    //std::cout << glob_phi << " " << glob_theta << " " << glob_eta << " " << glob_rho << std::endl;
-
-	    int fph = emtf::calc_phi_loc_int(glob_phi, bestEMTFHit.PC_sector());
-	    int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());
-	    std::cout << "fph: " << fph << " glob_phi: " << glob_phi << " PC_sector: " << bestEMTFHit.PC_sector() << std::endl; 
-
-
-	    if (0 > fph || fph > 1250) {break;}
-	    //if (0 > th || th > 32) {break;}
-	    //if (th == 0b11111) {break;}  // RPC hit valid when data is not all ones
-	    fph <<= 2;                   // upgrade to full CSC precision by adding 2 zeros
-	    th <<= 2;                    // upgrade to full CSC precision by adding 2 zeros
-	    th = (th == 0) ? 1 : th;     // protect against invalid value
 
             // create a new EMTFHit with the
             // best matching coincidence pad
@@ -245,6 +225,16 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             bestEMTFHit.set_bx(best.bx(1));
             bestEMTFHit.set_valid(1);
 	    
+	    int fph = emtf::calc_phi_loc_int(glob_phi, sector);                                                               
+            int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());                                                                   
+	    std::cout << "fph: " << fph << " glob_phi: " << glob_phi << " sector: " << sector << std::endl;                                                                                                       
+            if (0 > fph || fph > 4920) {break;}                                                                     
+            if (0 > th || th > 32) {break;}
+            if (th == 0b11111) {break;}  // RPC hit valid when data is not all ones
+            fph <<= 2;                   // upgrade to full CSC precision by adding 2 zeros         
+            th <<= 2;                    // upgrade to full CSC precision by adding 2 zeros                                                   
+            th = (th == 0) ? 1 : th;     // protect against invalid value
+
 	    bestEMTFHit.set_phi_sim(glob_phi);
 	    bestEMTFHit.set_theta_sim(glob_theta);
 	    bestEMTFHit.set_eta_sim(glob_eta);
@@ -277,7 +267,7 @@ void GEMEMTFMatcher::beginJob() {
 
   // Called once per job after ending event loop
 void GEMEMTFMatcher::endJob() {
-  std::cout << "All hits: " << count << ", ME11 valid hits: " << count_ME11 << ", GE11 valid hits if ME11 true: " << count_GE11 << std::endl;
+  //std::cout << "All hits: " << count << ", ME11 valid hits: " << count_ME11 << ", GE11 valid hits if ME11 true: " << count_GE11 << std::endl;
 }
 
 
