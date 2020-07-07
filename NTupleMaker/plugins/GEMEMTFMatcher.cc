@@ -242,6 +242,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    bestEMTFHit.set_rho_sim(glob_rho);
 
 	    bestEMTFHit.set_phi_loc(emtf::calc_phi_loc_deg(fph));
+	    bestEMTFHit.set_phi_loc(emtf::calc_phi_loc_deg_from_glob(glob_phi, sector));
 	    bestEMTFHit.set_phi_glob(glob_phi);
 	    bestEMTFHit.set_eta(emtf::calc_eta_from_theta_deg(glob_theta, bestEMTFHit.Endcap() ));
 	    bestEMTFHit.set_theta(glob_theta);
