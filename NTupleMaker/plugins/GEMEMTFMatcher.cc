@@ -237,9 +237,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		      const GlobalPoint& csc_gp2 = cscGeom->idToDet(key_id2)->surface().toGlobal(csc_intersect2); 
 
 		      std::cout << "GE11 - ME11: " << glob_phi -  emtf::rad_to_deg(csc_gp.phi().value()) << std::endl;
-		      //std::cout << "ME11 - ME2: " << emtf::rad_to_deg(csc_gp.phi().value()) - emtf::rad_to_deg(csc_gp2.phi().value()) << std::endl;
-		      std::cout << "ME11 phi (rad?): " << csc_gp.phi().value() << ", ME2 phi (rad?): " << csc_gp2.phi().value() << std::endl;
-		      std::cout << "manual dphi: " << emtf::rad_to_deg(csc_gp.phi().value()) - emtf::rad_to_deg(csc_gp2.phi().value()) << ", reco::dphi : " << reco::deltaPhi(float(csc_gp.phi()), float(csc_gp2.phi()))*180./3.14 << std::endl;
+		      std::cout << "ME11 - ME2: " << emtf::rad_to_deg(csc_gp.phi().value()) - emtf::rad_to_deg(csc_gp2.phi().value()) << std::endl;
 		      std::cout << "------------" << std::endl;
 
 		    }
