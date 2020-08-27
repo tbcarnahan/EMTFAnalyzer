@@ -110,15 +110,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       oc2->push_back(hit);     
     }
 
-    //for (const l1t::EMTFHit& emtfHit: *emtfHits) {
-      //if (emtfHit.Is_CSC() == 1 and emtfHit.Station() == 1 and emtfHit.Ring() == 1) {
-      //std::cout << "Chamber (top): " << emtfHit.Chamber() << ", Phi: " << emtfHit.Phi_glob() << ", Eta: " << emtfHit.Eta() << ", Theta: " << emtfHit.Theta() << std::endl;
-      //}
-    //}
-
   }
-
-  //std::cout << "Printing ME1/1 muon info in GEMEMTFMatcher (top):" << std::endl;
 
   if ( emtfTracks.isValid() ) {
 
@@ -141,7 +133,9 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         if (emtfHit.Is_CSC() == 1 and
             emtfHit.Station() == 1 and
             emtfHit.Ring() == 1) {
- 
+
+	  //std::cout << "ME11 hit BX: " << emtfHit.BX() << ", Endcap: " << emtfHit.Endcap() << ", Neighbor: " << emtfHit.Neighbor() << std::endl;
+	  //std::cout << "ME11 hit Pattern: " << emtfHit.Pattern() << ", Quality: " << emtfHit.Quality() << ", Strip: " << emtfHit.Strip() << ", Wire: " << emtfHit.Wire() << std::endl;
 
           // ME1/1 detid
           const auto& cscId = emtfHit.CSC_DetId();
@@ -163,6 +157,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           const LocalPoint& csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
           const GlobalPoint& csc_gp = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect);
 
+	  //std::cout << "Phi: " << float(csc_gp.phi()) << std::endl;
+	  //std::cout << "------------" << std::endl;
 
             // best copad
           GEMCoPadDigi best;
@@ -200,9 +196,15 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                      copad.roll());
 
 
+	      //std::cout << "Copad Roll: " << copad.roll() << ", pad(1): " << copad.pad(1) << ", pad(2)" << copad.pad(2) << std::endl;
+
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
               float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
+	      
+	      //std::cout << "Copad Phi: " << float(gem_gp.phi()) << std::endl;
+	      //std::cout << "-----------" << std::endl;
+
               if (std::abs(currentDPhi) < std::abs(minDPhi)) {
                 best = copad;
                 bestId = gemCoId;
@@ -213,8 +215,42 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		glob_eta = gem_gp.eta();
 		glob_rho = gem_gp.perp();
 
+		
+		if (std::abs(glob_phi -  emtf::rad_to_deg(csc_gp.phi().value())) < 0.05) {
+		  for (const l1t::EMTFHit& emtfHit2: trackHits) {                                                                                 
+		    if (emtfHit2.Is_CSC() == 1 and      
+			emtfHit2.Station() == 2 and
+			emtfHit2.Endcap()*emtfHit.Endcap() > 0) {                                                                                                                             
+		      //ME2 detID
+		      const auto& cscId2 = emtfHit2.CSC_DetId();                                                                             
+		      CSCDetId key_id2(cscId2.endcap(), cscId2.station(), cscId2.ring(), cscId2.chamber(), 3);
+                                                                           
+		      //ME2 chamber
+		      const auto& cscChamber2 = cscGeom->chamber(cscId2);
+
+		      //CSC GP in ME2
+		      const auto& lct2 = emtfHit2.CreateCSCCorrelatedLCTDigi();                              
+		      float fractional_strip2 = lct.getFractionalStrip();
+		      const auto& layer_geo2 = cscChamber2->layer(3)->geometry();
+		      float wire2 = layer_geo2->middleWireOfGroup(lct2.getKeyWG() + 1);
+		      const LocalPoint& csc_intersect2 = layer_geo2->intersectionOfStripAndWire(fractional_strip2, wire2);                  
+		      const GlobalPoint& csc_gp2 = cscGeom->idToDet(key_id2)->surface().toGlobal(csc_intersect2); 
+
+		      std::cout << "GE11 - ME11: " << glob_phi -  emtf::rad_to_deg(csc_gp.phi().value()) << std::endl;
+		      //std::cout << "ME11 - ME2: " << emtf::rad_to_deg(csc_gp.phi().value()) - emtf::rad_to_deg(csc_gp2.phi().value()) << std::endl;
+		      std::cout << "ME11 phi (rad?): " << csc_gp.phi().value() << ", ME2 phi (rad?): " << csc_gp2.phi().value() << std::endl;
+		      std::cout << "manual dphi: " << emtf::rad_to_deg(csc_gp.phi().value()) - emtf::rad_to_deg(csc_gp2.phi().value()) << ", reco::dphi : " << reco::deltaPhi(float(csc_gp.phi()), float(csc_gp2.phi()))*180./3.14 << std::endl;
+		      std::cout << "------------" << std::endl;
+
+		    }
+		  }
+		}
+		
+
               }
             }
+	    
+
           }
 
 
@@ -276,6 +312,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
   }
 
+  std::cout << "---Next event----" << std::endl;
   // put the new collections in the event
   iEvent.put(std::move(oc));
   iEvent.put(std::move(oc2));
