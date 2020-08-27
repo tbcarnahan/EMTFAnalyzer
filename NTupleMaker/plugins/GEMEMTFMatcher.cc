@@ -215,7 +215,9 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		glob_eta = gem_gp.eta();
 		glob_rho = gem_gp.perp();
 
-		
+
+		//Compare GE1/1 - ME1/1 bending to ME1/1-ME2 bending. For a low (high)-pt muon both bendings should be large (small).
+		//If one bend is large but other is small, this could be a bad ME1/1 stub, so skip the stub.
 		if (std::abs(glob_phi -  emtf::rad_to_deg(csc_gp.phi().value())) < 0.05) {
 		  for (const l1t::EMTFHit& emtfHit2: trackHits) {                                                                                 
 		    if (emtfHit2.Is_CSC() == 1 and      
