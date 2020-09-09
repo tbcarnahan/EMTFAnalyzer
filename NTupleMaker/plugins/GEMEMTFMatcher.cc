@@ -204,6 +204,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      //First extrapolate the halfstrip to GE1/1
 	      float HS_prime;
 
+	      //HS(GE11) = slope * DelX + HS(ME11). Get slope from pattern, DelX = 150mm for even chambers, 550mm for odd.
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
 		HS_prime = emtfHit.Strip()+6.0; //For pattern 10, slope ~ 0.04 HS/mm. DelX = 150mm -> 0.04*150 = +6.0
 	      }
