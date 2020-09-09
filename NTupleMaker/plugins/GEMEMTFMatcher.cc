@@ -196,8 +196,6 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  
 	  const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(HS_prime, wire);
 	  const GlobalPoint& csc_gp_prime = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect_prime);
-	  
-	  std::cout << "check 1" << std::endl;
 
             // best copad
           GEMCoPadDigi best;
@@ -232,21 +230,16 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                      (cscId.chamber() + deltaChamber) % 36,
                                      copad.roll());
 
+	      	      
 	      
-	      
-	      const GEMChamber* gemChamber(gemGeom->chamber(gemId));
-	      std::cout << "check2" << std::endl;
-	      auto randRoll(gemChamber->etaPartition(2)); //memory leak here
-	      std::cout << "check3" << std::endl;
 	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->centreOfStrip(HS_prime); 
-	      std::cout << "Pad: " << randRoll->pad(gem_lp_prime) << std::endl;
-	      
+	      std::cout << "Extrapolated pad number: " << gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime) << std::endl;
+	      std::cout << "Actual pad number: " << copad.pad(1) << std::endl;
+
 
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
               float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
-
-	      
 	      
 
               if (std::abs(currentDPhi) < std::abs(minDPhi)) {
@@ -262,11 +255,9 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		glob_rho = gem_gp.perp();
 
               }
-            }
-	    
+            }	    
 
           }
-
 
           if (best.isValid()) {
 	    l1t::EMTFHit bestEMTFHit;	    
