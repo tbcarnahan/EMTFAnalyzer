@@ -206,15 +206,18 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	      //HS(GE11) = slope * DelX + HS(ME11). Get slope from pattern, DelX = 150mm for even chambers, 550mm for odd.
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
-		HS_prime = emtfHit.Strip()+6.0; //For pattern 10, slope ~ 0.04 HS/mm. DelX = 150mm -> 0.04*150 = +6.0
+		HS_prime = fractional_strip+6.0; //For pattern 10, slope ~ 0.04 HS/mm. DelX = 150mm -> 0.04*150 = +6.0 HS
 	      }
 
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2!=0) {
-		HS_prime = emtfHit.Strip()+22.0; //0.04 HS/mm * 550mm = +22.0 HS           
+		HS_prime = fractional_strip-10.0; //0.04 HS/mm * 550mm = +22.0 HS           
 	      }
 
+	      //Convert half-strip to strip
+	      float strip_prime = 2.0 * (HS_prime + 0.25) - 1.0 ;
+ 
 	      //Next get the GEM lp via CSC lp -> CSC gp -> GEM lp
-	      const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(HS_prime, wire);
+	      const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(strip_prime, wire);
 	      const GlobalPoint& csc_gp_prime = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect_prime);
 	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->surface().toLocal(csc_gp_prime);
 
