@@ -167,36 +167,6 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           const LocalPoint& csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
           const GlobalPoint& csc_gp = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect);
 
-
-
-	  /*
-	  if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2==0) {
-            float pad_extrapolated = (emtfHit.Strip()-5.5)/0.67);
-          }                                                                                                                   
-                                                                 
-          if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2!=0) { 
-            float pad_extrapolated = 192 - ((emtfHit.Strip()-5.5)/0.67);
-          } 
-	  */
-	  
-	  
-	  float strip_prime;
-	  float HS_prime; 
-
-	  if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
-	    strip_prime = emtfHit.Strip()+3.0;
-	    HS_prime = strip_prime/2.;
-	  }
-
-	  if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2!=0) {
-	    strip_prime = emtfHit.Strip()+11.0;
-	    HS_prime = strip_prime/2.;
-	  }
-
-	  
-	  const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(HS_prime, wire);
-	  const GlobalPoint& csc_gp_prime = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect_prime);
-
             // best copad
           GEMCoPadDigi best;
           GEMDetId bestId;
@@ -230,11 +200,30 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                      (cscId.chamber() + deltaChamber) % 36,
                                      copad.roll());
 
-	      	      
-	      
-	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->centreOfStrip(HS_prime); 
+	      /////////////////////////////////////////////////////////////
+	      //Linear extrapolation code
+	      //First extrapolate the halfstrip to GE1/1
+	      float HS_prime;
+
+	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
+		HS_prime = emtfHit.Strip()+6.0; //For pattern 10, slope ~ 0.04 HS/mm. DelX = 150mm -> 0.04*150 = +6.0
+	      }
+
+	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2!=0) {
+		HS_prime = emtfHit.Strip()+22.0; //0.04 HS/mm * 550mm = +22.0 HS           
+	      }
+
+	      //Next get the gem lp via CSC lp -> CSC gp -> gem lp
+	      const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(HS_prime, wire);
+	      const GlobalPoint& csc_gp_prime = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect_prime);
+	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->centreOfStrip(HS_prime);
+	     
+	      //Get the extrapolated pad number from the gem lp, compare this to the actual GEM hit
 	      std::cout << "Extrapolated pad number: " << gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime) << std::endl;
 	      std::cout << "Actual pad number: " << copad.pad(1) << std::endl;
+
+	      /////////////////////////////////////////////////////////////
+
 
 
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
