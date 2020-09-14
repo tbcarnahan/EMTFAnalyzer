@@ -145,7 +145,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             emtfHit.Ring() == 1) {
 
 	  //std::cout << "ME11 chamber: " << emtfHit.Chamber() << ", ME11 hit Pattern: " << emtfHit.Pattern() << ", Strip: " << emtfHit.Strip() << std::endl;
-	  if(emtfHit.Pattern()!=10){break;} //Ignore patterns!=10 until done bugfixing.
+	  //if(emtfHit.Pattern()!=10){break;} //Ignore patterns!=10 until done bugfixing.
 
           // ME1/1 detid
           const auto& cscId = emtfHit.CSC_DetId();
@@ -204,48 +204,103 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      /////////////////////////////////////////////////////////////
 	      //Linear extrapolation code
 	      //First extrapolate the halfstrip to GE1/1
-	      float HS_prime;
+	      float pad_prime_min;
+	      float pad_prime_max;
 
-	      //HS(GE11) = slope * DelX + HS(ME11). Get slope from pattern, DelX = 150mm for even chambers, 550mm for odd.
+	      if(emtfHit.Pattern()==5 and emtfHit.Chamber()%2==0) {  
+                pad_prime_min = (emtfHit.Strip()-12.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()-24.0)/0.67;
+              }
+
+              if(emtfHit.Pattern()==5 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()-44.0)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-88.0)/0.67);
+              }
+
+	      if(emtfHit.Pattern()==6 and emtfHit.Chamber()%2==0) {
+                pad_prime_min = (emtfHit.Strip()+12.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()+24.0)/0.67;
+              }
+
+              if(emtfHit.Pattern()==6 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()+44.0)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()+88.0)/0.67);
+              }
+
+
+	      if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2==0) {                           
+                pad_prime_min = (emtfHit.Strip()-6.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()-18.0)/0.67;
+              }
+
+              if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()-22.0)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-66.0)/0.67);
+              }
+
+	      if(emtfHit.Pattern()==8 and emtfHit.Chamber()%2==0) {
+                pad_prime_min = (emtfHit.Strip()+6.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()+18.0)/0.67;
+              }
+
+              if(emtfHit.Pattern()==8 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()+22.0)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()+66.0)/0.67);
+              }
+
+
+	      if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2==0) {
+                pad_prime_min = emtfHit.Strip()/0.67;
+                pad_prime_max = (emtfHit.Strip()-12.0)/0.67;
+              }
+
+              if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2!=0) {                                            
+                pad_prime_min = 192 - (emtfHit.Strip()/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-44.0)/0.67);
+              }
+
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
-		HS_prime = fractional_strip+6.0; //For pattern 10, slope ~ 0.04 HS/mm. DelX = 150mm -> 0.04*150 = +6.0 HS
+		pad_prime_min = emtfHit.Strip()/0.67;
+		pad_prime_max = (emtfHit.Strip()+12.0)/0.67;
 	      }
 
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2!=0) {
-		HS_prime = fractional_strip+22.0; //0.04 HS/mm * 550mm = +22.0 HS           
+		pad_prime_min = 192 - (emtfHit.Strip()/0.67);
+		pad_prime_max = 192 - ((emtfHit.Strip()+44.0)/0.67);
 	      }
 
+	      /* //Coordinate transform code.
 	      //Convert half-strip to strip
 	      float strip_prime = 2.0 * (HS_prime + 0.25) - 1.0 ;
 
 	      //std::cout << "strip: " << emtfHit.Strip() << ", HS: " << fractional_strip << ", HS_prime: " << HS_prime << ", strip_prime: " << strip_prime << std::endl;
-	      //Next get the GEM lp via CSC lp -> CSC gp -> GEM lp
+	      Next get the GEM lp via CSC lp -> CSC gp -> GEM lp
 	      const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(strip_prime, wire);
 	      const GlobalPoint& csc_gp_prime = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect_prime);
-	      //const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->surface().toLocal(csc_gp_prime);
+	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->surface().toLocal(csc_gp_prime);
 	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->centreOfStrip(strip_prime);
 
 	      std::cout << "Actual GEM LP: " << gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1)) << ", extrapolated LP: " << gem_lp_prime << std::endl;
-	      //Get the extrapolated pad number from the GEM lp, compare this to the actual GEM hit
-	      //std::cout << "Extrapolated pad number: " << gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime) << std::endl;
-	      //std::cout << "Actual pad number: " << copad.pad(1) << std::endl;
-
+	      Get the extrapolated pad number from the GEM lp, compare this to the actual GEM hit
+	      std::cout << "Extrapolated pad number: " << gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime) << std::endl;
+	      std::cout << "Actual pad number: " << copad.pad(1) << std::endl;
 	      /////////////////////////////////////////////////////////////
-
+	      */
 
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
               //float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
-	      float currentDPad = std::abs(copad.pad(1) - gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime));
-	      
+	      //float currentDPad = std::abs(copad.pad(1) - gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime));
+	      float currentDPad_min = std::abs(copad.pad(1) - pad_prime_min);
+	      float currentDPad_max = std::abs(copad.pad(1) - pad_prime_max);
 
               //if (std::abs(currentDPhi) < std::abs(minDPhi)) {
-	      if (std::abs(currentDPad) <= std::abs(minDPad)) {
+	      if ((std::abs(currentDPad_min) <= std::abs(minDPad)) or (std::abs(currentDPad_max) <=std::abs(minDPad))) {
                 best = copad;
                 bestId = gemCoId;
                 //minDPhi = currentDPhi;
-		minDPad = currentDPad;
-
+		if (std::abs(currentDPad_min)<std::abs(currentDPad_max)) {minDPad = currentDPad_min;}
+                if (std::abs(currentDPad_min)>std::abs(currentDPad_max)) {minDPad = currentDPad_max;}
 
 		glob_phi = emtf::rad_to_deg(gem_gp.phi().value());
 		glob_theta = emtf::rad_to_deg(gem_gp.theta().value());
