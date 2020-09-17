@@ -186,7 +186,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             // at most the width of an ME11 chamber
 	    float minDPhi = 0.17;
-	    float minDPad = 99;
+	    float minDPad = 32;
 
             // loop on the GEM coincidence pads
             // find the closest matching one
@@ -226,7 +226,6 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 pad_prime_min = 192 - ((emtfHit.Strip()+44.0)/0.67);
                 pad_prime_max = 192 - ((emtfHit.Strip()+88.0)/0.67);
               }
-
 
 	      if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2==0) {                           
                 pad_prime_min = (emtfHit.Strip()-6.0)/0.67;
