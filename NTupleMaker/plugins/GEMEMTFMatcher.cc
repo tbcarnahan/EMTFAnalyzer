@@ -180,13 +180,28 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                  (cscId.chamber() + deltaChamber) % 36,
                                  0);
 
-
             // copad collection
             const auto& co_pads_in_det = gemCoPads.get(gemId);
 
             // at most the width of an ME11 chamber
 	    float minDPhi = 0.17;
 	    float minDPad = 32;
+
+	    /*
+	    int i=0;
+	    int first_pad=0;
+	    int check=0;
+
+	    for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it){
+	      const auto& copad = (*it);
+
+	      if(i==0){first_pad=copad.pad(1);}
+	      if (copad.pad(1)-first_pad != 0) {check++;}
+	      i++;
+	    }
+
+	    if(check!=0) {break;} //Pre-select only events with one pad number to test the extrapolation.
+	    */
 
             // loop on the GEM coincidence pads
             // find the closest matching one
@@ -207,65 +222,96 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      float pad_prime_min;
 	      float pad_prime_max;
 
+	      if(emtfHit.Pattern()==2 and emtfHit.Chamber()%2==0) {
+                pad_prime_min = (emtfHit.Strip()+5.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()+8.3)/0.67;
+              }
+
+              if(emtfHit.Pattern()==2 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()+17.5)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()+29.05)/0.67);
+              }
+
+              if(emtfHit.Pattern()==3 and emtfHit.Chamber()%2==0) {
+                pad_prime_min = (emtfHit.Strip()-5.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()-8.3)/0.67;
+              }
+
+              if(emtfHit.Pattern()==3 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()-17.5)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-29.05)/0.67);
+              }
+
+	      if(emtfHit.Pattern()==4 and emtfHit.Chamber()%2==0) {
+                pad_prime_min = (emtfHit.Strip()+3.3)/0.67;
+                pad_prime_max = (emtfHit.Strip()+6.5)/0.67;
+              }
+
+              if(emtfHit.Pattern()==4 and emtfHit.Chamber()%2!=0) {
+                pad_prime_min = 192 - ((emtfHit.Strip()+11.55)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()+22.75)/0.67);
+              }
+
+
 	      if(emtfHit.Pattern()==5 and emtfHit.Chamber()%2==0) {  
-                pad_prime_min = (emtfHit.Strip()-12.0)/0.67;
-                pad_prime_max = (emtfHit.Strip()-24.0)/0.67;
+                pad_prime_min = (emtfHit.Strip()-3.3)/0.67;
+                pad_prime_max = (emtfHit.Strip()-6.5)/0.67;
               }
 
               if(emtfHit.Pattern()==5 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()-44.0)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-88.0)/0.67);
+                pad_prime_min = 192 - ((emtfHit.Strip()-11.55)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-22.75)/0.67);
               }
 
 	      if(emtfHit.Pattern()==6 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip()+12.0)/0.67;
-                pad_prime_max = (emtfHit.Strip()+24.0)/0.67;
+                pad_prime_min = (emtfHit.Strip()+2.5)/0.67;
+                pad_prime_max = (emtfHit.Strip()+5.0)/0.67;
               }
 
               if(emtfHit.Pattern()==6 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()+44.0)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()+88.0)/0.67);
+                pad_prime_min = 192 - ((emtfHit.Strip()+8.75)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()+17.5)/0.67);
               }
 
 	      if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2==0) {                           
-                pad_prime_min = (emtfHit.Strip()-6.0)/0.67;
-                pad_prime_max = (emtfHit.Strip()-18.0)/0.67;
+                pad_prime_min = (emtfHit.Strip()-2.5)/0.67;
+                pad_prime_max = (emtfHit.Strip()-5.0)/0.67;
               }
 
               if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()-22.0)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-66.0)/0.67);
+                pad_prime_min = 192 - ((emtfHit.Strip()-8.75)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-17.5)/0.67);
               }
 
 	      if(emtfHit.Pattern()==8 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip()+6.0)/0.67;
-                pad_prime_max = (emtfHit.Strip()+18.0)/0.67;
+                pad_prime_min = (emtfHit.Strip())/0.67;
+                pad_prime_max = (emtfHit.Strip()+3.3)/0.67;
               }
 
               if(emtfHit.Pattern()==8 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()+22.0)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()+66.0)/0.67);
+                pad_prime_min = 192 - ((emtfHit.Strip())/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()+11.95)/0.67);
               }
 
 
 	      if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2==0) {
                 pad_prime_min = emtfHit.Strip()/0.67;
-                pad_prime_max = (emtfHit.Strip()-12.0)/0.67;
+                pad_prime_max = (emtfHit.Strip()-3.3)/0.67;
               }
 
               if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2!=0) {                                            
                 pad_prime_min = 192 - (emtfHit.Strip()/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-44.0)/0.67);
+                pad_prime_max = 192 - ((emtfHit.Strip()-11.95)/0.67);
               }
 
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
 		pad_prime_min = emtfHit.Strip()/0.67;
-		pad_prime_max = (emtfHit.Strip()+12.0)/0.67;
+		pad_prime_max = (emtfHit.Strip()+1.7)/0.67;
 	      }
 
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2!=0) {
 		pad_prime_min = 192 - (emtfHit.Strip()/0.67);
-		pad_prime_max = 192 - ((emtfHit.Strip()+44.0)/0.67);
+		pad_prime_max = 192 - ((emtfHit.Strip()+5.95)/0.67);
 	      }
 
 	      /* //Coordinate transform code.
@@ -282,10 +328,10 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      std::cout << "Actual GEM LP: " << gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1)) << ", extrapolated LP: " << gem_lp_prime << std::endl;
 	      Get the extrapolated pad number from the GEM lp, compare this to the actual GEM hit
 	      std::cout << "Extrapolated pad number: " << gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime) << std::endl;
+	      */
 	      std::cout << "Actual pad number: " << copad.pad(1) << std::endl;
 	      /////////////////////////////////////////////////////////////
-	      */
-
+	      
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
               //float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
