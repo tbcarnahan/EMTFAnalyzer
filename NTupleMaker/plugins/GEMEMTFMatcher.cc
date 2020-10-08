@@ -39,7 +39,28 @@
 //#include "L1Trigger/CSCCommonTrigger/interface/CSCTriggerGeometry.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/normalizedPhi.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "TrackingTools/GeomPropagators/interface/Propagator.h"
 
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
+#include "Geometry/CSCGeometry/interface/CSCLayerGeometry.h"
+
+//#define DataFormats_L1TMuon_EMTFTrack_h
+
+static const float AVERAGE_GEM_Z(568.6); // [cm]
+
+static const float AVERAGE_GE11_ODD_Z(568.6); // [cm]
+static const float AVERAGE_GE11_EVEN_Z(568.6); // [cm]
+
+static const float AVERAGE_ME11_EVEN_Z(585); // [cm]
+static const float AVERAGE_ME11_ODD_Z(615); // [cm]
 
 
 class GEMEMTFMatcher : public edm::EDProducer {
@@ -62,6 +83,10 @@ class GEMEMTFMatcher : public edm::EDProducer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;
   edm::EDGetTokenT<GEMCoPadDigiCollection>                 GEMCoPad_token;
+
+  /// general interface to propagation
+  GlobalPoint propagateToZ(const GlobalPoint &inner_point, const GlobalVector &inner_vector, float z, int charge) const;
+
 
 }; // End class GEMEMTFMatcher public edm::EDProducer
 
@@ -187,22 +212,6 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    float minDPhi = 0.17;
 	    float minDPad = 32;
 
-	    /*
-	    int i=0;
-	    int first_pad=0;
-	    int check=0;
-
-	    for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it){
-	      const auto& copad = (*it);
-
-	      if(i==0){first_pad=copad.pad(1);}
-	      if (copad.pad(1)-first_pad != 0) {check++;}
-	      i++;
-	    }
-
-	    if(check!=0) {break;} //Pre-select only events with one pad number to test the extrapolation.
-	    */
-
             // loop on the GEM coincidence pads
             // find the closest matching one
             for (auto it = co_pads_in_det.first; it != co_pads_in_det.second; ++it) {
@@ -219,133 +228,134 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      /////////////////////////////////////////////////////////////
 	      //Linear extrapolation code
 	      //First extrapolate the halfstrip to GE1/1
-	      float pad_prime_min;
-	      float pad_prime_max;
+	      //A description of how these LUT values are defined can be found in [link to detector note here].
+	      float a;
+	      float b;
+	      float c;
 
 	      if(emtfHit.Pattern()==2 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip()+5.0)/0.67;
-                pad_prime_max = (emtfHit.Strip()+8.3)/0.67;
+                a = emtfHit.Strip()-5.0;
+                b = emtfHit.Strip()+5.0;
+                c = emtfHit.Strip()+15.0;
               }
 
               if(emtfHit.Pattern()==2 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()+17.5)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()+29.05)/0.67);
+                a = 192 - (emtfHit.Strip());
+                b = 192 - (emtfHit.Strip()+10.0);
+                c = 192 - (emtfHit.Strip()+20.0);
               }
 
               if(emtfHit.Pattern()==3 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip()-5.0)/0.67;
-                pad_prime_max = (emtfHit.Strip()-8.3)/0.67;
+                a = emtfHit.Strip()-8.0;
+                b = emtfHit.Strip()-4.0;
+                c = emtfHit.Strip();
               }
 
               if(emtfHit.Pattern()==3 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()-17.5)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-29.05)/0.67);
+                a = 192 - (emtfHit.Strip()-15.0);
+                b = 192 - (emtfHit.Strip()-5.0);
+                c = 192 - (emtfHit.Strip()+5.0);
               }
 
 	      if(emtfHit.Pattern()==4 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip()+3.3)/0.67;
-                pad_prime_max = (emtfHit.Strip()+6.5)/0.67;
+                a = emtfHit.Strip()-8.0;
+                b = emtfHit.Strip()+5.0;
+                c = emtfHit.Strip()+18.0;
               }
 
               if(emtfHit.Pattern()==4 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()+11.55)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()+22.75)/0.67);
+                a = 192 - (emtfHit.Strip()-5.0);
+                b = 192 - (emtfHit.Strip()+13.0);
+                c = 192 - (emtfHit.Strip()+30.0);
               }
 
-
 	      if(emtfHit.Pattern()==5 and emtfHit.Chamber()%2==0) {  
-                pad_prime_min = (emtfHit.Strip()-3.3)/0.67;
-                pad_prime_max = (emtfHit.Strip()-6.5)/0.67;
+                a = emtfHit.Strip()-25.0;
+                b = emtfHit.Strip()-7.0;
+                c = emtfHit.Strip()+11.0;
               }
 
               if(emtfHit.Pattern()==5 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()-11.55)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-22.75)/0.67);
+                a = 192 - (emtfHit.Strip()-25.0);
+                b = 192 - (emtfHit.Strip()-10.0);
+                c = 192 - (emtfHit.Strip()+5.0);
               }
 
 	      if(emtfHit.Pattern()==6 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip()+2.5)/0.67;
-                pad_prime_max = (emtfHit.Strip()+5.0)/0.67;
+                a = emtfHit.Strip()-6.0;
+                b = emtfHit.Strip()+4.0;
+                c = emtfHit.Strip()+15.0;
               }
 
               if(emtfHit.Pattern()==6 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()+8.75)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()+17.5)/0.67);
+                a = 192 - emtfHit.Strip();
+                b = 192 - (emtfHit.Strip()+15.0);
+                c = 192 - (emtfHit.Strip()+30.0);
               }
 
 	      if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2==0) {                           
-                pad_prime_min = (emtfHit.Strip()-2.5)/0.67;
-                pad_prime_max = (emtfHit.Strip()-5.0)/0.67;
+                a = emtfHit.Strip()-15.0;
+                b = emtfHit.Strip()-2.0;
+                c = emtfHit.Strip()+10.0;
               }
 
               if(emtfHit.Pattern()==7 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip()-8.75)/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-17.5)/0.67);
+                a = 192 - (emtfHit.Strip()-25.0);
+                b = 192 - (emtfHit.Strip()-7.0);
+                c = 192 - (emtfHit.Strip()+10.0);
               }
 
 	      if(emtfHit.Pattern()==8 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = (emtfHit.Strip())/0.67;
-                pad_prime_max = (emtfHit.Strip()+3.3)/0.67;
+                a = emtfHit.Strip()-6.0;
+                b = emtfHit.Strip()+4.0;
+                c = emtfHit.Strip()+14.0;
               }
 
               if(emtfHit.Pattern()==8 and emtfHit.Chamber()%2!=0) {
-                pad_prime_min = 192 - ((emtfHit.Strip())/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()+11.95)/0.67);
+                a = 192 - (emtfHit.Strip()-5.0);
+                b = 192 - (emtfHit.Strip()+6.0);
+                c = 192 - (emtfHit.Strip()+18.0);
               }
 
-
 	      if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2==0) {
-                pad_prime_min = emtfHit.Strip()/0.67;
-                pad_prime_max = (emtfHit.Strip()-3.3)/0.67;
+                a = emtfHit.Strip()-10.0;
+                b = emtfHit.Strip()-1.0;
+                c = emtfHit.Strip()+7.0;
               }
 
               if(emtfHit.Pattern()==9 and emtfHit.Chamber()%2!=0) {                                            
-                pad_prime_min = 192 - (emtfHit.Strip()/0.67);
-                pad_prime_max = 192 - ((emtfHit.Strip()-11.95)/0.67);
+                a = 192 - (emtfHit.Strip()-18.0);
+                b = 192 - (emtfHit.Strip()-3.0);
+                c = 192 - (emtfHit.Strip()+10.0);
               }
 
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2==0) {
-		pad_prime_min = emtfHit.Strip()/0.67;
-		pad_prime_max = (emtfHit.Strip()+1.7)/0.67;
+		a = emtfHit.Strip()-4.0;
+		b = emtfHit.Strip();
+		c = emtfHit.Strip()+4.0;
 	      }
 
 	      if(emtfHit.Pattern()==10 and emtfHit.Chamber()%2!=0) {
-		pad_prime_min = 192 - (emtfHit.Strip()/0.67);
-		pad_prime_max = 192 - ((emtfHit.Strip()+5.95)/0.67);
+		a = 192 - (emtfHit.Strip()-8.0);
+                b = 192 - (emtfHit.Strip()+1.0);
+                c = 192 - (emtfHit.Strip()+10.0);
 	      }
-
-	      /* //Coordinate transform code.
-	      //Convert half-strip to strip
-	      float strip_prime = 2.0 * (HS_prime + 0.25) - 1.0 ;
-
-	      //std::cout << "strip: " << emtfHit.Strip() << ", HS: " << fractional_strip << ", HS_prime: " << HS_prime << ", strip_prime: " << strip_prime << std::endl;
-	      Next get the GEM lp via CSC lp -> CSC gp -> GEM lp
-	      const LocalPoint& csc_intersect_prime = layer_geo->intersectionOfStripAndWire(strip_prime, wire);
-	      const GlobalPoint& csc_gp_prime = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect_prime);
-	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->surface().toLocal(csc_gp_prime);
-	      const LocalPoint& gem_lp_prime = gemGeom->etaPartition(gemCoId)->centreOfStrip(strip_prime);
-
-	      std::cout << "Actual GEM LP: " << gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1)) << ", extrapolated LP: " << gem_lp_prime << std::endl;
-	      Get the extrapolated pad number from the GEM lp, compare this to the actual GEM hit
-	      std::cout << "Extrapolated pad number: " << gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime) << std::endl;
-	      */
-	      std::cout << "Actual pad number: " << copad.pad(1) << std::endl;
-	      /////////////////////////////////////////////////////////////
 	      
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
-              //float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
-	      //float currentDPad = std::abs(copad.pad(1) - gemGeom->etaPartition(gemCoId)->pad(gem_lp_prime));
-	      float currentDPad_min = std::abs(copad.pad(1) - pad_prime_min);
-	      float currentDPad_max = std::abs(copad.pad(1) - pad_prime_max);
+	      
+	      float dPad_a = std::abs((copad.pad(1)*0.67) - a); //0.67 is a scale-factor; a/b/c are HS numbers (192 copads per phi sector but 128 HS per phi sector)
+	      float dPad_b = std::abs((copad.pad(1)*0.67) - b);
+	      float dPad_c = std::abs((copad.pad(1)*0.67) - c);
 
               //if (std::abs(currentDPhi) < std::abs(minDPhi)) {
-	      if ((std::abs(currentDPad_min) <= std::abs(minDPad)) or (std::abs(currentDPad_max) <=std::abs(minDPad))) {
+	      if ((dPad_a <= std::abs(minDPad)) or (dPad_b <= std::abs(minDPad)) or (dPad_c <= std::abs(minDPad))) {
                 best = copad;
                 bestId = gemCoId;
                 //minDPhi = currentDPhi;
-		if (std::abs(currentDPad_min)<std::abs(currentDPad_max)) {minDPad = currentDPad_min;}
-                if (std::abs(currentDPad_min)>std::abs(currentDPad_max)) {minDPad = currentDPad_max;}
+		if ((dPad_a<dPad_b) and (dPad_a<dPad_c)) {minDPad = dPad_a;}
+                if ((dPad_b<dPad_a) and (dPad_b<dPad_c)) {minDPad = dPad_b;}
+		if ((dPad_c<dPad_a) and (dPad_c<dPad_b)) {minDPad = dPad_c;}
 
 		glob_phi = emtf::rad_to_deg(gem_gp.phi().value());
 		glob_theta = emtf::rad_to_deg(gem_gp.theta().value());
