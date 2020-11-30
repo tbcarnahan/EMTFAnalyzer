@@ -78,6 +78,7 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   // INSERT(mVInt, "hit_FR",           calc_FR_bit(emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber()) );
   INSERT(mVInt, "hit_FR",           isFront( emtfHit.Station(), emtfHit.Ring(), emtfHit.Chamber(), emtfHit.Subsystem() ) );
   INSERT(mVInt, "hit_pattern",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Pattern()) );
+  INSERT(mVInt, "hit_pattern_Run3", ( emtfHit.Is_RPC() ? DINT : emtfHit.Run3Pattern()) );
   INSERT(mVInt, "hit_quality",      ( emtfHit.Is_RPC() ? DINT : emtfHit.Quality()) );
   INSERT(mVInt, "hit_roll",         (!emtfHit.Is_RPC() ? DINT : emtfHit.Roll()) );
   INSERT(mVInt, "hit_subsector",    emtfHit.Subsector() );

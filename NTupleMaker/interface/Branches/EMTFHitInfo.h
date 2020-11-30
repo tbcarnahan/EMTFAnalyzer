@@ -21,7 +21,7 @@ struct EMTFHitInfo {
                                 "hit_eta_sim", "hit_theta_sim", "hit_phi_sim"}};
   std::vector<TString> vInt = {{"hit_eta_int", "hit_theta_int", "hit_phi_int", "hit_endcap", "hit_sector", "hit_sector_index", "hit_station",
                                 "hit_ring", "hit_CSC_ID", "hit_chamber", "hit_FR", "hit_pattern", "hit_quality", "hit_roll", "hit_subsector",
-                                "hit_isCSC", "hit_isRPC", "hit_valid", "hit_BX", "hit_strip", "hit_strip_hi", "hit_strip_low", "hit_wire", "hit_neighbor",
+                                "hit_isCSC", "hit_isRPC", "hit_valid", "hit_BX", "hit_strip", "hit_strip_hi", "hit_strip_low", "hit_wire", "hit_neighbor", "hit_pattern_Run3",
                                 "hit_match_iSimHit", "hit_sim_match_exact", "hit_match_iSeg", "hit_match_iSeg2", "hit_match_nSegs", "hit_seg_match_unique",
                                 "hit_isGEM"}};
   std::map<TString, int> mInts;
