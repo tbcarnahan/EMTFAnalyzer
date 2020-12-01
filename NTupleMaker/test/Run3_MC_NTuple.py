@@ -69,6 +69,8 @@ process.load('EMTFAnalyzer.NTupleMaker.PtLutInput_cfi')
 
 process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT", "", "ReL1")                                                
 process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT", "", "ReL1")
+process.FlatNtupleMC.lctDigiTag = cms.InputTag("simCSCTriggerPrimitiveDigisRun3CCLUT", "", "ReL1")
+
 
 process.PtLutInputMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT","","ReL1")                                                  
 process.PtLutInputMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT","","ReL1")
