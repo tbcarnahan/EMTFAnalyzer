@@ -230,6 +230,21 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     return;
   }
 
+
+  /*
+  // std::cout << "About to fill LCT Digi branches" << std::endl;
+  // Fill LCT digi branches
+  if ( lctDigis.IsValid() ) {
+    for (const l1t::LCTDigi& lctDigi: *lctDigis) {
+      lctDigiInfo.Fill(lctDigi);
+    }
+  }
+  else{
+    std:: << "ERROR: could not get lctDigis from event!!!" << std::endl;
+    return;
+  }
+  */
+
   // std::cout << "About to fill EMTF hit branches" << std::endl;
   // Fill EMTF hit branches
   if ( emtfHits.isValid() ) {
