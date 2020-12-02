@@ -25,6 +25,7 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/Branches/CSCSegInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/Branches/RecoMuonInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/Branches/RecoPairInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/CSCCorrelatedLCTDigiInfo.h"
 
 // Object matchers
 #include "EMTFAnalyzer/NTupleMaker/interface/Matchers/RecoTrkDR.h"
