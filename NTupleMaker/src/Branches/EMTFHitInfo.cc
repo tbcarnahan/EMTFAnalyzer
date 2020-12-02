@@ -91,6 +91,14 @@ void EMTFHitInfo::Fill(const l1t::EMTFHit & emtfHit) {
   INSERT(mVInt, "hit_strip_low",    (!emtfHit.Is_RPC() ? DINT : emtfHit.Strip_low()) );
   INSERT(mVInt, "hit_wire",         ( emtfHit.Is_RPC() ? DINT : emtfHit.Wire()) );
   INSERT(mVInt, "hit_neighbor",     emtfHit.Neighbor() );
+  // run-3
+  INSERT(mVInt, "hit_strip_quart",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Strip_quart()) );
+  INSERT(mVInt, "hit_strip_eight",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Strip_eight()) );
+  INSERT(mVInt, "hit_strip_quart_bit",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Strip_quart_bit()) );
+  INSERT(mVInt, "hit_strip_eight_bit",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Strip_eight_bit()) );
+  INSERT(mVInt, "hit_pattern_run3",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Pattern_run3()) );
+  INSERT(mVInt, "hit_slope",        ( emtfHit.Is_RPC() ? DINT : emtfHit.Slope()) );
+
 
   INSERT(mVInt, "hit_match_iSimHit", DINT);
   INSERT(mVInt, "hit_sim_match_exact",  0);
