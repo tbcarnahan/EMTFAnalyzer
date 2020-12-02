@@ -137,7 +137,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFSimHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFUnpTrack_token;
-  edm::EDGetTokenT<l1t::MuonDigiCollection>                CorrelatedLCTDigi_token;
+  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>         CorrelatedLCTDigi_token;
 
   // Event counters for metadata
   int nEventsProc_, nEventsSel_;
