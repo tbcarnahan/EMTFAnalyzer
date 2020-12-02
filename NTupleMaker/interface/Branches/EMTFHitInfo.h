@@ -24,7 +24,8 @@ struct EMTFHitInfo {
                                 "hit_isCSC", "hit_isRPC", "hit_valid", "hit_BX", "hit_strip", "hit_strip_hi", "hit_strip_low", "hit_wire", "hit_neighbor",
                                 "hit_match_iSimHit", "hit_sim_match_exact", "hit_match_iSeg", "hit_match_iSeg2", "hit_match_nSegs", "hit_seg_match_unique",
                                 "hit_isGEM",
-                                "hit_strip_quart", "hit_strip_eight", "hit_strip_quart_bit", "hit_strip_eight_bit", "hit_pattern_run3", "hit_slope"}};
+                                "hit_strip_quart", "hit_strip_eight", "hit_strip_quart_bit", "hit_strip_eight_bit",
+                                "hit_pattern_run3", "hit_slope", "hit_bend"}};
   std::map<TString, int> mInts;
   std::map<TString, std::vector<float> > mVFlt;
   std::map<TString, std::vector<int> > mVInt;
