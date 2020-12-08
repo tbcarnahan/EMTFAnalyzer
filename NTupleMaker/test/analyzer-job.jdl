@@ -1,0 +1,8 @@
+universe = vanilla
+Executable = condor-executable.sh
+should_transfer_files = YES
+Output = /sleep_$(Cluster)_$(Process).stdout
+Error = sleep_$(Cluster)_$(Process).stderr
+Log = /sleep_$(Cluster)_$(Process).log
+Arguments = test_ID $(process) ~/nobackup/EMU_UPDATE6/CMSSW_11_2_0_pre9/src/EMTFAnalyzer/NTupleMaker/test/ntuples  ~/nobackup/EMU_UPDATE6/CMSSW_11_2_0_pre9/src/EMTFAnalyzer/NTupleMaker/test Run3_MC_Ntuple.py 1234567 10
+Queue 1

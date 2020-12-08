@@ -50,8 +50,7 @@ readFiles = cms.untracked.vstring()
 process.source = cms.Source(
     'PoolSource',
     fileNames = cms.untracked.vstring(
-        #'file:step2bis.root'
-        'file:/uscms/home/mdecaro/nobackup/EMU_UPDATE4/CMSSW_11_2_0_pre7/src/GEMCode/GEMValidation/test/step2.root'
+        'file:/uscms/home/mdecaro/nobackup/EMU_UPDATE6/CMSSW_11_2_0_pre9/src/GEMCode/GEMValidation/test/step2bis_run3.root'
     ),
 )
 
@@ -60,28 +59,34 @@ process.source = cms.Source(
 ###################
 process.load('EMTFAnalyzer.NTupleMaker.GEMEMTFMatcher_cfi')
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
-process.load('EMTFAnalyzer.NTupleMaker.PtLutInput_cfi')
 
-#process.GEMEMTFMatcher.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
-#process.GEMEMTFMatcher.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.GEMEMTFMatcher.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.GEMEMTFMatcher.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
+
 ## just in case the copads need to be rerun
 #process.GEMEMTFMatcher.gemCoPadTag = cms.InputTag("cscTriggerPrimitiveDigis","","NTUPLE")
 
-process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT", "", "ReL1")                                                
-process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT", "", "ReL1")
+process.FlatNtupleMCRun2 = process.FlatNtupleMC.clone()
+process.FlatNtupleMCRun2.emtfHitTag = cms.InputTag("simEmtfDigis")
+process.FlatNtupleMCRun2.emtfTrackTag = cms.InputTag("simEmtfDigis")
 
-process.PtLutInputMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT","","ReL1")                                                  
-process.PtLutInputMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT","","ReL1")
+process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT")
+process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT")
 
-process.matcher = cms.Sequence(process.cscTriggerPrimitiveDigis) #* process.GEMEMTFMatcher)
-process.Analysis = cms.Sequence(process.FlatNtupleMC * process.PtLutInputMC)
-process.Analysis_step = cms.Path(process.matcher * process.Analysis)
+process.matcher = cms.Sequence(process.cscTriggerPrimitiveDigis * process.GEMEMTFMatcher)
+
+process.Analysis = cms.Sequence(process.FlatNtupleMCRun2 * process.FlatNtupleMC)
+
+process.Analysis_step = cms.Path(
+    #process.matcher *
+    process.Analysis)
+
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 ## NTuple output File
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string('EMTF_MC_NTuple_SingleMu_20201026.root')
+    fileName = cms.string('EMTF_MC_NTuple_SingleMu_20201202.root')
     )
 
 # Schedule definition
