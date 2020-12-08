@@ -105,6 +105,7 @@ void fillAllLCTs(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFHit>> LC
     int lct_bend          = Lct->Bend();
     int lct_quality       = Lct->Quality();
     int lct_keywire       = Lct->Wire();
+    //int lct_patternRun3   = Lct->Run3Pattern();
     float lct_phi         = Lct->Phi_glob_rad();
     float lct_eta         = Lct->Eta();
 
@@ -143,7 +144,6 @@ void fillAllLCTs(DataEvtSummary_t &ev, edm::Handle<std::vector<l1t::EMTFHit>> LC
     ev.lctStrip -> push_back(lct_strip);
     ev.lctGlobalPhi -> push_back(lct_phi);
     ev.lctEta -> push_back(lct_eta);
-
 
     /*
     int EndCapLUT = 1;

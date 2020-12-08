@@ -66,6 +66,7 @@ process.GEMEMTFMatcher.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
 ## just in case the copads need to be rerun
 #process.GEMEMTFMatcher.gemCoPadTag = cms.InputTag("cscTriggerPrimitiveDigis","","NTUPLE")
 
+<<<<<<< HEAD
 process.FlatNtupleMCRun2 = process.FlatNtupleMC.clone()
 process.FlatNtupleMCRun2.emtfHitTag = cms.InputTag("simEmtfDigis")
 process.FlatNtupleMCRun2.emtfTrackTag = cms.InputTag("simEmtfDigis")
@@ -76,6 +77,12 @@ process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT")
 process.matcher = cms.Sequence(process.cscTriggerPrimitiveDigis * process.GEMEMTFMatcher)
 
 process.Analysis = cms.Sequence(process.FlatNtupleMCRun2 * process.FlatNtupleMC)
+=======
+process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT", "", "ReL1")                                                
+process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT", "", "ReL1")
+process.FlatNtupleMC.lctDigiTag = cms.InputTag("simCSCTriggerPrimitiveDigisRun3CCLUT", "", "ReL1")
+
+>>>>>>> 2c926bfdc46985c6c37c63253f8b368eeb866ea5
 
 process.Analysis_step = cms.Path(
     #process.matcher *

@@ -47,6 +47,7 @@ FlatNtuple::FlatNtuple(const edm::ParameterSet& iConfig):
   EMTFSimHit_token   = consumes<std::vector<l1t::EMTFHit>>   (iConfig.getParameter<edm::InputTag>("emtfSimHitTag"));
   EMTFTrack_token    = consumes<std::vector<l1t::EMTFTrack>> (iConfig.getParameter<edm::InputTag>("emtfTrackTag"));
   EMTFUnpTrack_token = consumes<std::vector<l1t::EMTFTrack>> (iConfig.getParameter<edm::InputTag>("emtfUnpTrackTag"));
+  CorrelatedLCTDigi_token = consumes<CSCCorrelatedLCTDigiCollection> (iConfig.getParameter<edm::InputTag>("lctDigiTag"));
 
 } // End FlatNtuple::FlatNtuple
 
@@ -133,6 +134,8 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(EMTFTrack_token, emtfTracks);
   edm::Handle<std::vector<l1t::EMTFTrack>> emtfUnpTracks;
   iEvent.getByToken(EMTFUnpTrack_token, emtfUnpTracks);
+  edm::Handle<CSCCorrelatedLCTDigiCollection> lctDigis;
+  iEvent.getByToken(CorrelatedLCTDigi_token, lctDigis);
 
   edm::ESHandle<CSCGeometry> cscGeom;
   iSetup.get<MuonGeometryRecord>().get(cscGeom);
@@ -147,6 +150,7 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   cscSegInfo.Reset();
   recoMuonInfo.Reset();
   recoPairInfo.Reset();
+  lctDigiInfo.Reset();
 
   // ignore hits we are not interested in
   emtfHitInfo.ignoreGE11 = ignoreGE11_;
@@ -225,6 +229,20 @@ void FlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if (isMC && ACCESS(genMuonInfo.mInts, "nGenMuons") < 1) {
     return;
   }
+
+
+  // std::cout << "About to fill LCT Digi branches" << std::endl;
+  // Fill LCT digi branches
+  if ( lctDigis.isValid() ) {
+    for (const CSCCorrelatedLCTDigi& lctDigi: *lctDigis) {
+      lctDigiInfo.Fill(lctDigi);
+    }
+  }
+  else{
+    std::cout << "ERROR: could not get lctDigis from event!!!" << std::endl;
+    return;
+  }
+  
 
   // std::cout << "About to fill EMTF hit branches" << std::endl;
   // Fill EMTF hit branches

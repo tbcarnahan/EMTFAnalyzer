@@ -12,6 +12,7 @@ FlatNtupleMC = cms.EDAnalyzer('FlatNtuple',
                               #emtfHitTag       = cms.InputTag("GEMEMTFMatcher"),
                               #emtfTrackTag     = cms.InputTag("GEMEMTFMatcher"),
                               emtfUnpTrackTag  = cms.InputTag(""),
+                              lctDigiTag       = cms.InputTag("simCSCTriggerPrimitiveDigisRun3CCLUT")
 
                               cscSegmentTag    = cms.InputTag("cscSegments"),
                               recoMuonTag      = cms.InputTag("muons"),

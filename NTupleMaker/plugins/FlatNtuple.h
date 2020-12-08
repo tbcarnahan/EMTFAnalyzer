@@ -25,6 +25,7 @@
 #include "EMTFAnalyzer/NTupleMaker/interface/Branches/CSCSegInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/Branches/RecoMuonInfo.h"
 #include "EMTFAnalyzer/NTupleMaker/interface/Branches/RecoPairInfo.h"
+#include "EMTFAnalyzer/NTupleMaker/interface/Branches/CSCCorrelatedLCTDigiInfo.h"
 
 // Object matchers
 #include "EMTFAnalyzer/NTupleMaker/interface/Matchers/RecoTrkDR.h"
@@ -77,6 +78,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   EMTFSimHitInfo   emtfSimHitInfo;
   EMTFTrackInfo    emtfTrackInfo;
   EMTFUnpTrackInfo emtfUnpTrackInfo;
+  LCTDigiInfo      lctDigiInfo;
 
   /////////////////////////
   ///  Object matchers  ///
@@ -135,6 +137,7 @@ class FlatNtuple : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFSimHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFUnpTrack_token;
+  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>         CorrelatedLCTDigi_token;
 
   // Event counters for metadata
   int nEventsProc_, nEventsSel_;
