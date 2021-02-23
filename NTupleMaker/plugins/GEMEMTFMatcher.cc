@@ -206,11 +206,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
               int cscIO = cscId.chamber()%2==0?0:1; //determines the CSC inner or outermost table
               int gemIO = (cscIO+abs(deltaChamber))%2; //determines whether the innermost GEM copad is parallel or off-side
               float Slopes[2][2]={{6.523, 5.968},{16.11, 13.90}}; //linear slope correction fit values for innermost GEM to any CSC combinations
-              //tbd, needs to be extracted.
-              float cscSlope = (-1) * lct.getBend() * lct.getSlope();
-              //tbd, needs to extract the sign bit of the CSC z coordinate
-              float signCSCz = cscId.zendcap();
-              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())+Slopes[cscIO][gemIO]*0.00296/8.*cscSlope);
+              // slope value. The extra -1 is to account for a sign convention
+              float cscSlope = pow(-1, lct.getBend()) * lct.getSlope();
+              // need to extract the sign bit of the CSC z coordinate
+              float signCSCz = pow(-1, 1-signbit(csc_gp.z()));
+              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())) * signCSCz - Slopes[cscIO][gemIO] * cscSlope;
 
               if (std::abs(currentDPhi) < std::abs(minDPhi)) {
                 best = copad;
@@ -228,7 +228,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
           if (best.isValid()) {
-	    l1t::EMTFHit bestEMTFHit;
+            l1t::EMTFHit bestEMTFHit;
 
             // create a new EMTFHit with the
             // best matching coincidence pad

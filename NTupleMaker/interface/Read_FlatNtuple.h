@@ -58,11 +58,17 @@ std::vector<TString> vInt = {{
     "hit_match_iSimHit", "hit_sim_match_exact", "hit_match_iSeg", "hit_match_iSeg2", "hit_match_nSegs", "hit_seg_match_unique",
     "hit_isGEM",
 
+    "hit_strip_quart", "hit_strip_eight",
+    "hit_strip_quart_bit", "hit_strip_eight_bit",
+    "hit_pattern_run3", "hit_slope", "hit_bend",
+
     "sim_hit_eta_int", "sim_hit_theta_int", "sim_hit_phi_int", "sim_hit_endcap", "sim_hit_sector", "sim_hit_sector_index",
     "sim_hit_station", "sim_hit_ring", "sim_hit_CSC_ID", "sim_hit_chamber", "sim_hit_FR", "sim_hit_pattern", "sim_hit_quality",
     "sim_hit_alct_quality", "sim_hit_clct_quality", "sim_hit_roll", "sim_hit_subsector", "sim_hit_isCSC", "sim_hit_isRPC",
     "sim_hit_valid", "sim_hit_BX", "sim_hit_strip", "sim_hit_strip_hi", "sim_hit_strip_low", "sim_hit_wire", "sim_hit_neighbor",
     "sim_hit_match_iHit", "sim_hit_match_exact", "sim_hit_isGEM",
+
+
 
     "seg_endcap", "seg_ring", "seg_station", "seg_chamber", "seg_sector", "seg_CSC_ID",
     "seg_nRecHits", "seg_wire_max", "seg_wire_min", "seg_strip_max", "seg_strip_min",
