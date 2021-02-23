@@ -27,6 +27,7 @@
 
 // CSC segment geometry
 #include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
+#include "DataFormats/L1TMuon/interface/CSCConstants.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
@@ -48,11 +49,14 @@ class GEMEMTFMatcher : public edm::EDProducer {
   virtual void produce (edm::Event&, const edm::EventSetup&);
   virtual void endRun  (const edm::Run&,   const edm::EventSetup&);
   virtual void endJob  ();
+  GlobalPoint getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const;
 
   // EDM Tokens
   edm::EDGetTokenT<std::vector<l1t::EMTFHit>>              EMTFHit_token;
   edm::EDGetTokenT<std::vector<l1t::EMTFTrack>>            EMTFTrack_token;
   edm::EDGetTokenT<GEMCoPadDigiCollection>                 GEMCoPad_token;
+
+  const CSCGeometry* cscGeometry_;
 
 }; // End class GEMEMTFMatcher public edm::EDProducer
 
@@ -99,6 +103,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   edm::ESHandle<CSCGeometry> cscGeom;
   iSetup.get<MuonGeometryRecord>().get(cscGeom);
+  cscGeometry_ = &(*cscGeom);
 
   edm::ESHandle<GEMGeometry> gemGeom;
   iSetup.get<MuonGeometryRecord>().get(gemGeom);
@@ -107,7 +112,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   if ( emtfHits.isValid() ) {
     // loop over the tracks
     for (const auto& hit : *emtfHits) {
-      oc2->push_back(hit);     
+      oc2->push_back(hit);
     }
 
     //for (const l1t::EMTFHit& emtfHit: *emtfHits) {
@@ -136,12 +141,12 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // here, need to do the association with GEM hits
       for (const l1t::EMTFHit& emtfHit: trackHits) {
-	
+
         // require ME1/1 stubs!
         if (emtfHit.Is_CSC() == 1 and
             emtfHit.Station() == 1 and
             emtfHit.Ring() == 1) {
- 
+
 
           // ME1/1 detid
           const auto& cscId = emtfHit.CSC_DetId();
@@ -156,21 +161,16 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // CSC GP
           const auto& lct = emtfHit.CreateCSCCorrelatedLCTDigi();
-          float fractional_strip = lct.getFractionalStrip();
-          const auto& layer_geo = cscChamber->layer(3)->geometry();
-          // LCT::getKeyWG() also starts from 0
-          float wire = layer_geo->middleWireOfGroup(lct.getKeyWG() + 1);
-          const LocalPoint& csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
-          const GlobalPoint& csc_gp = cscGeom->idToDet(key_id)->surface().toGlobal(csc_intersect);
 
+          const GlobalPoint& csc_gp = getGlobalPosition(cscId, lct);
 
-            // best copad
+          // best copad
           GEMCoPadDigi best;
           GEMDetId bestId;
 
           // have to consider +1/0/-1 GEM chambers
           //for (int deltaChamber = -1; deltaChamber <= 1; deltaChamber++){
-	  for (int deltaChamber = 0; deltaChamber<1; deltaChamber++){
+          for (int deltaChamber = 0; deltaChamber<1; deltaChamber++){
 
             // corresponding GE1/1 detid
             const GEMDetId gemId(cscId.zendcap(), 1, 1, 0,
@@ -207,11 +207,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 best = copad;
                 bestId = gemCoId;
                 minDPhi = currentDPhi;
- 
-		glob_phi = emtf::rad_to_deg(gem_gp.phi().value());
-		glob_theta = emtf::rad_to_deg(gem_gp.theta().value());
-		glob_eta = gem_gp.eta();
-		glob_rho = gem_gp.perp();
+
+                glob_phi = emtf::rad_to_deg(gem_gp.phi().value());
+                glob_theta = emtf::rad_to_deg(gem_gp.theta().value());
+                glob_eta = gem_gp.eta();
+                glob_rho = gem_gp.perp();
 
               }
             }
@@ -219,7 +219,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
           if (best.isValid()) {
-	    l1t::EMTFHit bestEMTFHit;	    
+	    l1t::EMTFHit bestEMTFHit;
 
             // create a new EMTFHit with the
             // best matching coincidence pad
@@ -237,15 +237,15 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             bestEMTFHit.set_strip_low(best.pad(2));
             bestEMTFHit.set_bx(best.bx(1));
             bestEMTFHit.set_valid(1);
-	    
-	    int fph = emtf::calc_phi_loc_int(glob_phi, sector);                                                               
-            int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());                                                                   
 
-            if (0 > fph || fph > 4920) {break;}                                                                     
+	    int fph = emtf::calc_phi_loc_int(glob_phi, sector);
+            int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());
+
+            if (0 > fph || fph > 4920) {break;}
             if (0 > th || th > 32) {break;}
             if (th == 0b11111) {break;}  // RPC hit valid when data is not all ones
-            fph <<= 2;                   // upgrade to full CSC precision by adding 2 zeros         
-            th <<= 2;                    // upgrade to full CSC precision by adding 2 zeros                                                   
+            fph <<= 2;                   // upgrade to full CSC precision by adding 2 zeros
+            th <<= 2;                    // upgrade to full CSC precision by adding 2 zeros
             th = (th == 0) ? 1 : th;     // protect against invalid value
 
 	    bestEMTFHit.set_phi_sim(glob_phi);
@@ -264,7 +264,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             // push the new hit to the track and to the hit collection
             track.push_Hit(bestEMTFHit);
             oc2->push_back(bestEMTFHit);
-	    
+
             // An EMTF track can only be matched to 1 copad!
             break;
           }
@@ -272,7 +272,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
 
       oc->push_back(track);
-    
+
     }
   }
 
@@ -289,6 +289,23 @@ void GEMEMTFMatcher::beginJob() {
 void GEMEMTFMatcher::endJob() {
 }
 
+GlobalPoint GEMEMTFMatcher::getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const {
+  CSCDetId cscId(rawId);
+  CSCDetId keyId(cscId.endcap(), cscId.station(), cscId.ring(), cscId.chamber(), CSCConstants::KEY_CLCT_LAYER);
+  float fractional_strip = lct.getFractionalStrip();
+  // case ME1/a
+  if (cscId.station() == 1 and cscId.ring() == 4 and lct.getStrip() > CSCConstants::MAX_HALF_STRIP_ME1B) {
+    fractional_strip -= CSCConstants::MAX_NUM_STRIPS_ME1B;
+  }
+  // regular cases
+  const auto& chamber = cscGeometry_->chamber(cscId);
+  const auto& layer_geo = chamber->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
+  // LCT::getKeyWG() also starts from 0
+  float wire = layer_geo->middleWireOfGroup(lct.getKeyWG() + 1);
+  const LocalPoint& csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
+  const GlobalPoint& csc_gp = cscGeometry_->idToDet(keyId)->surface().toGlobal(csc_intersect);
+  return csc_gp;
+}
 
-  // Define as a plugin
+// Define as a plugin
 DEFINE_FWK_MODULE(GEMEMTFMatcher);
