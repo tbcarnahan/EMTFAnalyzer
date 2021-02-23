@@ -184,7 +184,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             // at most the width of an ME11 chamber
             //float minDPhi = 0.5;
-	    float minDPhi = 0.17;
+            float minDPhi = 0.17;
 
             // loop on the GEM coincidence pads
             // find the closest matching one
@@ -199,10 +199,19 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                      (cscId.chamber() + deltaChamber) % 36,
                                      copad.roll());
 
-
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
-              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()), float(gem_gp.phi()));
+
+              // Code by Denis 2021-02-23
+              int cscIO = cscId.chamber()%2==0?0:1; //determines the CSC inner or outermost table
+              int gemIO = (cscIO+abs(deltaChamber))%2; //determines whether the innermost GEM copad is parallel or off-side
+              float Slopes[2][2]={{6.523, 5.968},{16.11, 13.90}}; //linear slope correction fit values for innermost GEM to any CSC combinations
+              //tbd, needs to be extracted.
+              float cscSlope = (-1) * lct.getBend() * lct.getSlope();
+              //tbd, needs to extract the sign bit of the CSC z coordinate
+              float signCSCz = cscId.zendcap();
+              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())+Slopes[cscIO][gemIO]*0.00296/8.*cscSlope);
+
               if (std::abs(currentDPhi) < std::abs(minDPhi)) {
                 best = copad;
                 bestId = gemCoId;
