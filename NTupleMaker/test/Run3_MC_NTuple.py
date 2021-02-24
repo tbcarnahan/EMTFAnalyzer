@@ -50,7 +50,7 @@ readFiles = cms.untracked.vstring()
 process.source = cms.Source(
     'PoolSource',
     fileNames = cms.untracked.vstring(
-        'file:step2bis_run3.root'
+        'file:step2bis_run3_99.root'
     ),
 )
 
@@ -60,8 +60,8 @@ process.source = cms.Source(
 process.load('EMTFAnalyzer.NTupleMaker.GEMEMTFMatcher_cfi')
 process.load('EMTFAnalyzer.NTupleMaker.FlatNtuple_cfi')
 
-process.GEMEMTFMatcher.emtfHitTag = cms.InputTag("simEmtfDigis","","ReL1")
-process.GEMEMTFMatcher.emtfTrackTag = cms.InputTag("simEmtfDigis","","ReL1")
+process.GEMEMTFMatcher.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT")
+process.GEMEMTFMatcher.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT")
 
 ## just in case the copads need to be rerun
 #process.GEMEMTFMatcher.gemCoPadTag = cms.InputTag("cscTriggerPrimitiveDigis","","NTUPLE")
@@ -73,12 +73,12 @@ process.FlatNtupleMCRun2.emtfTrackTag = cms.InputTag("simEmtfDigis")
 process.FlatNtupleMC.emtfHitTag = cms.InputTag("simEmtfDigisRun3CCLUT")
 process.FlatNtupleMC.emtfTrackTag = cms.InputTag("simEmtfDigisRun3CCLUT")
 
-process.matcher = cms.Sequence(process.cscTriggerPrimitiveDigis * process.GEMEMTFMatcher)
-
+#process.matcher = cms.Sequence(process.cscTriggerPrimitiveDigis * process.GEMEMTFMatcher)
+process.matcher = cms.Sequence(process.GEMEMTFMatcher)
 process.Analysis = cms.Sequence(process.FlatNtupleMCRun2 * process.FlatNtupleMC)
 
 process.Analysis_step = cms.Path(
-    #process.matcher *
+    process.matcher *
     process.Analysis)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

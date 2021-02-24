@@ -125,6 +125,15 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //std::cout << "Printing ME1/1 muon info in GEMEMTFMatcher (top):" << std::endl;
 
+  /*
+  for (reco::GenParticle genMuon: *genMuons) {
+    if (abs(genMuon.pdgId()) != 13) continue; // Must be a muon               
+    std::cout << "gen pt: " << genMuon.pt() << std::endl;
+    }
+  } // End for (reco::GenParticle genMuon: *genMuons)                         
+  */
+
+ 
   if ( emtfTracks.isValid() ) {
 
     // loop over the tracks
@@ -133,6 +142,9 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       auto track = ttrack;
 
       const auto& trackHits = track.Hits();
+
+      if (track.Pt() > 6.0 ) continue;
+      std::cout << track.Pt() << std::endl;
 
       double glob_phi;
       double glob_theta;
@@ -161,6 +173,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // CSC GP
           const auto& lct = emtfHit.CreateCSCCorrelatedLCTDigi();
+	  lct.setRun3(1);
 
           const GlobalPoint& csc_gp = getGlobalPosition(cscId, lct);
 
@@ -177,6 +190,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                  (cscId.chamber() + deltaChamber) % 36,
                                  0);
 
+	    std::cout << "csc gp: " << csc_gp << std::endl;
 
 
             // copad collection
@@ -201,12 +215,20 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
 
+	      std::cout << "gem gp: " << gem_gp << std::endl;
+
               // Code by Denis 2021-02-23
               int cscIO = cscId.chamber()%2==0?0:1; //determines the CSC inner or outermost table
               int gemIO = (cscIO + abs(deltaChamber))%2; //determines whether the innermost GEM copad is parallel or off-side
+	      
               float Slopes[2][2]={{6.523, 5.968},{16.11, 13.90}}; //linear slope correction fit values for innermost GEM to any CSC combinations
               // slope value. The extra -1 is to account for a sign convention
               float cscSlope = pow(-1, lct.getBend()) * lct.getSlope();
+
+	      std::cout << "lct.getSlope: " << lct.getSlope() << std::endl;
+	      if (cscIO==0){std::cout << "corrected EtoE slope: " << cscSlope*6.523 << std::endl;}
+	      else { std::cout << "corrected OtoO slope: " << cscSlope*13.90 << std::endl;}
+
               // need to extract the sign bit of the CSC z coordinate
               float signCSCz = pow(-1, 1-signbit(csc_gp.z()));
               float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())) * signCSCz - Slopes[cscIO][gemIO] * cscSlope;
