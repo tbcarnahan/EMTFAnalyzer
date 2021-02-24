@@ -163,8 +163,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           GEMDetId bestId;
 
           // have to consider +1/0/-1 GEM chambers
-          //for (int deltaChamber = -1; deltaChamber <= 1; deltaChamber++){
-          for (int deltaChamber = 0; deltaChamber<1; deltaChamber++){
+          for (int deltaChamber = -1; deltaChamber <= 1; deltaChamber++){
+	    //for (int deltaChamber = 0; deltaChamber<1; deltaChamber++){
 
             // corresponding GE1/1 detid
             const GEMDetId gemId(cscId.zendcap(), 1, 1, 0,
@@ -202,7 +202,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
               int cscIO = cscId.chamber()%2==0?0:1; //determines the CSC inner or outermost table
               int gemIO = (cscIO + abs(deltaChamber))%2; //determines whether the innermost GEM copad is parallel or off-side
 	      
-              float Slopes[2][2]={{6.523*0.00296/8., 5.968*0.00296/8.},{16.11*0.00296/8., 13.90*0.00296/8.}}; //linear slope correction fit values for innermost GEM to any CSC combinations
+              float Slopes[2][2]={{6.523, 5.968},{16.11, 13.90}}; //linear slope correction fit values for innermost GEM to any CSC combinations
               // slope value. The extra -1 is to account for a sign convention
               float cscSlope = pow(-1, lct.getBend()) * emtfHit.Slope();
 
@@ -212,7 +212,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
               // need to extract the sign bit of the CSC z coordinate
               float signCSCz = pow(-1, 1-signbit(csc_gp.z()));
-              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())) * signCSCz - Slopes[cscIO][gemIO] * cscSlope;
+              float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())) * signCSCz - Slopes[cscIO][gemIO] * cscSlope * 0.00296/8.;
 	      std::cout << "Current dPhi: " << currentDPhi << std::endl;
 	      std::cout << "CSC gp phi: " << float(csc_gp.phi()) << ", GEM gp phi: " << float(gem_gp.phi()) << std::endl;
 
