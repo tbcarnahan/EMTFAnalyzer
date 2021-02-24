@@ -156,6 +156,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // CSC GP
           const auto& lct = emtfHit.CreateCSCCorrelatedLCTDigi();
+	  //lct.setRun3(true);
+	  
 
           const GlobalPoint& csc_gp = getGlobalPosition(cscId, lct);
 
@@ -172,7 +174,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                                  (cscId.chamber() + deltaChamber) % 36,
                                  0);
 
-	    std::cout << "csc gp: " << csc_gp << std::endl;
+	    //std::cout << "csc gp: " << csc_gp << std::endl;
 
 
             // copad collection
@@ -197,17 +199,17 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
               const LocalPoint& gem_lp = gemGeom->etaPartition(gemCoId)->centreOfPad(copad.pad(1));
               const GlobalPoint& gem_gp = gemGeom->idToDet(gemCoId)->surface().toGlobal(gem_lp);
 
-	      std::cout << "gem gp: " << gem_gp << std::endl;
+	      //std::cout << "gem gp: " << gem_gp << std::endl;
 
               // Code by Denis 2021-02-23
               int cscIO = cscId.chamber()%2==0?0:1; //determines the CSC inner or outermost table
               int gemIO = (cscIO + abs(deltaChamber))%2; //determines whether the innermost GEM copad is parallel or off-side
 	      
-              float Slopes[2][2]={{6.523, 5.968},{16.11, 13.90}}; //linear slope correction fit values for innermost GEM to any CSC combinations
+              float Slopes[2][2]={{6.523*0.00296/8., 5.968*0.00296/8.},{16.11*0.00296/8., 13.90*0.00296/8.}}; //linear slope correction fit values for innermost GEM to any CSC combinations
               // slope value. The extra -1 is to account for a sign convention
-              float cscSlope = pow(-1, lct.getBend()) * lct.getSlope();
+              float cscSlope = pow(-1, lct.getBend()) * emtfHit.Slope();
 
-	      std::cout << "lct.getSlope: " << lct.getSlope() << std::endl;
+	      std::cout << "emtfHit.Slope: " << emtfHit.Slope() << std::endl;
 	      if (cscIO==0){std::cout << "corrected EvenToEven slope: " << cscSlope*6.523 << std::endl;}
 	      else { std::cout << "corrected OddToOdd slope: " << cscSlope*13.90 << std::endl;}
 
@@ -215,6 +217,7 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
               float signCSCz = pow(-1, 1-signbit(csc_gp.z()));
               float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())) * signCSCz - Slopes[cscIO][gemIO] * cscSlope;
 	      std::cout << "Current dPhi: " << currentDPhi << std::endl;
+	      std::cout << "CSC gp phi: " << float(csc_gp.phi()) << ", GEM gp phi: " << float(gem_gp.phi()) << std::endl;
 
               if (std::abs(currentDPhi) < std::abs(maxDPhi)) {
                 best = copad;
