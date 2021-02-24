@@ -126,9 +126,6 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       const auto& trackHits = track.Hits();
 
-      if (track.Pt() > 6.0 ) continue;
-      std::cout << track.Pt() << std::endl;
-
       double glob_phi;
       double glob_theta;
       double glob_eta;
