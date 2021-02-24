@@ -50,7 +50,7 @@ readFiles = cms.untracked.vstring()
 process.source = cms.Source(
     'PoolSource',
     fileNames = cms.untracked.vstring(
-        'file:step2bis_run3_99.root'
+        'file:/uscms/home/mdecaro/nobackup/EMU_UPDATE6/CMSSW_11_2_0_pre9/src/EMTFAnalyzer/NTupleMaker/test/step2bis_run3_99.root'
     ),
 )
 

@@ -115,25 +115,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       oc2->push_back(hit);
     }
 
-    //for (const l1t::EMTFHit& emtfHit: *emtfHits) {
-      //if (emtfHit.Is_CSC() == 1 and emtfHit.Station() == 1 and emtfHit.Ring() == 1) {
-      //std::cout << "Chamber (top): " << emtfHit.Chamber() << ", Phi: " << emtfHit.Phi_glob() << ", Eta: " << emtfHit.Eta() << ", Theta: " << emtfHit.Theta() << std::endl;
-      //}
-    //}
-
   }
 
-  //std::cout << "Printing ME1/1 muon info in GEMEMTFMatcher (top):" << std::endl;
-
-  /*
-  for (reco::GenParticle genMuon: *genMuons) {
-    if (abs(genMuon.pdgId()) != 13) continue; // Must be a muon               
-    std::cout << "gen pt: " << genMuon.pt() << std::endl;
-    }
-  } // End for (reco::GenParticle genMuon: *genMuons)                         
-  */
-
- 
   if ( emtfTracks.isValid() ) {
 
     // loop over the tracks
@@ -173,7 +156,6 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // CSC GP
           const auto& lct = emtfHit.CreateCSCCorrelatedLCTDigi();
-	  lct.setRun3(1);
 
           const GlobalPoint& csc_gp = getGlobalPosition(cscId, lct);
 
@@ -226,17 +208,19 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
               float cscSlope = pow(-1, lct.getBend()) * lct.getSlope();
 
 	      std::cout << "lct.getSlope: " << lct.getSlope() << std::endl;
-	      if (cscIO==0){std::cout << "corrected EtoE slope: " << cscSlope*6.523 << std::endl;}
-	      else { std::cout << "corrected OtoO slope: " << cscSlope*13.90 << std::endl;}
+	      if (cscIO==0){std::cout << "corrected EvenToEven slope: " << cscSlope*6.523 << std::endl;}
+	      else { std::cout << "corrected OddToOdd slope: " << cscSlope*13.90 << std::endl;}
 
               // need to extract the sign bit of the CSC z coordinate
               float signCSCz = pow(-1, 1-signbit(csc_gp.z()));
               float currentDPhi = reco::deltaPhi(float(csc_gp.phi()) , float(gem_gp.phi())) * signCSCz - Slopes[cscIO][gemIO] * cscSlope;
+	      std::cout << "Current dPhi: " << currentDPhi << std::endl;
 
               if (std::abs(currentDPhi) < std::abs(maxDPhi)) {
                 best = copad;
                 bestId = gemCoId;
                 maxDPhi = currentDPhi;
+		std::cout << "maxDPhi: " << maxDPhi << std::endl;
 
                 glob_phi = emtf::rad_to_deg(gem_gp.phi().value());
                 glob_theta = emtf::rad_to_deg(gem_gp.theta().value());
