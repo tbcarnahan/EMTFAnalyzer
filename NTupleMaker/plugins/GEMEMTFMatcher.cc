@@ -198,6 +198,9 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	      //std::cout << "gem gp: " << gem_gp << std::endl;
 
+	      //Lines 200 - 250ish--can change and printout with std::cout << "variable:" << explanatory string attached to variable << std:endl;
+
+
               // Code by Denis 2021-02-23
               int cscIO = cscId.chamber()%2==0?0:1; //determines the CSC inner or outermost table
               int gemIO = (cscIO + abs(deltaChamber))%2; //determines whether the innermost GEM copad is parallel or off-side
@@ -216,6 +219,28 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	      std::cout << "Current dPhi: " << currentDPhi << std::endl;
 	      std::cout << "CSC gp phi: " << float(csc_gp.phi()) << ", GEM gp phi: " << float(gem_gp.phi()) << std::endl;
 
+	      //modified here for float question/linear extrapolation test--how do you do a "versus" function here and what is the float part actually for?
+	      std::cout << "Linear extrapolation test:" << currentDPhi << std::endl;
+	      std::cout << "Slope check:" << Slopes << std::endl;
+	      std::cout << "CSC Slope check:" << cscSlope << std::endl;
+
+	      std::cout << "glob_phi:" << csc_gp << std::endl;
+	      std::cout << "gemCoId:" << gemCoId << std::endl;
+	      std::cout << "copad:" << copad << std::endl;
+	      std::cout << "csc ID:" << cscId << std::endl;
+	      std::cout << "key ID for csc:" << key_id << std::endl;
+	      std::cout << "lct numeric:" << lct << std::endl;
+	      std::cout << "delta chamber numeric:" << deltaChamber << std::endl;
+	      std::cout << "gem ID:" << gemId << std::endl;
+	      std::cout << "gem coID:" << gemCoId << std::endl;
+	      std::cout << "gem local point:" << gem_lp << std::endl;
+	      std::cout << "gem global point:" << gem_gp << std::endl;
+
+	      std::cout << "Subsystem hit:" << emtfHit.Subsystem() << std::endl;
+	      std::cout << "Strip hit:" << emtfHit.Strip() << std::endl;
+
+
+
               if (std::abs(currentDPhi) < std::abs(maxDPhi)) {
                 best = copad;
                 bestId = gemCoId;
@@ -226,6 +251,8 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 glob_theta = emtf::rad_to_deg(gem_gp.theta().value());
                 glob_eta = gem_gp.eta();
                 glob_rho = gem_gp.perp();
+
+
 
               }
             }
@@ -251,6 +278,11 @@ void GEMEMTFMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             bestEMTFHit.set_strip_low(best.pad(2));
             bestEMTFHit.set_bx(best.bx(1));
             bestEMTFHit.set_valid(1);
+
+	    //want to print some of these to see what they do--maybe a bestEMTFHit.set_bx(best.bx(1))?
+	    //std::cout << "bestEMTFHit" << bestEMTFHit.set_valid(1) << std:: endl;
+	    //did not work: warning of the last parentheses here^ invalid--these are settings. Need a getter.
+
 
 	    int fph = emtf::calc_phi_loc_int(glob_phi, sector);
             int th = emtf::calc_theta_int(glob_theta, bestEMTFHit.Endcap());
